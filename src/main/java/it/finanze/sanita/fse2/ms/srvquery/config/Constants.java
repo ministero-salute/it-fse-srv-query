@@ -91,23 +91,6 @@ public class Constants {
 	}
 	
 	public static final class Logs {
-
-		
-		public static final String ELASTIC_LOGGER_APP_NAME = "application"; 
-		 
-		public static final String ELASTIC_LOGGER_OP_NAME = "operation"; 
-
-		public static final String ELASTIC_LOGGER_OP_TIMESTAMP = "op-log-timestamp"; 
-
-		public static final String ELASTIC_LOGGER_OP_RESULT = "op-result"; 
-		 
-		public static final String ELASTIC_LOGGER_OP_TIMESTAMP_START = "op-timestamp-start"; 
-		 
-		public static final String ELASTIC_LOGGER_OP_TIMESTAMP_END = "op-timestamp-end"; 
-		 
-		public static final String ELASTIC_LOGGER_OP_ERROR_CODE = "op-error"; 
-		 
-		public static final String ELASTIC_LOGGER_OP_ERROR_DESCRIPTION = "op-error-description"; 
 		
 		public static final String ERROR_RETRIEVING_HOST_INFO = "Error while retrieving host informations"; 
 
