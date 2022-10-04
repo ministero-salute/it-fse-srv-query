@@ -39,8 +39,10 @@ public class KafkaProducerCFG {
 	@Autowired
 	private KafkaProducerPropertiesCFG kafkaProducerPropCFG;
 
-	/** 
-	 *  Kafka producer configurazione.
+
+	/**
+	 * Kafka Producer Configuration 
+	 * @return Map  ProducerConfigs 
 	 */
 	@Bean 
 	public Map<String, Object> producerConfigs() {
@@ -84,8 +86,9 @@ public class KafkaProducerCFG {
 	}
 
 	/**
-	 * @param id
-	 * @return
+	 * Retrieves the local host 
+	 * 
+	 * @return InetAddress  The local host 
 	 */
 	private InetAddress getLocalHost() {
 		InetAddress id = null;
@@ -97,8 +100,11 @@ public class KafkaProducerCFG {
 		return id;
 	}
 
+
 	/**
-	 * Transactional producer.
+	 * Producer Factory 
+	 * 
+	 * @return ProducerFactory  factory 
 	 */
 	@Bean
 	@Qualifier("txkafkatemplateFactory") 
@@ -108,7 +114,9 @@ public class KafkaProducerCFG {
 	}
 
 	/**
-	 *  Kafka template.
+	 * Tx Kafka Template 
+	 * 
+	 * @return KafkaTemplate  KafkaTemplate
 	 */
 	@Bean
 	@Qualifier("txkafkatemplate") 
@@ -116,8 +124,11 @@ public class KafkaProducerCFG {
 		return new KafkaTemplate<>(producerFactory());
 	}
 
+
 	/**
-	 * Non transactional producer config.
+	 * Producer without tx config 
+	 * 
+	 * @return Map  producer 
 	 */
 	@Bean 
 	public Map<String, Object> producerWithoutTransactionConfigs() {
@@ -148,9 +159,12 @@ public class KafkaProducerCFG {
 		return props;
 	}
 
+
 	/**
-	 * Non transactional producer.
-	 */ 
+	 * Non transactional producer 
+	 * 
+	 * @return ProducerFactory  factory 
+	 */
 	@Bean
 	@Qualifier("notxkafkatemplateFactory") 
 	public ProducerFactory<String, String> producerFactoryWithoutTransaction() {
@@ -158,9 +172,12 @@ public class KafkaProducerCFG {
 		return new DefaultKafkaProducerFactory<>(producerWithoutTransactionConfigs());
 	}
 
+
 	/**
-	 * Non transactional kafka template.
-	 */ 
+	 * notxKafkaTemplate
+	 * 
+	 * @return KafkaTemplate  template 
+	 */
 	@Bean
 	@Qualifier("notxkafkatemplate") 
 	public KafkaTemplate<String, String> notxKafkaTemplate() {
@@ -169,9 +186,9 @@ public class KafkaProducerCFG {
 
 
 	/**
-	 * Facotry dead producer.
+	 * Factory dead producer.
 	 * 
-	 * @return	factory dead producer.
+	 * @return ProducerFactory	factory dead producer.
 	 */
 	@Bean
 	public ProducerFactory<Object, Object> producerDeadFactory() {
@@ -181,7 +198,7 @@ public class KafkaProducerCFG {
 	/**
 	 * Kafka template dead letter.
 	 *
-	 * @return	Kafka template
+	 * @return KafkaTemplate  Kafka template
 	 */
 	@Bean
 	@Qualifier("notxkafkadeadtemplate")

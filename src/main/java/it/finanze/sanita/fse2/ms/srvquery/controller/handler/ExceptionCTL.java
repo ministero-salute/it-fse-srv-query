@@ -40,9 +40,10 @@ public class ExceptionCTL extends ResponseEntityExceptionHandler {
 
 
     /**
-     * Handle resource not found exception.
-     *
-     * @param ex		exception
+     * Handles Resource Not Found Exception 
+     * 
+     * @param ex  Exception 
+     * @return ErrorResponseDTO  A DTO representing the error response 
      */
     @ExceptionHandler(ResourceNotFoundException.class)
     protected ResponseEntity<ErrorResponseDTO> handleResourceNotFoundException(ResourceNotFoundException ex) {
@@ -58,10 +59,12 @@ public class ExceptionCTL extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(out, headers, out.getStatus());
     }
     
+
     /**
-     * Handle resource already present exception.
-     *
-     * @param ex		exception
+     * Handles Resource Already Present Exception 
+     * 
+     * @param ex  Exception 
+     * @return ErrorResponseDTO  A DTO representing the error response 
      */
     @ExceptionHandler(ResourceAlreadyPresentException.class)
     protected ResponseEntity<ErrorResponseDTO> handleResourceAlreadyPresentException(ResourceAlreadyPresentException ex) {
@@ -80,9 +83,10 @@ public class ExceptionCTL extends ResponseEntityExceptionHandler {
 
 
     /**
-     * Handle operation exception.
-     *
-     * @param ex		exception
+     * Handles Operation Exception 
+     * 
+     * @param ex  Exception 
+     * @return ErrorResponseDTO  A DTO representing the error response 
      */
     @ExceptionHandler(OperationException.class)
     protected ResponseEntity<ErrorResponseDTO> handleOperationException(OperationException ex) {
@@ -98,14 +102,11 @@ public class ExceptionCTL extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(out, headers, out.getStatus());
     }
 
-
-
-
-
     /**
-     * Handle generic exception.
-     *
-     * @param ex		exception
+     * Handles Generic Exception 
+     * 
+     * @param ex  Exception 
+     * @return ErrorResponseDTO  A DTO representing the error response 
      */
     @ExceptionHandler(value = {Exception.class})
     protected ResponseEntity<ErrorResponseDTO> handleGenericException(Exception ex) {

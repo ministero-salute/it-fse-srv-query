@@ -18,6 +18,9 @@ import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
 @RestController
 public class TerminologyServiceCTL extends AbstractCTL implements ITerminologyServiceCTL {
 
+	/** 
+	 * FHIR Service 
+	 */
     @Autowired
     private IFHIRSRV FHIRSRV;
     

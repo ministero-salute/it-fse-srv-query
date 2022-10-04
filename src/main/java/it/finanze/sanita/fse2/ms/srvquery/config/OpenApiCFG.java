@@ -19,6 +19,10 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.servers.Server;
 import it.finanze.sanita.fse2.ms.srvquery.config.CustomSwaggerCFG;
 
+/**
+ * Open API Config s
+ *
+ */
 @Configuration
 @SuppressWarnings("all")
 public class OpenApiCFG {
@@ -26,8 +30,9 @@ public class OpenApiCFG {
 	@Autowired
 	private CustomSwaggerCFG customOpenapi;
 
+	
 	public OpenApiCFG() {
-		// Empty constructor.
+
 	}
 	
 	@Bean

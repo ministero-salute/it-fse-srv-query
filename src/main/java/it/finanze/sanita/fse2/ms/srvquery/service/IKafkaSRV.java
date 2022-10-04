@@ -5,22 +5,27 @@ import org.apache.kafka.clients.producer.RecordMetadata;
 
 import java.io.Serializable;
 
-
+/** 
+ * Interface for managing Kafka 
+ *
+ */
 public interface IKafkaSRV extends Serializable {
 
     /**
 	 * Send message over kafka topic
-	 * @param topic
-	 * @param key
-	 * @param value
-	 * @param trans
-	 * @return
+	 * 
+	 * @param topic  The topic to create 
+	 * @param key  The message key 
+	 * @param value  The message value 
+	 * @param trans  Boolean for transactionality 
+	 * @return RecordMetadata  RecordMetadata
 	 */
 	RecordMetadata sendMessage(String topic, String key, String value, boolean trans);
 
     /**
      * Send create resource message via Kafka
-     * @param resource
+     * 
+     * @param resource  The FHIR resource to create on ElasticSearch 
      */
     void sendCreateElasticsearch(FhirPublicationDTO resource);
 

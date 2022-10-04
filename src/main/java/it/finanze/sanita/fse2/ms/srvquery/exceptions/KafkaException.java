@@ -1,6 +1,9 @@
 package it.finanze.sanita.fse2.ms.srvquery.exceptions;
 
-
+/** 
+ * Kafka Exception 
+ *
+ */
 public class KafkaException extends Exception {
 
 	

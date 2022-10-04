@@ -19,6 +19,9 @@ public class CodeTranslationResDTO extends ResponseDTO {
 	 */
 	private static final long serialVersionUID = -1550025571939901939L;
 	
+	/** 
+	 * Check exists result 
+	 */
 	private String result;
 	
 	public CodeTranslationResDTO() {

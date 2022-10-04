@@ -15,22 +15,41 @@ import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 
+/** 
+ * Contains the ElasticSearch configuration 
+s *
+ */
 @Configuration
 public class ElasticSearchConfig {
 
+	/** 
+	 * The ElasticSearch username
+	 */
 	@Value("${elasticsearch.username}")
 	private String elasticSearchUsername; 
 	
+	/** 
+	 * The ElasticSearch password
+	 */
 	@Value("${elasticsearch.password}")
 	private String elasticSearchPassword; 
 	
+	/** 
+	 * The ElasticSearch search URL 
+	 */
 	@Value("${elasticsearch.url}")
 	private String elasticSearchUrl; 
 	
+	/** 
+	 * The ElasticSearch port
+	 */
 	@Value("${elasticsearch.port}")
 	private Integer elasticSearchPort; 
 	
-	
+	/** 
+	 * Returns the ElasticSearch client 
+	 * @return ElasticsearchClient  The ElasticsearchClient 
+	 */
 	@Bean
     public ElasticsearchClient buildElasticSearchClient() {
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();

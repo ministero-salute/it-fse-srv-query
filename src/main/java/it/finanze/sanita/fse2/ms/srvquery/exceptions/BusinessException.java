@@ -1,5 +1,9 @@
 package it.finanze.sanita.fse2.ms.srvquery.exceptions;
 
+/** 
+ * Business Exception 
+ *
+ */
 public class BusinessException extends RuntimeException {
 
 	/**

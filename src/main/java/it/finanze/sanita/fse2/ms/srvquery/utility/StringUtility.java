@@ -42,6 +42,12 @@ public final class StringUtility {
 		return out;
 	} 
 	
+	/**
+	 * Generates a Transaction ID from a given method 
+	 * 
+	 * @param mode UID Mode Generation 
+	 * @return String  The generated UID 
+	 */
 	public static String generateTransactionUID(final UIDModeEnum mode) {
 	    
 		String uid = null;
@@ -79,14 +85,6 @@ public final class StringUtility {
 	} 
 	
 	
-	/**
-	 * Transformation from Json to Object.
-	 * 
-	 * @param <T>	Generic type of return
-	 * @param json	json
-	 * @param cls	Object class to return
-	 * @return		object
-	 */
 	public static <T> T fromJSON(final String json, final Class<T> cls) {
 		return new Gson().fromJson(json, cls);
 	}

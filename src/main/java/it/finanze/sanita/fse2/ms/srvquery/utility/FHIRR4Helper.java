@@ -7,6 +7,10 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 
+/** 
+ * FHIR Helper Class 
+ *
+ */
 public class FHIRR4Helper {
 
 	private static FhirContext context;

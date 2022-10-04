@@ -23,7 +23,7 @@ public class KafkaTopicCFG {
 	private ProfileUtility profileUtility;
 	
 	/**
-	 * Topic for Eleasticsearch create feature.
+	 * Topic for ElasticSearch create feature 
 	 */
 	@Value("${kafka.create-elasticsearch.topic}")
 	private String createElasticsearchTopic;

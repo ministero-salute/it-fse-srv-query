@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
  * 
  * @author Riccardo Bonesi
  *
- * Kafka management service.
+ * Kafka management service implementation.
  */
 @Service
 @Slf4j

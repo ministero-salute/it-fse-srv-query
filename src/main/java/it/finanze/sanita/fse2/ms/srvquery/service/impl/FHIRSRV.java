@@ -15,17 +15,29 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.PostConstruct;
 
-
+/** 
+ * FHIR Service Implementation 
+ *
+ */
 @Service
 @Slf4j
 public class FHIRSRV implements IFHIRSRV {
-
+	
+	/** 
+	 * Profile Utility 
+	 */
     @Autowired
 	private ProfileUtility profileUtility;
 
+    /** 
+     * FHIR Configuration 
+     */
     @Autowired
 	private FHIRCFG FHIRCFG;
 
+    /** 
+     * FHIR Client 
+     */
     private FHIRClient client;
 
     @PostConstruct

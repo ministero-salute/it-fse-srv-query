@@ -19,8 +19,14 @@ public class DocumentReferenceResDTO extends ResponseDTO {
 	 */
 	private static final long serialVersionUID = -1556625571939901939L;
 	
+	/** 
+	 * Document ID 
+	 */
 	private String id;
 
+	/** 
+	 * Document JSON String 
+	 */
 	private String jsonString;
 	
 	public DocumentReferenceResDTO() {

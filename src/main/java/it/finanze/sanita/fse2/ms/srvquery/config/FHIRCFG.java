@@ -7,6 +7,10 @@ import org.springframework.stereotype.Component;
 
 import lombok.Data;
 
+/** 
+ * FHIR Server Config 
+ *
+ */
 @Data
 @Component
 public class FHIRCFG implements Serializable {
@@ -32,6 +36,9 @@ public class FHIRCFG implements Serializable {
 	// @Value("${eds-ingestion.url.path.delete}")
 	// private String edsIngestionDeletePath;
 	
+	/** 
+	 * FHIR Server Test URL 
+	 */
 	@Value("${fhir-server-test-url}")
 	private String fhirServerTestUrl;
 

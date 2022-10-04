@@ -19,17 +19,26 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 /** 
+ * The document CTL Implementation 
+ * 
  * @author Riccardo Bonesi
  */
 @RestController
 @Slf4j
 public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
 
+	/** 
+	 * The FHIR Service 
+	 */
     @Autowired
     private transient IFHIRSRV fhirSRV;
 
+    /** 
+     * The Kafka Service 
+     */
     @Autowired
 	private IKafkaSRV kafkaSRV;
+    
     
     @Override
     public ResponseDTO create(final HttpServletRequest request, final FhirPublicationDTO body) throws IOException, OperationException, ResourceAlreadyPresentException {

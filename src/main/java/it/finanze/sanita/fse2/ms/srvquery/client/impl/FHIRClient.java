@@ -14,6 +14,10 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 
+/** 
+ * FHIR Client Implementation 
+ *
+ */
 @Slf4j
 public class FHIRClient {
 

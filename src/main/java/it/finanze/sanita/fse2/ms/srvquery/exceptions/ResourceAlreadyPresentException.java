@@ -1,5 +1,9 @@
 package it.finanze.sanita.fse2.ms.srvquery.exceptions;
 
+/** 
+ * Resource Already Present Exceptuon 
+ *
+ */
 public class ResourceAlreadyPresentException extends Exception {
 
     /**

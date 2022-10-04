@@ -23,6 +23,10 @@ import org.springframework.util.backoff.FixedBackOff;
 
 import lombok.extern.slf4j.Slf4j;
 
+/** 
+ * Kafka Consumer Config 
+ *
+ */
 @Slf4j
 @Configuration
 public class KafkaConsumerCFG {
@@ -33,6 +37,9 @@ public class KafkaConsumerCFG {
 	@Autowired
 	private KafkaConsumerPropertiesCFG kafkaConsumerPropCFG;
 
+	/** 
+	 * Kafka Topic Config 
+	 */
 	@Autowired
 	private KafkaTopicCFG kafkaTopicCFG;
 
@@ -94,8 +101,8 @@ public class KafkaConsumerCFG {
 	/**
 	 * Factory with dead letter configuration.
 	 * 
-	 * @param deadLetterKafkaTemplate
-	 * @return	factory
+	 * @param deadLetterKafkaTemplate  Dead Letter
+	 * @return	factory  Factory 
 	 */
 	@Bean
 	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerDeadLetterContainerFactory(final @Qualifier("notxkafkadeadtemplate") KafkaTemplate<Object, Object> deadLetterKafkaTemplate) {
@@ -154,7 +161,7 @@ public class KafkaConsumerCFG {
 	 * Default Container factory.
 	 * 
 	 * @param kafkaTemplate	templete
-	 * @return				factory
+	 * @return KafkaListenerContainerFactory  factory
 	 */
 	@Bean
 	public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, String>> kafkaListenerContainerFactory(final @Qualifier("notxkafkatemplate") KafkaTemplate<String, String> kafkaTemplate) {

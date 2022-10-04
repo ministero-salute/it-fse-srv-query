@@ -13,6 +13,10 @@ import it.finanze.sanita.fse2.ms.srvquery.exceptions.OperationException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceAlreadyPresentException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceNotFoundException;
 
+/** 
+ * Builds the error responses according to the given exception 
+ *
+ */
 public final class ErrorBuilderDTO {
 
     /**
@@ -21,6 +25,14 @@ public final class ErrorBuilderDTO {
     private ErrorBuilderDTO() {}
 
 
+
+    /**
+     * Builds a Generic Exception 
+     * 
+     * @param trace  The LogInfoDTO with trace and span ID 
+     * @param ex  The Exception 
+     * @return ErrorResponseDTO  The error response 
+     */
     public static ErrorResponseDTO createGenericError(LogTraceInfoDTO trace, Exception ex) {
         return new ErrorResponseDTO(
             trace,
@@ -32,7 +44,13 @@ public final class ErrorBuilderDTO {
         );
     }
 
-
+    /**
+     * Builds an Operation Exception 
+     * 
+     * @param trace  The LogInfoDTO with trace and span ID 
+     * @param ex  The Exception 
+     * @return ErrorResponseDTO  The error response 
+     */
     public static ErrorResponseDTO createOperationError(LogTraceInfoDTO trace, OperationException ex) {
         return new ErrorResponseDTO(
             trace,
@@ -44,6 +62,13 @@ public final class ErrorBuilderDTO {
         );
     }
 
+    /**
+     * Builds a Document Not Found Exception 
+     * 
+     * @param trace  The LogInfoDTO with trace and span ID 
+     * @param ex  The Exception 
+     * @return ErrorResponseDTO  The error response 
+     */
     public static ErrorResponseDTO createDocumentNotFoundError(LogTraceInfoDTO trace, ResourceNotFoundException ex) {
         return new ErrorResponseDTO(
             trace,
@@ -55,6 +80,13 @@ public final class ErrorBuilderDTO {
         );
     }
 
+    /**
+     * Builds a Document Already Present Exception 
+     * 
+     * @param trace  The LogInfoDTO with trace and span ID 
+     * @param ex  The Exception 
+     * @return ErrorResponseDTO  The error response 
+     */
     public static ErrorResponseDTO createDocumentAlreadyPresentError(LogTraceInfoDTO trace, ResourceAlreadyPresentException ex) {
         return new ErrorResponseDTO(
             trace,

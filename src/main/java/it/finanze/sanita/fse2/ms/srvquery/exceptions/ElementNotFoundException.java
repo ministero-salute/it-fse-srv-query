@@ -1,5 +1,9 @@
 package it.finanze.sanita.fse2.ms.srvquery.exceptions;
 
+/** 
+ * Element not found exception 
+ *
+ */
 public class ElementNotFoundException extends Exception {
 
 
@@ -9,13 +13,12 @@ public class ElementNotFoundException extends Exception {
 	private static final long serialVersionUID = 182266721949057193L; 
 	
 
+
 	/**
-     * Complete constructor.
-     *
-     * @param msg	Message to be shown.
-     *              It should describe what the operation was trying to accomplish.
-     * @param e		The original MongoExceptions.
-     */
+	 * Element Not Found Exception 
+	 * 
+	 * @param msg  The exception message 
+	 */
     public ElementNotFoundException(final String msg) {
         super(msg);
         
