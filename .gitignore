@@ -14,3 +14,9 @@ bin/
 .metadata
 tmp/
 .vscode/
+*.MF
+.settings/org.eclipse.jdt.apt.core.prefs
+*.component
+.settings/org.eclipse.wst.common.project.facet.core.xml
+.settings/org.eclipse.wst.validation.prefs
+.settings/org.springframework.ide.eclipse.prefs
