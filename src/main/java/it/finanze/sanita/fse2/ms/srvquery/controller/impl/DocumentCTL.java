@@ -1,22 +1,20 @@
 package it.finanze.sanita.fse2.ms.srvquery.controller.impl;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RestController;
+
 import it.finanze.sanita.fse2.ms.srvquery.controller.AbstractCTL;
 import it.finanze.sanita.fse2.ms.srvquery.controller.IDocumentCTL;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.DocumentReferenceResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.ResourceExistResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.ResponseDTO;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.OperationException;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceAlreadyPresentException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceNotFoundException;
 import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
 import it.finanze.sanita.fse2.ms.srvquery.service.IKafkaSRV;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
 
 /** 
  * The document CTL Implementation 
@@ -26,6 +24,11 @@ import java.io.IOException;
 @RestController
 @Slf4j
 public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
+
+	/**
+	 * Serial version uid.
+	 */
+	private static final long serialVersionUID = 4761820033633287423L;
 
 	/** 
 	 * The FHIR Service 
@@ -41,7 +44,7 @@ public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
     
     
     @Override
-    public ResponseDTO create(final HttpServletRequest request, final FhirPublicationDTO body) throws IOException, OperationException, ResourceAlreadyPresentException {
+    public ResponseDTO create(final HttpServletRequest request, final FhirPublicationDTO body){
         log.info("[FHIR] Create - START");
         log.debug("Received: " + body.toString());
 
@@ -61,7 +64,7 @@ public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
     }
 
     @Override
-    public ResponseDTO delete(final HttpServletRequest request, final String identifier) throws ResourceNotFoundException, OperationException {
+    public ResponseDTO delete(final HttpServletRequest request, final String identifier){
         log.info("[FHIR] Delete - START");
         log.debug("Deleting resource: " + identifier);
         // TODO

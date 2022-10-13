@@ -9,7 +9,6 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.ErrorInstance.Resource;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.ErrorInstance.Server;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseDTO;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.OperationException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceAlreadyPresentException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceNotFoundException;
 
@@ -44,24 +43,7 @@ public final class ErrorBuilderDTO {
         );
     }
 
-    /**
-     * Builds an Operation Exception 
-     * 
-     * @param trace  The LogInfoDTO with trace and span ID 
-     * @param ex  The Exception 
-     * @return ErrorResponseDTO  The error response 
-     */
-    public static ErrorResponseDTO createOperationError(LogTraceInfoDTO trace, OperationException ex) {
-        return new ErrorResponseDTO(
-            trace,
-            ErrorType.SERVER.getType(),
-            ErrorType.SERVER.getTitle(),
-            ex.getMessage(),
-            SC_INTERNAL_SERVER_ERROR,
-            ErrorType.SERVER.toInstance(Server.INTERNAL)
-        );
-    }
-
+ 
     /**
      * Builds a Document Not Found Exception 
      * 

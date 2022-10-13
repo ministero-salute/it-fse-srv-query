@@ -2,11 +2,9 @@ package it.finanze.sanita.fse2.ms.srvquery.controller.handler;
 
 
 
-
 import static it.finanze.sanita.fse2.ms.srvquery.dto.response.error.ErrorBuilderDTO.createDocumentAlreadyPresentError;
 import static it.finanze.sanita.fse2.ms.srvquery.dto.response.error.ErrorBuilderDTO.createDocumentNotFoundError;
 import static it.finanze.sanita.fse2.ms.srvquery.dto.response.error.ErrorBuilderDTO.createGenericError;
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.error.ErrorBuilderDTO.createOperationError;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -19,7 +17,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import brave.Tracer;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseDTO;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.OperationException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceAlreadyPresentException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -80,27 +77,6 @@ public class ExceptionCTL extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(out, headers, out.getStatus());
     } 
     
-
-
-    /**
-     * Handles Operation Exception 
-     * 
-     * @param ex  Exception 
-     * @return ErrorResponseDTO  A DTO representing the error response 
-     */
-    @ExceptionHandler(OperationException.class)
-    protected ResponseEntity<ErrorResponseDTO> handleOperationException(OperationException ex) {
-        // Log me
-        log.warn("HANDLER handleOperationException()");
-        log.error("HANDLER handleOperationException()", ex);
-        // Create error DTO
-        ErrorResponseDTO out = createOperationError(getLogTraceInfo(), ex);
-        // Set HTTP headers
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
-        // Bye bye
-        return new ResponseEntity<>(out, headers, out.getStatus());
-    }
 
     /**
      * Handles Generic Exception 
