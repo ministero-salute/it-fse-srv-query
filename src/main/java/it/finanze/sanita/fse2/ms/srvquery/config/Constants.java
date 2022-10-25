@@ -13,22 +13,22 @@ public class Constants {
 		/**
 		 * Base path.
 		 */
-		public static final String BASE = "it.sanita.srvquery";
+		public static final String BASE = "it.finanze.sanita.fse2.ms.srvquery";
 
 		/**
 		 * Controller path.
 		 */
-		public static final String CONTROLLER = "it.sanita.srvquery.controller";
+		public static final String CONTROLLER = "it.finanze.sanita.fse2.ms.srvquery.controller";
 
 		/**
 		 * Service path.
 		 */
-		public static final String SERVICE = "it.sanita.srvquery.service";
+		public static final String SERVICE = "it.finanze.sanita.fse2.ms.srvquery.service";
 
 		/**
 		 * Configuration path.
 		 */
-		public static final String CONFIG = "it.sanita.srvquery.config";
+		public static final String CONFIG = "it.finanze.sanita.fse2.ms.srvquery.config";
 
 		/** 
 		 * This method is intentionally left blank
@@ -39,25 +39,6 @@ public class Constants {
 
 	}
 	
-	/** 
-	 * Contains all the constants used in the headers of HTTP calls 
-	 */
-	public static final class Headers {
-		
-		/**
-		 * JWT header field.
-		 */
-		public static final String JWT_HEADER = "Authorization";
-
-		/** 
-		 * This method is intentionally left blank
-		 */
-		private Headers() {
-
-		}
-
-	}
- 
 	/** 
 	 * Contains the constants for the launch profile of the SpringBoot application. 
 	 * 
@@ -98,31 +79,7 @@ public class Constants {
 		 * The JWT Token Audience 
 		 */
 		public static final String JWT_TOKEN_AUDIENCE = "eds-srv-query";
-
-		/** 
-		 * The JWT Token Type 
-		 */
-		public static final String JWT_TOKEN_TYPE = "JWT";
-
-		/** 
-		 * The JWT Bearer Prefix
-		 */
-		public static final String BEARER_PREFIX = "Bearer ";
-		
-		/** 
-		 * Deleted field 
-		 */
-		public static final String DELETED = "deleted"; 
-		
-		/** 
-		 * SHA-256 
-		 */
-		public static final String SHA_256 = "SHA-256"; 
-		
-		/** 
-		 * Identifier field 
-		 */
-		public static final String IDENTIFIER = "identifier";
+		 
 
 		/** 
 		 * Constructor. This method is intentionally left blank.
