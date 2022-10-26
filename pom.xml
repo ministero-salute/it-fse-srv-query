@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>it.finanze.sanita.fse2</groupId>
-	<artifactId>ms.srvquery</artifactId>
+	<artifactId>srvquery-ms</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>ms.srvquery</name>
+	<name>srvquery-ms</name>
 	<description>EDS SRV Query</description>
 	<properties>
 		<java.version>1.8</java.version>
