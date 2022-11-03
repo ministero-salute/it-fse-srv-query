@@ -36,7 +36,7 @@ public class FHIRSRV implements IFHIRSRV {
      * FHIR Configuration 
      */
     @Autowired
-	private FHIRCFG FHIRCFG;
+	private FHIRCFG fhirCFG;
 
     /** 
      * FHIR Client 
@@ -45,37 +45,31 @@ public class FHIRSRV implements IFHIRSRV {
 
     @PostConstruct
     void init() {
-        this.client = new FHIRClient(FHIRCFG.getFhirServerTestUrl());
+        client = new FHIRClient(fhirCFG.getFhirServerTestUrl());
     }
 
     @Override
-	public Boolean create(final FhirPublicationDTO createDTO) {
-		boolean out = false;
-		try {
-            if (profileUtility.isDevProfile()) {
-                String json = createDTO.getJsonString();
-                Bundle bundle = FHIRR4Helper.deserializeResource(Bundle.class, json, true);
+    public Boolean create(final FhirPublicationDTO createDTO) {
+    	boolean out = false;
+    	try {
+    		String json = createDTO.getJsonString();
+    		Bundle bundle = FHIRR4Helper.deserializeResource(Bundle.class, json, true);
 
-                client.saveBundleWithTransaction(bundle);
-                out = true;
-                log.info("FHIR bundle: {}", json);
-            } else {
-                // TODO
-            }
-
-		} catch(Exception e) {
-			log.error("Error creating new resource on FHIR Server: ", e);
-			throw new BusinessException(e);
-		}
-		return out;
-	}
+    		client.saveBundleWithTransaction(bundle);
+    		out = true;
+    		log.debug("FHIR bundle: {}", json);
+    	} catch(Exception e) {
+    		log.error("Error creating new resource on FHIR Server: ", e);
+    		throw new BusinessException(e);
+    	}
+    	return out;
+    }
 
     @Override
     public String translateCode(String code, String system, String targetSystem) {
         String out = "";
 		try {
             if (profileUtility.isDevProfile()) {
-                FHIRClient client = new FHIRClient(FHIRCFG.getFhirServerTestUrl());
                 out = client.translateCode(code, system, targetSystem);
                 log.info("Code translated result: {}", out);
             } else {
@@ -90,8 +84,8 @@ public class FHIRSRV implements IFHIRSRV {
     }
 
     @Override
-    public boolean checkExist(String masterIdentifier) {
-        boolean isFound = this.client.read(masterIdentifier);
+    public boolean checkExist(final String masterIdentifier) {
+        boolean isFound = client.read(masterIdentifier);
         log.info("found?: {}", isFound);
         return isFound;
     }

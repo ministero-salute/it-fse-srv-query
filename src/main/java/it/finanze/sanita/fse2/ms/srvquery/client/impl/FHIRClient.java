@@ -3,11 +3,6 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.client.impl;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import com.google.gson.Gson;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
-import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
-import lombok.extern.slf4j.Slf4j;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DocumentReference;
@@ -15,7 +10,10 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Date;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
+import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
+import lombok.extern.slf4j.Slf4j;
 
 /** 
  * FHIR Client Implementation 
@@ -34,21 +32,17 @@ public class FHIRClient {
 		return client.transaction().withBundle(bundle).execute();
 	}
 
-	public boolean read(String masterIdentifier) {
-		Date startTime = new Date();
-		Bundle bundle =
-				client.search()
-						.forResource(DocumentReference.class)
-						.where(DocumentReference.IDENTIFIER.exactly().identifier(masterIdentifier))
-						.returnBundle(Bundle.class)
-						.execute();
-		Date endTime = new Date();
-		log.info("start time: {}", startTime.getTime());
-		log.info("end time: {}", endTime.getTime());
-		log.info("diff: {}", endTime.getTime() - startTime.getTime());
-		log.info("bundle: {}", new Gson().toJson(bundle.getEntry()));
-
-		return !CollectionUtils.isEmpty(bundle.getEntry());
+	public boolean read(final String masterIdentifier) {
+		boolean output = false;
+		try {
+			Bundle bundle = client.search().forResource(DocumentReference.class).where(DocumentReference.IDENTIFIER.exactly().identifier(masterIdentifier))
+					.returnBundle(Bundle.class).execute();
+			output = !CollectionUtils.isEmpty(bundle.getEntry());
+		} catch(Exception ex) {
+			log.error("Errore durante la read sul fhir server : ", ex);
+			throw new BusinessException("Errore durante la read sul fhir server : ", ex);
+		}
+		return output;
 	}
 
 	public String translateCode(String code, String system, String targetSystem){

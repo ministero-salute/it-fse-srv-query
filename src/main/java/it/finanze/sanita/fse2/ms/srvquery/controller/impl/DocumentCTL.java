@@ -16,7 +16,6 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.response.ResourceExistResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.ResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceNotFoundException;
 import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
-import it.finanze.sanita.fse2.ms.srvquery.service.IKafkaSRV;
 import lombok.extern.slf4j.Slf4j;
 
 /** 
@@ -38,12 +37,7 @@ public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
 	 */
     @Autowired
     private transient IFHIRSRV fhirSRV;
-
-    /** 
-     * The Kafka Service 
-     */
-    @Autowired
-	private IKafkaSRV kafkaSRV;
+ 
     
     
     @Override
@@ -53,17 +47,8 @@ public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
 
         // create resource on FHIR Server
         Boolean result = fhirSRV.create(body);
-
-        // if the FHIR creation was successful create also on Elasticsearch
-        if(result){
-            kafkaSRV.sendCreateElasticsearch(body);
-            
-        } else {
-            // TODO: tornare messaggio di errore;
-        }
-
+        //TODO - Create resource
         return new ResponseDTO();
-        
     }
 
     @Override
@@ -78,8 +63,7 @@ public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
 
     @Override
     public ResourceExistResDTO exist(final String id, final HttpServletRequest request) {
-        log.info("[FHIR] Check exist - START");
-        // TODO check esistenza su Elasticsearch
+        log.debug("[FHIR] Check exist - START");
         boolean result = fhirSRV.checkExist(id);
         return new ResourceExistResDTO(getLogTraceInfo(), result);
     }
