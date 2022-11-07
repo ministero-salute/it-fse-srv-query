@@ -6,7 +6,6 @@ package it.finanze.sanita.fse2.ms.srvquery.exceptions;
 
 /**
  * Where the requested document is not found, this exception kicks in
- * @author G. Baittiner
  */
 public class ResourceNotFoundException extends Exception {
 
