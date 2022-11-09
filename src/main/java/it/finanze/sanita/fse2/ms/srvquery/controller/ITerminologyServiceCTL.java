@@ -26,7 +26,6 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseD
 
 /**
  * 
- * @author Riccardo Bonesi
  *
  * Controller used to manage FHIR Terminology Service resources.
  */

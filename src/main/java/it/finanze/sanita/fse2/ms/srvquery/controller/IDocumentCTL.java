@@ -37,7 +37,6 @@ import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceNotFoundException;
 
 /**
  * 
- * @author Riccardo Bonesi
  *
  * Controller used to manage FHIR resources.
  */

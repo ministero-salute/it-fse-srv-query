@@ -12,7 +12,6 @@ import it.finanze.sanita.fse2.ms.srvquery.exceptions.ElementNotFoundException;
 /**
  * Interface for the ElasticSearch Service 
  * 
- * @author Guido Rocco
  * 
  */
 public interface IElasticSearchSRV extends Serializable {

@@ -12,7 +12,6 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
 
 /**
  * 
- * @author CPIERASC
  *
  *	Abstract controller.
  */

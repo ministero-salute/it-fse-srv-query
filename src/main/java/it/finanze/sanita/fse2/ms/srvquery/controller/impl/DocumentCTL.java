@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 /** 
  * The document CTL Implementation 
  * 
- * @author Riccardo Bonesi
  */
 @RestController
 @Slf4j

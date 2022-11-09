@@ -26,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  *	Exceptions handler
- *  @author Riccardo Bonesi
  */
 @ControllerAdvice
 @Slf4j

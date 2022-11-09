@@ -19,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * ElasticSearch Service implementation 
  * 
- * @author Guido Rocco
  * 
  */
 @Service

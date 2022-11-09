@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 /**
  * 
- * @author Riccardo Bonesi
  *
  * Kafka management service implementation.
  */
