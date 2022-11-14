@@ -18,16 +18,7 @@ public interface IFHIRSRV {
      */
 	Boolean create(FhirPublicationDTO createDTO);
 
-    /**
-     * Translate a code into a different codeSystem 
-     * 
-     * @param code  The code to be translated 
-     * @param system  The starting system 
-     * @param targetSystem  The target system 
-     * @return String  The translated code 
-     */
-    String translateCode(String code, String system, String targetSystem);
-
+    
     /**
      * Check if a document reference exist on FHIR server
      * 
@@ -35,4 +26,6 @@ public interface IFHIRSRV {
      * @return boolean  True if the document exists on ElasticSearch 
      */
     boolean checkExist(String masterIdentifier);
+    
+    void delete(String masterIdentifier);
 }

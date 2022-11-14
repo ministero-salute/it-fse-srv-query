@@ -5,11 +5,15 @@ package it.finanze.sanita.fse2.ms.srvquery.client.impl;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
-import org.springframework.util.CollectionUtils;
 
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
@@ -17,30 +21,58 @@ import lombok.extern.slf4j.Slf4j;
 
 /** 
  * FHIR Client Implementation 
- *
  */
 @Slf4j
 public class FHIRClient {
 
 	private IGenericClient client;
 
-	public FHIRClient(String serverURL) {
+	public FHIRClient(final String serverURL) {
 		client = FHIRR4Helper.createClient(serverURL);
 	}
 
-	public Bundle saveBundleWithTransaction(Bundle bundle) {
-		return client.transaction().withBundle(bundle).execute();
+	public Bundle saveBundleWithTransaction(final Bundle bundleToSave) {
+		Bundle savedBundle = null;
+		try {
+			log.info("Bundle to Save id : " + bundleToSave.getId());
+			savedBundle = client.transaction().withBundle(bundleToSave).execute();
+			log.info("Bundle saved : " + savedBundle.getId());
+		} catch(Exception ex) {
+			log.error("Error while save bundle with transaction : " , ex);
+			throw new BusinessException("Error while save bundle with transaction : " , ex);
+		}
+		return savedBundle;
 	}
 
-	public boolean read(final String masterIdentifier) {
-		boolean output = false;
+	public DocumentReference searchDocRefByMasterIdentifier(final String masterIdentifier) {
+		DocumentReference docReference = null;
 		try {
-			Bundle bundle = client.search().forResource(DocumentReference.class).where(DocumentReference.IDENTIFIER.exactly().identifier(masterIdentifier))
-					.returnBundle(Bundle.class).execute();
-			output = !CollectionUtils.isEmpty(bundle.getEntry());
+			Bundle bundle = client.search().forResource(DocumentReference.class).where(DocumentReference.IDENTIFIER.exactly().
+					identifier(masterIdentifier)).returnBundle(Bundle.class).execute();
+			
+			if(bundle!=null) {
+				for(BundleEntryComponent entry : bundle.getEntry()) {
+					if(entry.getResource() instanceof DocumentReference) {
+						docReference =  (DocumentReference)entry.getResource();
+						break;
+					}
+				}
+			} 
+			
 		} catch(Exception ex) {
 			log.error("Errore durante la read sul fhir server : ", ex);
 			throw new BusinessException("Errore durante la read sul fhir server : ", ex);
+		}
+		return docReference;
+	}
+	
+	public Composition searchCompositionByUrl(final String urlComposition) {
+		Composition output = null;
+		try {
+			output = (Composition)client.search().byUrl(urlComposition).execute();
+		} catch(Exception ex) {
+			log.error("Errore while perform search composition by url: ", ex);
+			throw new BusinessException("Errore while perform search composition by url: ", ex);
 		}
 		return output;
 	}
@@ -87,25 +119,44 @@ public class FHIRClient {
 	// TODO: delete https://hapifhir.io/hapi-fhir/docs/client/generic_client.html
 	// ricevo il masteridentifier con cui recupero la DocumentReference 
 
+	
+	public boolean deleteByUrl(final String resourceToDelete) {
+		boolean resourceDeleted = false;
+		try {
+			MethodOutcome response = client.delete().resourceConditionalByUrl(resourceToDelete).execute();
+			OperationOutcome outcome = (OperationOutcome)response.getOperationOutcome();
+			if (outcome != null) {
+				resourceDeleted = true;
+			}
+		} catch(Exception ex) {
+			log.error("Error while perform delete by url : " , ex);
+			throw new BusinessException("Error while perform delete by url : " , ex);
+		}
+		return resourceDeleted;
+	}
+	
 
-	// public Boolean delete(String identifier){
-	// 	Boolean res = false;
-	// 	try {
-	// 		MethodOutcome response = client
-	// 		.delete()
-	// 		.resourceById(new IdType("Patient", identifier))
-	// 		.execute();
-
-	// 		// outcome may be null if the server didn't return one
-	// 		OperationOutcome outcome = (OperationOutcome) response.getOperationOutcome();
-	// 		if (outcome != null) {
-	// 			res = true;
-	// 		}
-	// 	} catch (Exception e) {
-	// 		// TODO: handle exception
-	// 	}
-	// 	return res;
-	// }
+//	public Boolean delete(String identifier){
+//		Boolean res = false;
+//		try {
+//			
+//			client.delete().resourceConditionalByUrl(identifier)
+//			
+//			MethodOutcome response = client
+//					.delete()
+//					.resourceById(new IdType("Patient", identifier))
+//					.execute();
+//
+//			// outcome may be null if the server didn't return one
+//			OperationOutcome outcome = (OperationOutcome) response.getOperationOutcome();
+//			if (outcome != null) {
+//				res = true;
+//			}
+//		} catch (Exception e) {
+//			// TODO: handle exception
+//		}
+//		return res;
+//	}
 
 	
 	

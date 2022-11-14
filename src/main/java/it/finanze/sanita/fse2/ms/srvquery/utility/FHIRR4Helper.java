@@ -42,7 +42,7 @@ public class FHIRR4Helper {
 		return (T) parser.parseResource(resourceClass, input);
 	}
 
-	public static IGenericClient createClient(String serverURL) {
+	public static IGenericClient createClient(final String serverURL) {
 		return context.newRestfulGenericClient(serverURL);
 	}
 

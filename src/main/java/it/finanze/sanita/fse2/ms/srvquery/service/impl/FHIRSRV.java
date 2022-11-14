@@ -3,20 +3,21 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 
+import javax.annotation.PostConstruct;
+
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
-import it.finanze.sanita.fse2.ms.srvquery.config.FHIRCFG;
+import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
-import it.finanze.sanita.fse2.ms.srvquery.utility.ProfileUtility;
 import lombok.extern.slf4j.Slf4j;
-
-import javax.annotation.PostConstruct;
 
 /** 
  * FHIR Service Implementation 
@@ -26,26 +27,21 @@ import javax.annotation.PostConstruct;
 @Slf4j
 public class FHIRSRV implements IFHIRSRV {
 	
-	/** 
-	 * Profile Utility 
-	 */
-    @Autowired
-	private ProfileUtility profileUtility;
 
     /** 
      * FHIR Configuration 
      */
     @Autowired
-	private FHIRCFG fhirCFG;
+	private FhirCFG fhirCFG;
 
     /** 
      * FHIR Client 
      */
-    private FHIRClient client;
+    private FHIRClient fhirClient;
 
     @PostConstruct
     void init() {
-        client = new FHIRClient(fhirCFG.getFhirServerTestUrl());
+    	fhirClient = new FHIRClient(fhirCFG.getFhirServerUrl());
     }
 
     @Override
@@ -54,8 +50,7 @@ public class FHIRSRV implements IFHIRSRV {
     	try {
     		String json = createDTO.getJsonString();
     		Bundle bundle = FHIRR4Helper.deserializeResource(Bundle.class, json, true);
-
-    		client.saveBundleWithTransaction(bundle);
+    		fhirClient.saveBundleWithTransaction(bundle);
     		out = true;
     		log.debug("FHIR bundle: {}", json);
     	} catch(Exception e) {
@@ -66,27 +61,36 @@ public class FHIRSRV implements IFHIRSRV {
     }
 
     @Override
-    public String translateCode(String code, String system, String targetSystem) {
-        String out = "";
-		try {
-            if (profileUtility.isDevProfile()) {
-                out = client.translateCode(code, system, targetSystem);
-                log.info("Code translated result: {}", out);
-            } else {
-                // TODO
-            }
-
-		} catch(Exception e) {
-			log.error("Error translating Code from FHIR Terminology Server: ", e);
-			throw new BusinessException(e);
-		}
-		return out;
-    }
-
-    @Override
     public boolean checkExist(final String masterIdentifier) {
-        boolean isFound = client.read(masterIdentifier);
-        log.info("found?: {}", isFound);
-        return isFound;
+    	boolean exist = false;
+    	try {
+    		DocumentReference docReference = fhirClient.searchDocRefByMasterIdentifier(masterIdentifier);
+    		if(docReference!=null) {
+    			exist = true;
+    		}
+    	} catch(Exception ex) {
+    		log.error("Error while perform check exist : " , ex);
+    		throw new BusinessException("Error while perform check exist : " , ex);
+    	}
+        return exist;
+    }
+    
+    
+    @Override
+    public void delete(final String masterIdentifier) {
+    	boolean out = false;
+    	try {
+    		DocumentReference docReference = fhirClient.searchDocRefByMasterIdentifier(masterIdentifier);
+    		if(docReference!=null && docReference.hasContext()) {
+    			String compositionId = docReference.getContext().getRelatedFirstRep().getReference();
+    			String url = fhirCFG.getFhirServerUrl() + "/" + compositionId;
+    			Composition composition = fhirClient.searchCompositionByUrl(url);
+    		} else {
+    			//Set DTO for message
+    		}
+    	} catch(Exception e) {
+    		log.error("Error creating new resource on FHIR Server: ", e);
+    		throw new BusinessException(e);
+    	}
     }
 }

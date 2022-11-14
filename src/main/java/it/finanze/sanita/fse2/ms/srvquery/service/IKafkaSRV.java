@@ -3,16 +3,15 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.service;
 
-import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 import org.apache.kafka.clients.producer.RecordMetadata;
 
-import java.io.Serializable;
+import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 
 /** 
  * Interface for managing Kafka 
  *
  */
-public interface IKafkaSRV extends Serializable {
+public interface IKafkaSRV {
 
     /**
 	 * Send message over kafka topic

@@ -36,8 +36,6 @@ public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
 	 */
     @Autowired
     private transient IFHIRSRV fhirSRV;
- 
-    
     
     @Override
     public ResponseDTO create(final HttpServletRequest request, final FhirPublicationDTO body){
