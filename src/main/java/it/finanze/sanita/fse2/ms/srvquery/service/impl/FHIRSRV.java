@@ -4,17 +4,27 @@
 package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceRelatesToComponent;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentRelationshipType;
+import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,6 +45,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FHIRSRV implements IFHIRSRV {
 
+	public static final List<Class<?>> IMMUTABLE_RESOURCES = Arrays.asList(
+			Patient.class,
+			Practitioner.class,
+			PractitionerRole.class,
+			Organization.class,
+			Location.class
+			);
+	
     @Autowired
 	private FhirCFG fhirCFG;
 
@@ -57,11 +75,10 @@ public class FHIRSRV implements IFHIRSRV {
     public boolean delete(String identifier) {
     	DocumentReference documentReference = fhirClient.getDocumentReference(identifier);
     	Composition composition = fhirClient.getComposition(documentReference);
-    	Bundle document = fhirClient.getDocument(composition);
-//    	ResourceRelationshipUtility.run(document);
+    	Bundle document = fhirClient.getDocument(composition);    	
     	List<IdType> idTypes = getIdTypesToDelete(document);
     	if (idTypes.isEmpty()) return false;
-    	return delete(idTypes);
+    	return delete(documentReference, idTypes);
     }
 
 	@Override
@@ -142,11 +159,21 @@ public class FHIRSRV implements IFHIRSRV {
 		return related;
 	}
 
-	private boolean delete(List<IdType> idTypes) {
-		return idTypes
+	private boolean delete(DocumentReference documentReference, List<IdType> idTypes) {
+		Bundle bundleToDelete = new Bundle();
+		bundleToDelete.setType(BundleType.TRANSACTION);
+		
+		List<BundleEntryComponent> entry = idTypes
 				.stream()
-				.map(idType -> fhirClient.deleteResource(idType))
-				.allMatch(result -> result);
+				.map(idType -> getBundleEntryComponent(idType, HTTPVerb.DELETE))
+				.collect(Collectors.toList());
+		
+		IdType documentReferenceIdType = documentReference.getIdElement();
+		entry.add(getBundleEntryComponent(documentReferenceIdType, HTTPVerb.DELETE));
+		bundleToDelete.setEntry(entry);
+		Bundle deletedBundle = fhirClient.delete(bundleToDelete);
+		FHIRR4Helper.serializeResource(bundleToDelete, true, false, false);
+		return true;
 	}
 
 	private List<IdType> getIdTypesToDelete(Bundle document) {
@@ -160,8 +187,19 @@ public class FHIRSRV implements IFHIRSRV {
 				.collect(Collectors.toList());
 	}
 	
-	private boolean canBeDeleted(Resource resource1) {
-		return true;
+	private boolean canBeDeleted(Resource resource) {
+		return IMMUTABLE_RESOURCES
+				.stream()
+				.allMatch(unchangeable -> resource.getClass() != unchangeable);
+	}
+
+	private BundleEntryComponent getBundleEntryComponent(IdType idtype, HTTPVerb method) {
+		BundleEntryRequestComponent request = new BundleEntryRequestComponent();
+		request.setMethod(method);
+		request.setUrl(idtype.getResourceType() + "/" + idtype.getIdPart());
+		BundleEntryComponent component = new BundleEntryComponent();
+		component.setRequest(request);
+		return component;
 	}
 	
 }

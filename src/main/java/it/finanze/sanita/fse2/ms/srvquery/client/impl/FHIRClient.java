@@ -45,13 +45,22 @@ public class FHIRClient {
 
 	public Bundle create(Bundle bundle) {
 		try { 
-			return _create(bundle);
+			return _transaction(bundle);
 		} catch(Exception ex) {
 			log.error("Errore durante il salvataggio del bundle sul fhir server : ", ex);
 			throw new BusinessException("Errore durante il salvataggio del bundle sul fhir server : ", ex);
 		}
 	}
 
+	public Bundle delete(Bundle bundle) {
+		try {
+			return _transaction(bundle);
+		} catch(Exception ex) {
+			log.error("Errore durante la delete sul fhir server : ", ex);
+			throw new BusinessException("Errore durante la delete sul fhir server : ", ex);
+		}
+	}
+	
 	public boolean deleteResource(IdType idType) {
 		try {
 			return _deleteResource(idType);
@@ -118,14 +127,14 @@ public class FHIRClient {
 				.execute();
 	}
 
-	private Bundle _create(Bundle bundle) {
+	private Bundle _transaction(Bundle bundle) {
 		if (bundle == null) return null;
 		return client
 				.transaction()
 				.withBundle(bundle)
 				.execute();
 	}
-
+	
 	private boolean _deleteResource(IdType idType) {
 		if (idType == null) return false;
 		MethodOutcome response = client
