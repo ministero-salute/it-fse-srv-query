@@ -124,16 +124,16 @@ public interface IDocumentCTL {
      * @param body  The body of the request 
      * @return ResponseDTO  A DTO representing the response 
      */
-    @PutMapping(value = "/replace", produces = {
-        MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = "/replace/{identifier}",  produces = { MediaType.APPLICATION_JSON_VALUE })
     @Operation(summary = "Replace a document", description = "Servizio che consente di effettuare la replace di un Document.")
     @ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Replace Document avvenuta con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class))),
             @ApiResponse(responseCode = "400", description = "Bad request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
-    ResponseDTO replace(HttpServletRequest request, @RequestBody FhirPublicationDTO body);
-
+//    ResponseDTO replace(HttpServletRequest request, @RequestBody FhirPublicationDTO body);
+    ResponseDTO replace(HttpServletRequest request, @PathVariable @Size(min = DEFAULT_STRING_MIN_SIZE, max = DEFAULT_STRING_MAX_SIZE, message = "resourceId does not match the expected size") String identifier); 
+    
     /** 
      * Updates an existing document on FHIR Server. 
      * 
@@ -141,14 +141,14 @@ public interface IDocumentCTL {
      * @param body  The body of the request 
      * @return ResponseDTO  A DTO representing the response 
      */
-    @PutMapping(value = "/metadata", produces = {
-        MediaType.APPLICATION_JSON_VALUE }, consumes = { MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = "/metadata/{identifier}",  produces = { MediaType.APPLICATION_JSON_VALUE })
     @Operation(summary = "Update Document metadata", description = "Servizio che consente di aggiornare i metadati di un Documento.")
     @ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Aggiornamento metadati completato con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
-    ResponseDTO updateMetadata(HttpServletRequest request, @RequestBody FhirPublicationDTO body);
+    ResponseDTO updateMetadata(HttpServletRequest request, @PathVariable @Size(min = DEFAULT_STRING_MIN_SIZE, max = DEFAULT_STRING_MAX_SIZE, message = "resourceId does not match the expected size") String identifier); 
+    //    ResponseDTO updateMetadata(HttpServletRequest request, @RequestBody FhirPublicationDTO body);
     
 }

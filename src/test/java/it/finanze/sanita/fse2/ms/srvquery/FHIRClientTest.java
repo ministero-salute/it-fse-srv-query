@@ -46,7 +46,7 @@ class FHIRClientTest {
 			String transactionId = StringUtility.generateTransactionUID(UIDModeEnum.UUID_UUID);
 			String modifiedBundle = TestConstants.TEST_BUNDLE.replace(TestConstants.PLACEHOLDER, transactionId);
 			Bundle bundle = FHIRR4Helper.deserializeResource(Bundle.class, modifiedBundle, true);
-			assertDoesNotThrow(() -> fhirClient.saveBundleWithTransaction(bundle));
+			assertDoesNotThrow(() -> fhirClient.create(bundle));
 			log.info("Published: {}", transactionId);
 		}
 	}
