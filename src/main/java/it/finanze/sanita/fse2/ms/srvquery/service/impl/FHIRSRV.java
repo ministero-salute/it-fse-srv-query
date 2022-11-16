@@ -10,7 +10,6 @@ import javax.annotation.PostConstruct;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DocumentReference;
-import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceRelatesToComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FHIRSRV implements IFHIRSRV {
 
+	
     @Autowired
 	private FhirCFG fhirCFG;
 
@@ -62,14 +62,8 @@ public class FHIRSRV implements IFHIRSRV {
     	try {
     		DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(masterIdentifier);
     		if(documentReference!=null) {
-    			String urlComposition = "";
-    			for(DocumentReferenceRelatesToComponent entry : documentReference.getRelatesTo()) {
-    				if(true) {
-    					urlComposition = "";
-    					break;
-    				}
-    			}
-    			Bundle bundleToDelete = fhirClient.getDocument(urlComposition);
+    			String urlComposition = documentReference.getContext().getRelated().get(0).getReference();
+    			Bundle bundleToDelete = fhirClient.getDocument(urlComposition,fhirCFG.getFhirServerUrl());
     			FHIRUtility.prepareForDelete(bundleToDelete, documentReference);
     			output = fhirClient.delete(bundleToDelete);
     		}
@@ -88,7 +82,7 @@ public class FHIRSRV implements IFHIRSRV {
 			String identifier = body.getIdentifier();
 			DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(identifier);
 	    	Composition composition = fhirClient.getComposition(documentReference);
-	    	Bundle document = fhirClient.getDocument(composition.getId());
+	    	Bundle document = fhirClient.getDocument(composition.getId(),fhirCFG.getFhirServerUrl());
 	    	FHIRUtility.prepareForReplace(bundleToReplace, documentReference, document);
 	    	output = fhirClient.replace(bundleToReplace);
 		} catch(Exception ex) {
@@ -113,13 +107,8 @@ public class FHIRSRV implements IFHIRSRV {
 		if(StringUtility.isNullOrEmpty(masterIdentifier)) {
 			throw new BusinessException("Attenzione. Il master identifier risulta essere null");
 		}
-		
-		String searchParameter = masterIdentifier;
-		if (masterIdentifier.contains("^")) {
-			searchParameter = masterIdentifier.split("\\^")[1];
-		} 
-		
-		Bundle bundle = fhirClient.findByMasterIdentifier(searchParameter);
+		 
+		Bundle bundle = fhirClient.findByMasterIdentifier(masterIdentifier);
 		if(bundle==null || bundle.getEntry().isEmpty()) {
 			isFound = false;
 		}

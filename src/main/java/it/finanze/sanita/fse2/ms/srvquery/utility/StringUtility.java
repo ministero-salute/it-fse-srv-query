@@ -119,6 +119,13 @@ public final class StringUtility {
 		return out; 
 	}
 	
+	public static String getSearchParameterFromMasterIdentifier(final String masterIdentifier) {
+		String searchParameter = masterIdentifier;
+		if (masterIdentifier.contains("^")) {
+			searchParameter = masterIdentifier.split("\\^")[1];
+		} 
+		return searchParameter;
+	}
 
 }
 

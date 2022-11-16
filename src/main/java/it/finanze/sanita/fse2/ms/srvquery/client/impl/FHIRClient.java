@@ -98,17 +98,7 @@ public class FHIRClient {
 			log.error("Errore durante la getComposition sul fhir server : ", ex);
 			throw new BusinessException("Errore durante la getComposition sul fhir server : ", ex);
 		}
-	}
-
-//	public Bundle getDocument(Composition composition) {
-//		try {
-//			return _getDocument(composition);
-//		} catch(Exception ex) {
-//			log.error("Errore durante la getDocument sul fhir server : ", ex);
-//			throw new BusinessException("Errore durante la getDocument sul fhir server : ", ex);
-//		}
-//	}
-	
+	} 
 
 	public String translateCode(String code, String system, String targetSystem) {
 		try {
@@ -189,9 +179,9 @@ public class FHIRClient {
 	}
 	
 	
-	public Bundle getDocument(final String idComposition) {
+	public Bundle getDocument(final String idComposition, final String url) {
 		try {
-			return client.read().resource(Bundle.class).withUrl(idComposition+"/$document").execute(); 
+			return (Bundle)client.search().byUrl(url+"/"+idComposition+"/$document").execute(); 
 		} catch(Exception ex) {
 			log.error("Errore durante la getDocument sul fhir server : ", ex);
 			throw new BusinessException("Errore durante la getDocument sul fhir server : ", ex);
@@ -263,8 +253,10 @@ public class FHIRClient {
 	}
 	
 	public Bundle findByMasterIdentifier(final String masterIdentifier) {
+		String searchParameter = StringUtility.getSearchParameterFromMasterIdentifier(masterIdentifier);
+		
 		return client.search().forResource(DocumentReference.class)
-						.where(DocumentReference.IDENTIFIER.exactly().identifier(masterIdentifier)).returnBundle(Bundle.class).execute();
+						.where(DocumentReference.IDENTIFIER.exactly().identifier(searchParameter)).returnBundle(Bundle.class).execute();
 	}
 
 }
