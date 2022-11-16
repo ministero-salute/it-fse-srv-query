@@ -10,14 +10,17 @@ import javax.annotation.PostConstruct;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceRelatesToComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
+import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 
 /** 
@@ -40,47 +43,89 @@ public class FHIRSRV implements IFHIRSRV {
 
     @Override
     public boolean create(final FhirPublicationDTO createDTO) {
-    	String json = createDTO.getJsonString();
-    	Bundle bundle = deserializeBundle(json);
-    	log.debug("FHIR bundle: {}", json);
-    	return fhirClient.create(bundle);
+    	boolean esito = false;
+    	try {
+    		String json = createDTO.getJsonString();
+    		log.debug("FHIR bundle: {}", json);
+    		Bundle bundle = deserializeBundle(json);
+    		esito = fhirClient.create(bundle);
+    	}catch(Exception ex) {
+    		log.error("Error while perform create method :", ex);
+    		throw new BusinessException("Error while perform create method :", ex);
+    	}
+    	return esito;
     }
 
-	@Override
-    public boolean delete(String identifier) {
-    	DocumentReference documentReference = fhirClient.getDocumentReference(identifier);
-    	Composition composition = fhirClient.getComposition(documentReference);
-    	Bundle bundleToDelete = fhirClient.getDocument(composition);
-    	FHIRUtility.prepareForDelete(bundleToDelete, documentReference);
-    	return fhirClient.delete(bundleToDelete);
+    @Override
+    public boolean delete(final String masterIdentifier) {
+    	boolean output = false;
+    	try {
+    		DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(masterIdentifier);
+    		if(documentReference!=null) {
+    			String urlComposition = "";
+    			for(DocumentReferenceRelatesToComponent entry : documentReference.getRelatesTo()) {
+    				if(true) {
+    					urlComposition = "";
+    					break;
+    				}
+    			}
+    			Bundle bundleToDelete = fhirClient.getDocument(urlComposition);
+    			FHIRUtility.prepareForDelete(bundleToDelete, documentReference);
+    			output = fhirClient.delete(bundleToDelete);
+    		}
+    	} catch(Exception ex) {
+    		log.error("Error while perform delete operation : " , ex);
+    		throw new BusinessException("Error while perform delete operation : " , ex);
+    	}
+    	return output;
     }
 
 	@Override
     public boolean replace(FhirPublicationDTO body) {
-		Bundle bundleToReplace = deserializeBundle(body.getJsonString());
-		String identifier = body.getIdentifier();
-		DocumentReference documentReference = fhirClient.getDocumentReference(identifier);
-    	Composition composition = fhirClient.getComposition(documentReference);
-    	Bundle document = fhirClient.getDocument(composition);
-    	FHIRUtility.prepareForReplace(bundleToReplace, documentReference, document);
-    	return fhirClient.replace(bundleToReplace);
+		boolean output = false;
+		try {
+			Bundle bundleToReplace = deserializeBundle(body.getJsonString());
+			String identifier = body.getIdentifier();
+			DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(identifier);
+	    	Composition composition = fhirClient.getComposition(documentReference);
+	    	Bundle document = fhirClient.getDocument(composition.getId());
+	    	FHIRUtility.prepareForReplace(bundleToReplace, documentReference, document);
+	    	output = fhirClient.replace(bundleToReplace);
+		} catch(Exception ex) {
+			log.error("Error while perform replace operation : " , ex);
+			throw new BusinessException("Error while perform replace operation : " , ex);
+		}
+    	return output;
     }
 
 	@Override
     public boolean updateMetadata(FhirPublicationDTO body) {
     	String identifier = body.getIdentifier();
-    	DocumentReference documentReference = fhirClient.getDocumentReference(identifier);
+    	DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(identifier);
     	FHIRUtility.prepareForUpdate(documentReference, body.getJsonString());
     	boolean result = fhirClient.update(documentReference);
     	return result;
     }
 
-    @Override
-    public boolean checkExists(final String masterIdentifier) {
-        boolean isFound = fhirClient.checkExists(masterIdentifier);
-        log.info("found?: {}", isFound);
-        return isFound;
-    }
+	@Override
+	public boolean checkExists(final String masterIdentifier) {
+		boolean isFound = true;
+		if(StringUtility.isNullOrEmpty(masterIdentifier)) {
+			throw new BusinessException("Attenzione. Il master identifier risulta essere null");
+		}
+		
+		String searchParameter = masterIdentifier;
+		if (masterIdentifier.contains("^")) {
+			searchParameter = masterIdentifier.split("\\^")[1];
+		} 
+		
+		Bundle bundle = fhirClient.findByMasterIdentifier(searchParameter);
+		if(bundle==null || bundle.getEntry().isEmpty()) {
+			isFound = false;
+		}
+
+		return isFound;
+	}
     
 	@Override
     public String translateCode(String code, String system, String targetSystem) {

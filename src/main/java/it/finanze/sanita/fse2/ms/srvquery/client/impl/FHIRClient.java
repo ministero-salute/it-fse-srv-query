@@ -4,7 +4,6 @@
 package it.finanze.sanita.fse2.ms.srvquery.client.impl;
 
 import static it.finanze.sanita.fse2.ms.srvquery.utility.OptionalUtility.getValue;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.util.List;
@@ -20,13 +19,14 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
-import it.finanze.sanita.fse2.ms.srvquery.utility.OptionalUtility;
+import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 
 /** 
@@ -43,18 +43,20 @@ public class FHIRClient {
 		client = FHIRR4Helper.createClient(serverURL);
 	}
 
-	public boolean create(Bundle bundle) {
+	public boolean create(final Bundle bundle) {
 		try { 
-			return _transaction(bundle);
+			String id = transaction(bundle);
+			return !StringUtility.isNullOrEmpty(id);
 		} catch(Exception ex) {
 			log.error("Errore durante il salvataggio del bundle sul fhir server : ", ex);
 			throw new BusinessException("Errore durante il salvataggio del bundle sul fhir server : ", ex);
 		}
 	}
-
+	
 	public boolean delete(Bundle bundle) {
 		try {
-			return _transaction(bundle);
+			String id = transaction(bundle);
+			return !StringUtility.isNullOrEmpty(id);
 		} catch(Exception ex) {
 			log.error("Errore durante la delete sul fhir server : ", ex);
 			throw new BusinessException("Errore durante la delete sul fhir server : ", ex);
@@ -63,7 +65,8 @@ public class FHIRClient {
 	
 	public boolean replace(Bundle bundle) {
 		try {
-			return _transaction(bundle);
+			String id = transaction(bundle);
+			return !StringUtility.isNullOrEmpty(id);
 		} catch(Exception ex) {
 			log.error("Errore durante la delete sul fhir server : ", ex);
 			throw new BusinessException("Errore durante la delete sul fhir server : ", ex);
@@ -87,16 +90,7 @@ public class FHIRClient {
 			throw new BusinessException("Errore durante la deleteResoruce sul fhir server : ", ex);
 		}
 	}
-	
-	public DocumentReference getDocumentReference(final String identifier) {
-		try {
-			return _getDocumentReference(identifier);
-		} catch(Exception ex) {
-			log.error("Errore durante la getDocumentReference sul fhir server : ", ex);
-			throw new BusinessException("Errore durante la getDocumentReference sul fhir server : ", ex);
-		}
-	}
-	
+ 
 	public Composition getComposition(DocumentReference documentReference) {
 		try {
 			return _getComposition(documentReference);
@@ -106,18 +100,15 @@ public class FHIRClient {
 		}
 	}
 
-	public Bundle getDocument(Composition composition) {
-		try {
-			return _getDocument(composition);
-		} catch(Exception ex) {
-			log.error("Errore durante la getDocument sul fhir server : ", ex);
-			throw new BusinessException("Errore durante la getDocument sul fhir server : ", ex);
-		}
-	}
+//	public Bundle getDocument(Composition composition) {
+//		try {
+//			return _getDocument(composition);
+//		} catch(Exception ex) {
+//			log.error("Errore durante la getDocument sul fhir server : ", ex);
+//			throw new BusinessException("Errore durante la getDocument sul fhir server : ", ex);
+//		}
+//	}
 	
-	public boolean checkExists(final String masterIdentifier) {
-		return getDocumentReference(masterIdentifier) != null;
-	}
 
 	public String translateCode(String code, String system, String targetSystem) {
 		try {
@@ -136,13 +127,13 @@ public class FHIRClient {
 				.execute();
 	}
 
-	private boolean _transaction(Bundle bundle) {
-		if (bundle == null) return false;
-		Bundle response = client
-				.transaction()
-				.withBundle(bundle)
-				.execute();
-		return isExecuted(response);
+	private String transaction(final Bundle bundle) {
+		String id = "";
+		Bundle response = client.transaction().withBundle(bundle).execute();
+		if(response!=null && !StringUtility.isNullOrEmpty(response.getIdElement().getIdPart())) {
+			id = response.getId();
+		}
+		return id;
 	}
 	
 	private boolean _deleteResource(IdType idType) {
@@ -162,35 +153,7 @@ public class FHIRClient {
 				.execute();
 		return isExecuted(response);
 	}
-
-	private DocumentReference _getDocumentReference(final String identifier) {
-		return getDocumentReferenceBundle(identifier)
-				.getEntry()
-				.stream()
-				.map(entry -> entry.getResource())
-				.filter(resource -> resource instanceof DocumentReference)
-				.map(resource -> (DocumentReference) resource)
-				.findFirst()
-				.orElse(null);
-	}
-	
-	private Bundle getDocumentReferenceBundle(String masterIdentifier) {
-		Bundle bundle = _getDocumentReferenceBundle(masterIdentifier);
-		List<BundleEntryComponent> entry = OptionalUtility.getValue(bundle, Bundle::getEntry);
-		if (isEmpty(entry)) return null;
-		return bundle;
-	}
-
-	private Bundle _getDocumentReferenceBundle(String masterIdentifier) {
-		if (isBlank(masterIdentifier)) return null;
-		return client
-				.search()
-				.forResource(DocumentReference.class)
-				.where(DocumentReference.IDENTIFIER.exactly().identifier(masterIdentifier))
-				.returnBundle(Bundle.class)
-				.execute();
-	}
-
+ 
 	private Composition _getComposition(DocumentReference documentReference) {
     	DocumentReferenceContextComponent context = getValue(documentReference, DocumentReference::getContext);
     	if (context == null) return null;
@@ -223,6 +186,16 @@ public class FHIRClient {
 				.withNoParameters(Parameters.class)
 				.returnResourceType(Bundle.class)
 				.execute();
+	}
+	
+	
+	public Bundle getDocument(final String idComposition) {
+		try {
+			return client.read().resource(Bundle.class).withUrl(idComposition+"/$document").execute(); 
+		} catch(Exception ex) {
+			log.error("Errore durante la getDocument sul fhir server : ", ex);
+			throw new BusinessException("Errore durante la getDocument sul fhir server : ", ex);
+		}
 	}
 	
 	private boolean isExecuted(MethodOutcome response) {
@@ -267,6 +240,31 @@ public class FHIRClient {
 	private String extractCodeFromParam(ParametersParameterComponent param) {
 		//TODO
 		return param.getPart().get(0).getValue().getNamedProperty("code").getValues().get(0).toString();
+	}
+	
+	
+	public DocumentReference getDocumentReferenceBundle(final String masterIdentifier) {
+		DocumentReference output = null;
+		try {
+			Bundle bundle = findByMasterIdentifier(masterIdentifier);
+			if(bundle!=null && !bundle.getEntry().isEmpty()) {
+				for(BundleEntryComponent entry : bundle.getEntry()) {
+					if(ResourceType.DocumentReference.equals(entry.getResource().getResourceType())){
+						output = (DocumentReference)entry.getResource();
+						break;
+					} 
+				}
+			}
+		} catch(Exception ex) {
+			log.error("Error while get document reference bundle : ", ex);
+			throw new BusinessException("Error while get document reference bundle : ", ex);
+		}
+		return output;
+	}
+	
+	public Bundle findByMasterIdentifier(final String masterIdentifier) {
+		return client.search().forResource(DocumentReference.class)
+						.where(DocumentReference.IDENTIFIER.exactly().identifier(masterIdentifier)).returnBundle(Bundle.class).execute();
 	}
 
 }

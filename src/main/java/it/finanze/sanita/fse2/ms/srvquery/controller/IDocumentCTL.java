@@ -28,9 +28,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.DocumentReferenceResDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.CreateResponseDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.DeleteResponseDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.ReplaceResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.ResourceExistResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.ResponseDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.UpdateResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceAlreadyPresentException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceNotFoundException;
@@ -57,13 +60,13 @@ public interface IDocumentCTL {
 	 * @throws ResourceAlreadyPresentException  An exception thrown when the resource is already present on FHIR Server 
 	 */
     @PostMapping(value = "/create",  produces = {MediaType.APPLICATION_JSON_VALUE })
-    @Operation(summary = "Create a new FHIR resource in a FHIR Server and in Elasticsearch", description = "Servizio che consente di creare una nuova risorsa FHIR all'interno del Server FHIR e una sua copia su Elasticsearch.")
-    @ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class)))
+    @Operation(summary = "Create a new bundle in a server fhir", description = "Servizio che consente di creare un nuovo bundle all'interno del Server FHIR.")
+    @ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = CreateResponseDTO.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Creazione risorsa avvenuta con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
-    ResponseDTO create(HttpServletRequest request, @RequestBody FhirPublicationDTO body);
+    CreateResponseDTO create(@RequestBody FhirPublicationDTO body,HttpServletRequest request);
 
     /** 
      * Deletes a document on FHIR Server. 
@@ -75,15 +78,31 @@ public interface IDocumentCTL {
      * @throws OperationException  Generic MongoDB Exception 
      */
     @DeleteMapping(value = "/delete/{identifier}",  produces = { MediaType.APPLICATION_JSON_VALUE })
-    @Operation(summary = "Delete a FHIR resource", description = "Servizio che consente di cancellare una risorsa FHIR dal Server FHIR e da Elasticsearch.")
-    @ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class)))
+    @Operation(summary = "Delete a FHIR resource", description = "Servizio che consente di cancellare una risorsa FHIR dal Server FHIR.")
+    @ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = DeleteResponseDTO.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Cancellazione risorsa avvenuta con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class))),
+            @ApiResponse(responseCode = "200", description = "Cancellazione risorsa avvenuta con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = DeleteResponseDTO.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "404", description = "Risorsa non trovata", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
-    ResponseDTO delete(HttpServletRequest request, @PathVariable @Size(min = DEFAULT_STRING_MIN_SIZE, max = DEFAULT_STRING_MAX_SIZE, message = "resourceId does not match the expected size") String identifier); 
+    DeleteResponseDTO delete(@PathVariable @Size(min = DEFAULT_STRING_MIN_SIZE, max = DEFAULT_STRING_MAX_SIZE, message = "resourceId does not match the expected size") String identifier,HttpServletRequest request);
 
+    /** 
+     * Replaces an existing document on FHIR Server (it performs a deletion plus a new creation) 
+     *
+     * @param request  The HTTP Servlet Request 
+     * @param body  The body of the request 
+     * @return ResponseDTO  A DTO representing the response 
+     */
+    @PutMapping(value = "/replace",  produces = { MediaType.APPLICATION_JSON_VALUE })
+    @Operation(summary = "Replace a document", description = "Servizio che consente di effettuare la replace di un Document.")
+    @ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ReplaceResponseDTO.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Replace Document avvenuta con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReplaceResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Bad request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
+    ReplaceResponseDTO replace(@RequestBody FhirPublicationDTO body,HttpServletRequest request);
+    
     /** 
      * Check if the document exists on the secondary storage (MongoDB). 
      * 
@@ -99,39 +118,8 @@ public interface IDocumentCTL {
 			@ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
     ResourceExistResDTO exist(@PathVariable(required = true, name = "id") String id, HttpServletRequest request);
 
-    /** 
-     * Returns a document given its master identifier. 
-     * 
-     * @param request  The HTTP Servlet Request 
-     * @param id  The ID of the document to search 
-     * @return DocumentReferenceResDTO  A DTO with the ID and the Json String of the document 
-     * @throws ResourceNotFoundException  An exception thrown when the document is not found on MongoDB 
-     */
-    @GetMapping(value = "/{id}", produces = {
-        MediaType.APPLICATION_JSON_VALUE })
-    @Operation(summary = "Returns a document given its identifier", description = "Servizio che consente di ritornare un documento dato il suo id.")
-    @ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = DocumentReferenceResDTO.class)))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = DocumentReferenceResDTO.class))),
-            @ApiResponse(responseCode = "404", description = "Documento non trovato", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
-    DocumentReferenceResDTO getDocumentById(HttpServletRequest request, @PathVariable @Size(min = DEFAULT_STRING_MIN_SIZE, max = DEFAULT_STRING_MAX_SIZE, message = "identifier does not match the expected size") String id) throws ResourceNotFoundException; 
-
-    /** 
-     * Replaces an existing document on FHIR Server (it performs a deletion plus a new creation) 
-     *
-     * @param request  The HTTP Servlet Request 
-     * @param body  The body of the request 
-     * @return ResponseDTO  A DTO representing the response 
-     */
-    @PutMapping(value = "/replace/{identifier}",  produces = { MediaType.APPLICATION_JSON_VALUE })
-    @Operation(summary = "Replace a document", description = "Servizio che consente di effettuare la replace di un Document.")
-    @ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class)))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Replace Document avvenuta con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Bad request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
-    ResponseDTO replace(HttpServletRequest request, @RequestBody FhirPublicationDTO body);
+    
+    
     
     /** 
      * Updates an existing document on FHIR Server. 
@@ -142,11 +130,11 @@ public interface IDocumentCTL {
      */
     @PutMapping(value = "/metadata/{identifier}",  produces = { MediaType.APPLICATION_JSON_VALUE })
     @Operation(summary = "Update Document metadata", description = "Servizio che consente di aggiornare i metadati di un Documento.")
-    @ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class)))
+    @ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = UpdateResponseDTO.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Aggiornamento metadati completato con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class))),
+            @ApiResponse(responseCode = "200", description = "Aggiornamento metadati completato con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UpdateResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) }) 
-    ResponseDTO updateMetadata(HttpServletRequest request, @RequestBody FhirPublicationDTO body);
+    UpdateResponseDTO updateMetadata(FhirPublicationDTO body,HttpServletRequest request);
     
 }
