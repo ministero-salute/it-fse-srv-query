@@ -63,7 +63,6 @@ public class FHIRClient {
 	
 	public boolean update(DocumentReference documentReference) {
 		try {
-			if (documentReference == null) return false;
 			return _update(documentReference);
 		} catch(Exception ex) {
 			log.error("Errore durante la deleteResoruce sul fhir server : ", ex);
@@ -137,6 +136,7 @@ public class FHIRClient {
 	}
 
 	private boolean _update(DocumentReference documentReference) {
+		if (documentReference == null) return false;
 		MethodOutcome response = client
 				.update()
 				.resource(documentReference)

@@ -4,9 +4,7 @@
 package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -27,7 +25,6 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
-import it.finanze.sanita.fse2.ms.srvquery.utility.ResourceRelationshipUtility;
 import lombok.extern.slf4j.Slf4j;
 
 /** 
@@ -41,7 +38,7 @@ public class FHIRSRV implements IFHIRSRV {
     @Autowired
 	private FhirCFG fhirCFG;
 
-    private FHIRClient client;
+    private FHIRClient fhirClient;
 
     @PostConstruct
     void init() {
@@ -58,10 +55,10 @@ public class FHIRSRV implements IFHIRSRV {
 
 	@Override
     public boolean delete(String identifier) {
-    	DocumentReference documentReference = client.getDocumentReference(identifier);
-    	Composition composition = client.getComposition(documentReference);
-    	Bundle document = client.getDocument(composition);
-    	ResourceRelationshipUtility.run(document);
+    	DocumentReference documentReference = fhirClient.getDocumentReference(identifier);
+    	Composition composition = fhirClient.getComposition(documentReference);
+    	Bundle document = fhirClient.getDocument(composition);
+//    	ResourceRelationshipUtility.run(document);
     	List<IdType> idTypes = getIdTypesToDelete(document);
     	if (idTypes.isEmpty()) return false;
     	return delete(idTypes);
@@ -82,22 +79,22 @@ public class FHIRSRV implements IFHIRSRV {
 	@Override
     public boolean updateMetadata(FhirPublicationDTO body) {
     	String identifier = body.getIdentifier();
-    	DocumentReference documentReference = client.getDocumentReference(identifier);
+    	DocumentReference documentReference = fhirClient.getDocumentReference(identifier);
     	setMetadata(documentReference, body.getJsonString());
-    	boolean result = client.update(documentReference);
+    	boolean result = fhirClient.update(documentReference);
     	return result;
     }
 
     @Override
     public boolean checkExists(final String masterIdentifier) {
-        boolean isFound = client.checkExists(masterIdentifier);
+        boolean isFound = fhirClient.checkExists(masterIdentifier);
         log.info("found?: {}", isFound);
         return isFound;
     }
     
 	@Override
     public String translateCode(String code, String system, String targetSystem) {
-        String out = client.translateCode(code, system, targetSystem);
+        String out = fhirClient.translateCode(code, system, targetSystem);
         log.info("Code translated result: {}", out);
         return out;
     }
@@ -107,19 +104,19 @@ public class FHIRSRV implements IFHIRSRV {
 	}
 	
     private boolean create(Bundle bundle) {
-    	Bundle newBundle = client.create(bundle);
+    	Bundle newBundle = fhirClient.create(bundle);
     	return newBundle != null && newBundle.hasEntry();
 	}
 
     private String getDocumentReferenceId(String masterIdentifier) {
-    	DocumentReference documentReference = client.getDocumentReference(masterIdentifier);
+    	DocumentReference documentReference = fhirClient.getDocumentReference(masterIdentifier);
     	if (documentReference == null) return null;
     	return documentReference.getId();
 	}
 
     private void setMetadata(DocumentReference documentReference, String jsonString) {
+    	// TODO 
     	documentReference.getCategory().get(0).getCoding().get(0).setCode("livBasso");
-		// TODO 
 	}
 
     private void setRelatedDocumentReference(Bundle bundle, String previousIdentifier) {
@@ -148,7 +145,7 @@ public class FHIRSRV implements IFHIRSRV {
 	private boolean delete(List<IdType> idTypes) {
 		return idTypes
 				.stream()
-				.map(idType -> client.deleteResource(idType))
+				.map(idType -> fhirClient.deleteResource(idType))
 				.allMatch(result -> result);
 	}
 

@@ -31,7 +31,7 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.DocumentReferenceResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.ResourceExistResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.ResponseDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseDTO; 
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceAlreadyPresentException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceNotFoundException;
 
@@ -131,8 +131,7 @@ public interface IDocumentCTL {
             @ApiResponse(responseCode = "200", description = "Replace Document avvenuta con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class))),
             @ApiResponse(responseCode = "400", description = "Bad request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
-//    ResponseDTO replace(HttpServletRequest request, @RequestBody FhirPublicationDTO body);
-    ResponseDTO replace(HttpServletRequest request, @PathVariable @Size(min = DEFAULT_STRING_MIN_SIZE, max = DEFAULT_STRING_MAX_SIZE, message = "resourceId does not match the expected size") String identifier); 
+    ResponseDTO replace(HttpServletRequest request, @RequestBody FhirPublicationDTO body);
     
     /** 
      * Updates an existing document on FHIR Server. 
@@ -147,8 +146,7 @@ public interface IDocumentCTL {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Aggiornamento metadati completato con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class))),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
-    ResponseDTO updateMetadata(HttpServletRequest request, @PathVariable @Size(min = DEFAULT_STRING_MIN_SIZE, max = DEFAULT_STRING_MAX_SIZE, message = "resourceId does not match the expected size") String identifier); 
-    //    ResponseDTO updateMetadata(HttpServletRequest request, @RequestBody FhirPublicationDTO body);
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) }) 
+    ResponseDTO updateMetadata(HttpServletRequest request, @RequestBody FhirPublicationDTO body);
     
 }
