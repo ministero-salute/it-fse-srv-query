@@ -43,7 +43,7 @@ public class FHIRClient {
 		client = FHIRR4Helper.createClient(serverURL);
 	}
 
-	public Bundle create(Bundle bundle) {
+	public boolean create(Bundle bundle) {
 		try { 
 			return _transaction(bundle);
 		} catch(Exception ex) {
@@ -52,7 +52,7 @@ public class FHIRClient {
 		}
 	}
 
-	public Bundle delete(Bundle bundle) {
+	public boolean delete(Bundle bundle) {
 		try {
 			return _transaction(bundle);
 		} catch(Exception ex) {
@@ -61,12 +61,12 @@ public class FHIRClient {
 		}
 	}
 	
-	public boolean deleteResource(IdType idType) {
+	public boolean replace(Bundle bundle) {
 		try {
-			return _deleteResource(idType);
+			return _transaction(bundle);
 		} catch(Exception ex) {
-			log.error("Errore durante la deleteResoruce sul fhir server : ", ex);
-			throw new BusinessException("Errore durante la deleteResoruce sul fhir server : ", ex);
+			log.error("Errore durante la delete sul fhir server : ", ex);
+			throw new BusinessException("Errore durante la delete sul fhir server : ", ex);
 		}
 	}
 	
@@ -79,6 +79,15 @@ public class FHIRClient {
 		}
 	}
 
+	public boolean deleteResource(IdType idType) {
+		try {
+			return _deleteResource(idType);
+		} catch(Exception ex) {
+			log.error("Errore durante la deleteResoruce sul fhir server : ", ex);
+			throw new BusinessException("Errore durante la deleteResoruce sul fhir server : ", ex);
+		}
+	}
+	
 	public DocumentReference getDocumentReference(final String identifier) {
 		try {
 			return _getDocumentReference(identifier);
@@ -127,12 +136,13 @@ public class FHIRClient {
 				.execute();
 	}
 
-	private Bundle _transaction(Bundle bundle) {
-		if (bundle == null) return null;
-		return client
+	private boolean _transaction(Bundle bundle) {
+		if (bundle == null) return false;
+		Bundle response = client
 				.transaction()
 				.withBundle(bundle)
 				.execute();
+		return isExecuted(response);
 	}
 	
 	private boolean _deleteResource(IdType idType) {
@@ -217,6 +227,10 @@ public class FHIRClient {
 	
 	private boolean isExecuted(MethodOutcome response) {
 		return response.getOperationOutcome() == null;
+	}
+
+	private boolean isExecuted(Bundle response) {
+		return response != null && response.hasEntry();
 	}
 
 	public String _translateCode(String code, String system, String targetSystem) {
