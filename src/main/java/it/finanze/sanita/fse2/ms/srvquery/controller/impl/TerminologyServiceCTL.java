@@ -16,7 +16,6 @@ import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
 
 
 /** 
- * @author Riccardo Bonesi
  */
 @RestController
 public class TerminologyServiceCTL extends AbstractCTL implements ITerminologyServiceCTL {

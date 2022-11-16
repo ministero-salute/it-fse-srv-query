@@ -8,7 +8,6 @@ import lombok.Setter;
 
 /**
  * 
- * @author Riccardo Bonesi
  *
  *	DTO used to return check exist result.
  */

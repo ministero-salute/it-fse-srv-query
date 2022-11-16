@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import lombok.Data;
 
 /**
- *	@author Riccardo Bonesi
  *
  *	Kafka consumer properties configuration.
  */
