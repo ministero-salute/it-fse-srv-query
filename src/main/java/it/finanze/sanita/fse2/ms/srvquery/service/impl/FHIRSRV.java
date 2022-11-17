@@ -8,7 +8,6 @@ import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility.deserialize
 import javax.annotation.PostConstruct;
 
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,14 +17,12 @@ import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
-import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 
 /** 
  * FHIR Service Implementation 
- *
  */
 @Service
 @Slf4j
@@ -51,8 +48,8 @@ public class FHIRSRV implements IFHIRSRV {
     		Bundle bundle = deserializeBundle(json);
     		esito = fhirClient.create(bundle);
     	}catch(Exception ex) {
-    		log.error("Error while perform create method :", ex);
-    		throw new BusinessException("Error while perform create method :", ex);
+    		log.error("Error while perform create operation :", ex);
+    		throw new BusinessException("Error while perform create operation :", ex);
     	}
     	return esito;
     }
@@ -95,11 +92,17 @@ public class FHIRSRV implements IFHIRSRV {
 
 	@Override
     public boolean updateMetadata(final FhirPublicationDTO body) {
-    	String identifier = body.getIdentifier();
-    	DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(identifier);
-    	FHIRUtility.prepareForUpdate(documentReference, body.getJsonString());
-    	boolean result = fhirClient.update(documentReference);
-    	return result;
+		boolean output = false;
+		try {
+			String identifier = body.getIdentifier();
+			DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(identifier);
+			FHIRUtility.prepareForUpdate(documentReference, body.getJsonString());
+			output = fhirClient.update(documentReference);
+		} catch(Exception ex) {
+			log.error("Error while perform update operation : " , ex);
+			throw new BusinessException("Error while perform update operation : " , ex);
+		}
+    	return output;
     }
 
 	@Override

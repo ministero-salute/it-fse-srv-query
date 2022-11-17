@@ -3,21 +3,12 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.client.impl;
 
-import static it.finanze.sanita.fse2.ms.srvquery.utility.OptionalUtility.getValue;
-import static org.springframework.util.CollectionUtils.isEmpty;
-
-import java.util.List;
-import java.util.Objects;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.DocumentReference;
-import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 
@@ -34,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FHIRClient {
 
-	// DOC: https://hapifhir.io/hapi-fhir/docs/client/generic_client.html
 	
 	private IGenericClient client;
 
@@ -47,8 +37,8 @@ public class FHIRClient {
 			String id = transaction(bundle);
 			return !StringUtility.isNullOrEmpty(id);
 		} catch(Exception ex) {
-			log.error("Errore durante il salvataggio del bundle sul fhir server : ", ex);
-			throw new BusinessException("Errore durante il salvataggio del bundle sul fhir server : ", ex);
+			log.error("Errore while perform create client method: ", ex);
+			throw new BusinessException("Errore while perform create client method : ", ex);
 		}
 	}
 	
@@ -57,8 +47,8 @@ public class FHIRClient {
 			String id = transaction(bundle);
 			return !StringUtility.isNullOrEmpty(id);
 		} catch(Exception ex) {
-			log.error("Errore durante la delete sul fhir server : ", ex);
-			throw new BusinessException("Errore durante la delete sul fhir server : ", ex);
+			log.error("Errore while perform delete client method: ", ex);
+			throw new BusinessException("Errore while perform delete client method : ", ex);
 		}
 	}
 	
@@ -67,28 +57,11 @@ public class FHIRClient {
 			String id = transaction(bundle);
 			return !StringUtility.isNullOrEmpty(id);
 		} catch(Exception ex) {
-			log.error("Errore durante la delete sul fhir server : ", ex);
-			throw new BusinessException("Errore durante la delete sul fhir server : ", ex);
+			log.error("Errore while perform replace client method: ", ex);
+			throw new BusinessException("Errore while perform replace client method:", ex);
 		}
 	}
 	
-	public boolean update(DocumentReference documentReference) {
-		try {
-			return _update(documentReference);
-		} catch(Exception ex) {
-			log.error("Errore durante la deleteResoruce sul fhir server : ", ex);
-			throw new BusinessException("Errore durante la deleteResoruce sul fhir server : ", ex);
-		}
-	}
- 
-	public Composition getComposition(DocumentReference documentReference) {
-		try {
-			return _getComposition(documentReference);
-		} catch(Exception ex) {
-			log.error("Errore durante la getComposition sul fhir server : ", ex);
-			throw new BusinessException("Errore durante la getComposition sul fhir server : ", ex);
-		}
-	} 
 
 	public String translateCode(String code, String system, String targetSystem) {
 		try {
@@ -99,83 +72,43 @@ public class FHIRClient {
 		}
 	}
 
-	private Composition _getCompositionById(final String resourceId) {
-		return client
-				.read()
-				.resource(Composition.class)
-				.withId(resourceId)
-				.execute();
-	}
-
 	private String transaction(final Bundle bundle) {
 		String id = "";
-		Bundle response = client.transaction().withBundle(bundle).execute();
-		if(response!=null && !StringUtility.isNullOrEmpty(response.getIdElement().getIdPart())) {
-			id = response.getId();
+		try {
+			Bundle response = client.transaction().withBundle(bundle).execute();
+			if(response!=null && !StringUtility.isNullOrEmpty(response.getIdElement().getIdPart())) {
+				id = response.getId();
+			}
+		} catch(Exception ex) {
+			log.error("Error while perform transaction : " , ex);
+			throw new BusinessException("Error while perform transaction : " , ex);
 		}
 		return id;
 	}
 	 
-
-	private boolean _update(DocumentReference documentReference) {
-		if (documentReference == null) return false;
-		MethodOutcome response = client
-				.update()
-				.resource(documentReference)
-				.execute();
-		return isExecuted(response);
+	public boolean update(final DocumentReference documentReference) {
+		boolean esito = false;
+		try {
+			MethodOutcome response = client
+					.update()
+					.resource(documentReference)
+					.execute();
+			esito = response.getCreated();
+		} catch(Exception ex) {
+			log.error("Errore while perform update client method:" , ex);
+			throw new BusinessException("Errore while perform update client method:" , ex);
+		}
+		return esito;
 	}
- 
-	private Composition _getComposition(DocumentReference documentReference) {
-    	DocumentReferenceContextComponent context = getValue(documentReference, DocumentReference::getContext);
-    	if (context == null) return null;
-    	if (isEmpty(context.getRelated())) return null;
-    	return _getComposition(context.getRelated());
-	}
-	
-	private Composition _getComposition(List<Reference> references) {
-		if (isEmpty(references)) return null;
-		return references
-    			.stream()
-    			.filter(Objects::nonNull)
-    			.map(Reference::getReference)
-    			.map(this::_getCompositionById)
-    			.findFirst()
-    			.orElse(null);
-	}
-	
-	private Bundle _getDocument(Composition composition) {
-		String compositionId = getValue(composition, Composition::getId);
-		if (compositionId == null) return null;
-		return _getDocument(compositionId);
-	}
-	
-	private Bundle _getDocument(String compositionId) {
-		return client
-				.operation()
-				.onInstance(compositionId)
-				.named("$document")
-				.withNoParameters(Parameters.class)
-				.returnResourceType(Bundle.class)
-				.execute();
-	}
-	
+   
 	
 	public Bundle getDocument(final String idComposition, final String url) {
 		try {
 			return (Bundle)client.search().byUrl(url+"/"+idComposition+"/$document").execute(); 
 		} catch(Exception ex) {
-			log.error("Errore durante la getDocument sul fhir server : ", ex);
-			throw new BusinessException("Errore durante la getDocument sul fhir server : ", ex);
+			log.error("Errore while perform getDocument client method:", ex);
+			throw new BusinessException("Errore while perform getDocument client method:", ex);
 		}
-	}
-	
-	private boolean isExecuted(MethodOutcome response) {
-		return response.getOperationOutcome() == null;
-	}
-
-	private boolean isExecuted(Bundle response) {
-		return response != null && response.hasEntry();
 	}
 
 	public String _translateCode(String code, String system, String targetSystem) {
@@ -228,8 +161,8 @@ public class FHIRClient {
 				}
 			}
 		} catch(Exception ex) {
-			log.error("Error while get document reference bundle : ", ex);
-			throw new BusinessException("Error while get document reference bundle : ", ex);
+			log.error("Errore while perform getDocumentReferenceBundle client method:", ex);
+			throw new BusinessException("Errore while perform getDocumentReferenceBundle client method:", ex);
 		}
 		return output;
 	}
