@@ -15,7 +15,6 @@ import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Reference;
@@ -81,15 +80,6 @@ public class FHIRClient {
 			throw new BusinessException("Errore durante la deleteResoruce sul fhir server : ", ex);
 		}
 	}
-
-	public boolean deleteResource(IdType idType) {
-		try {
-			return _deleteResource(idType);
-		} catch(Exception ex) {
-			log.error("Errore durante la deleteResoruce sul fhir server : ", ex);
-			throw new BusinessException("Errore durante la deleteResoruce sul fhir server : ", ex);
-		}
-	}
  
 	public Composition getComposition(DocumentReference documentReference) {
 		try {
@@ -125,15 +115,7 @@ public class FHIRClient {
 		}
 		return id;
 	}
-	
-	private boolean _deleteResource(IdType idType) {
-		if (idType == null) return false;
-		MethodOutcome response = client
-				.delete()
-				.resourceById(idType)
-				.execute();
-		return isExecuted(response);
-	}
+	 
 
 	private boolean _update(DocumentReference documentReference) {
 		if (documentReference == null) return false;

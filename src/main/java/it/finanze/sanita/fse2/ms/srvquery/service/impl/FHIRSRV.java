@@ -18,6 +18,7 @@ import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
+import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
@@ -62,8 +63,8 @@ public class FHIRSRV implements IFHIRSRV {
     	try {
     		DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(masterIdentifier);
     		if(documentReference!=null) {
-    			String urlComposition = documentReference.getContext().getRelated().get(0).getReference();
-    			Bundle bundleToDelete = fhirClient.getDocument(urlComposition,fhirCFG.getFhirServerUrl());
+    			String idComposition = documentReference.getContext().getRelated().get(0).getReference();
+    			Bundle bundleToDelete = fhirClient.getDocument(idComposition,fhirCFG.getFhirServerUrl());
     			FHIRUtility.prepareForDelete(bundleToDelete, documentReference);
     			output = fhirClient.delete(bundleToDelete);
     		}
@@ -75,15 +76,15 @@ public class FHIRSRV implements IFHIRSRV {
     }
 
 	@Override
-    public boolean replace(FhirPublicationDTO body) {
+    public boolean replace(final FhirPublicationDTO body) {
 		boolean output = false;
 		try {
 			Bundle bundleToReplace = deserializeBundle(body.getJsonString());
 			String identifier = body.getIdentifier();
 			DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(identifier);
-	    	Composition composition = fhirClient.getComposition(documentReference);
-	    	Bundle document = fhirClient.getDocument(composition.getId(),fhirCFG.getFhirServerUrl());
-	    	FHIRUtility.prepareForReplace(bundleToReplace, documentReference, document);
+			String idComposition = documentReference.getContext().getRelated().get(0).getReference();
+			Bundle bundle = fhirClient.getDocument(idComposition,fhirCFG.getFhirServerUrl());
+	    	FHIRUtility.prepareForReplace(bundleToReplace, documentReference, bundle);
 	    	output = fhirClient.replace(bundleToReplace);
 		} catch(Exception ex) {
 			log.error("Error while perform replace operation : " , ex);
@@ -93,7 +94,7 @@ public class FHIRSRV implements IFHIRSRV {
     }
 
 	@Override
-    public boolean updateMetadata(FhirPublicationDTO body) {
+    public boolean updateMetadata(final FhirPublicationDTO body) {
     	String identifier = body.getIdentifier();
     	DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(identifier);
     	FHIRUtility.prepareForUpdate(documentReference, body.getJsonString());
