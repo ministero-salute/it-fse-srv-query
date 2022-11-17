@@ -135,6 +135,6 @@ public interface IDocumentCTL {
             @ApiResponse(responseCode = "200", description = "Aggiornamento metadati completato con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UpdateResponseDTO.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) }) 
-    UpdateResponseDTO updateMetadata(FhirPublicationDTO body,HttpServletRequest request);
+    UpdateResponseDTO updateMetadata(@RequestBody FhirPublicationDTO body,HttpServletRequest request);
     
 }
