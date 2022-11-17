@@ -1,5 +1,6 @@
 package it.finanze.sanita.fse2.ms.srvquery.utility;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -9,17 +10,28 @@ import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceRelatesToComponent;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentRelationshipType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Resource;
 
+import com.google.gson.internal.LinkedTreeMap;
+
+import it.finanze.sanita.fse2.ms.srvquery.dto.UpdateBodyDTO;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class FHIRUtility {
 
 	public static final List<Class<?>> IMMUTABLE_RESOURCES = Arrays.asList(
@@ -46,9 +58,50 @@ public class FHIRUtility {
     	addResourcesToDelete(bundle, previousDocumentReference, previousDocument);
 	}
 	
-	public static void prepareForUpdate(DocumentReference documentReference, String jsonString) {
-    	// TODO 
-    	documentReference.getCategory().get(0).getCoding().get(0).setCode("livBasso");
+	
+	public static void prepareForUpdate(DocumentReference documentReference, String jsonString) { 
+		try {
+			LinkedTreeMap<String, Object> objT = StringUtility.fromJSON(jsonString, LinkedTreeMap.class);
+			UpdateBodyDTO obj = StringUtility.fromJSON(StringUtility.toJSON(objT.get("body")), UpdateBodyDTO.class);
+			
+			//Category
+			documentReference.getCategory().clear();
+			if(!StringUtility.isNullOrEmpty(obj.getTipoDocumentoLivAlto())) {
+				documentReference.getCategory().add(new CodeableConcept(new Coding("http://terminology.hl7.org/CodeSystem/media-category", obj.getTipoDocumentoLivAlto() , null)));
+			}
+			
+			DocumentReferenceContextComponent drcc = documentReference.getContext();
+			//Facility Type Code
+			Coding codeFT = new Coding("urn:oid", obj.getTipologiaStruttura(), null);
+			CodeableConcept ccFacilityType = new CodeableConcept(codeFT);
+			drcc.setFacilityType(ccFacilityType);
+			
+			//Events
+			List<CodeableConcept> events = new ArrayList<>();
+			for(String tipoDocLivAlto : obj.getAttiCliniciRegoleAccesso()) {
+				events.add(new CodeableConcept(new Coding("http://terminology.hl7.org/CodeSystem/media-category", tipoDocLivAlto , null)));
+			}
+			drcc.setEvent(events);
+			
+			//Practice Setting
+			drcc.setPracticeSetting(new CodeableConcept(new Coding("urn:oid", obj.getAssettoOrganizzativo(), null)));
+			
+			//Period
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+			Period period = new Period();
+			if(obj.getDataInizioPrestazione() != null) {
+				period.setStart(sdf.parse(obj.getDataInizioPrestazione()));
+			}
+			
+			if(obj.getDataFinePrestazione() != null) {
+				period.setEnd(sdf.parse(obj.getDataFinePrestazione()));
+			}
+			drcc.setPeriod(period);
+		} catch(Exception ex) {
+			log.error("Error while perform prepare for update : " , ex);
+			throw new BusinessException("Error while perform prepare for update : " , ex);
+		}
+		  
 	}
 
 	private static void setDeletionRequest(BundleEntryComponent entry) {
