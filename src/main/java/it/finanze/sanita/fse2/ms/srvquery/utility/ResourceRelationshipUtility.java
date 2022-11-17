@@ -25,7 +25,6 @@ public class ResourceRelationshipUtility {
 		Map<IdType, Set<IdType>> referencesMap = new HashMap<>();
 		initialize(referencesMap, document);
 		getResources(document).forEach(resource -> addReferences(referencesMap, resource));
-		referencesMap.size();
 	}
 
 	private static void addReferences(Map<IdType, Set<IdType>> referencesMap, Resource resource) {
