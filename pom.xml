@@ -25,6 +25,7 @@
 		<sonar.organization>ministero-salute</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -46,44 +47,6 @@
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 		</dependency> 
-		
-		<!--  ELASTICSEARCH -->
-	    <dependency>
-	      <groupId>co.elastic.clients</groupId>
-	      <artifactId>elasticsearch-java</artifactId>
-	      <version>8.4.1</version>
-	    </dependency>
-	
-	    <dependency>
-	      <groupId>com.fasterxml.jackson.core</groupId>
-	      <artifactId>jackson-databind</artifactId>
-	      <version>2.13.4</version>
-	    </dependency> 
-	    
-	    <dependency>
-	      <groupId>jakarta.json</groupId>
-	      <artifactId>jakarta.json-api</artifactId>
-	      <version>2.0.1</version>
-  	    </dependency>
-		    
-		<!-- KAFKA -->
-		<dependency>
-			<groupId>org.springframework.kafka</groupId>
-			<artifactId>spring-kafka</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.kafka</groupId>
-			<artifactId>spring-kafka-test</artifactId>
-			<scope>test</scope>
-		</dependency> 
-		
-		<!-- CRYPT -->
-		<!-- https://mvnrepository.com/artifact/org.jasypt/jasypt -->
-		<dependency>
-			<groupId>org.jasypt</groupId>
-			<artifactId>jasypt</artifactId>
-			<version>1.9.3</version>
-		</dependency>
 		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -131,45 +94,14 @@
 			<artifactId>logback-jackson</artifactId>
 			<version>0.1.5</version>
 		</dependency> 
-		<dependency>
-            <groupId>org.codehaus.janino</groupId>
-            <artifactId>janino</artifactId>
-            <version>3.1.7</version>
-        </dependency>	
-		<dependency>
-			  <groupId>javax.xml.bind</groupId>
-			  <artifactId>jaxb-api</artifactId>
-			  <version>2.3.1</version>
-		</dependency>	
-		<dependency>
-			  <groupId>org.glassfish.jaxb</groupId>
-			  <artifactId>jaxb-runtime</artifactId>
-			  <version>4.0.0</version>
-		</dependency>	
-
- 
-		<!-- LOGSTASH LOGBACK ENCODER -->
-		<dependency>
-		    <groupId>net.logstash.logback</groupId>
-		    <artifactId>logstash-logback-encoder</artifactId>
-		    <version>7.2</version>
-		</dependency> 
-		
+		   
 		<!-- DEVTOOL -->
 		<dependency>
 			  <groupId>org.projectlombok</groupId>
 			  <artifactId>lombok</artifactId>
-			  <version>1.18.24</version>
-			  <scope>provided</scope>
+			  <scope>optional</scope>
 		</dependency>	
-		<dependency>
-	        <groupId>org.junit.jupiter</groupId>
-	        <artifactId>junit-jupiter</artifactId>
-	        <version>5.9.0</version>
-	        <scope>test</scope>
-   		</dependency> 	
-
-
+		 
 		<!-- FHIR -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
