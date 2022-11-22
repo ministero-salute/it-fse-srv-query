@@ -28,8 +28,8 @@ public class FHIRClient {
 	
 	private IGenericClient client;
 
-	public FHIRClient(final String serverURL) {
-		client = FHIRR4Helper.createClient(serverURL);
+	public FHIRClient(final String serverURL, final String username, final String pwd) {
+		client = FHIRR4Helper.createClient(serverURL, username, pwd);
 	}
 
 	public boolean create(final Bundle bundle) {

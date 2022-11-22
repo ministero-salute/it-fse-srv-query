@@ -36,7 +36,7 @@ public class FHIRSRV implements IFHIRSRV {
 
     @PostConstruct
     void init() {
-    	fhirClient = new FHIRClient(fhirCFG.getFhirServerUrl());
+    	fhirClient = new FHIRClient(fhirCFG.getFhirServerUrl(),fhirCFG.getFhirServerUser() ,fhirCFG.getFhirServerPwd());
     }
 
     @Override

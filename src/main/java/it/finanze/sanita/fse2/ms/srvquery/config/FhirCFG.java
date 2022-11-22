@@ -24,9 +24,21 @@ public class FhirCFG implements Serializable {
 	private static final long serialVersionUID = 7544807186612242808L;
  
 	/** 
-	 * FHIR Server URL 
+	 * FHIR Server URL. 
 	 */
 	@Value("${fhir-server-url}")
 	private String fhirServerUrl;
+	
+	/** 
+	 * FHIR Server User. 
+	 */
+	@Value("${fhir-server-user}")
+	private String fhirServerUser;
+	
+	/** 
+	 * FHIR Server Pwd. 
+	 */
+	@Value("${fhir-server-pwd}")
+	private String fhirServerPwd;
 
 }
