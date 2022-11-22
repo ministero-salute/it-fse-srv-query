@@ -15,20 +15,6 @@ public class Constants {
 		 */
 		public static final String BASE = "it.finanze.sanita.fse2.ms.srvquery";
 
-		/**
-		 * Controller path.
-		 */
-		public static final String CONTROLLER = "it.finanze.sanita.fse2.ms.srvquery.controller";
-
-		/**
-		 * Service path.
-		 */
-		public static final String SERVICE = "it.finanze.sanita.fse2.ms.srvquery.service";
-
-		/**
-		 * Configuration path.
-		 */
-		public static final String CONFIG = "it.finanze.sanita.fse2.ms.srvquery.config";
 
 		/** 
 		 * This method is intentionally left blank
@@ -67,26 +53,6 @@ public class Constants {
 
 		}
 
-	}
-
-	/** 
-	 * Generic Constants used in the application. 
-	 *
-	 */
-	public static final class App {
-		
-		/** 
-		 * The JWT Token Audience 
-		 */
-		public static final String JWT_TOKEN_AUDIENCE = "eds-srv-query";
-		 
-
-		/** 
-		 * Constructor. This method is intentionally left blank.
-		 */
-		private App() {
-
-		}
 	}
 	
 	/**
