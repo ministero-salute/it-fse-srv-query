@@ -93,7 +93,7 @@ public class FHIRClient {
 					.update()
 					.resource(documentReference)
 					.execute();
-			esito = response.getCreated();
+			esito = !StringUtility.isNullOrEmpty(response.getId().toString()); 
 		} catch(Exception ex) {
 			log.error("Errore while perform update client method:" , ex);
 			throw new BusinessException("Errore while perform update client method:" , ex);
