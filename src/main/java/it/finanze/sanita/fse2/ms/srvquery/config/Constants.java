@@ -26,6 +26,11 @@ public class Constants {
 		 * Dev profile.
 		 */
 		public static final String DEV = "dev";
+		
+		/**
+		 * Docker profile.
+		 */
+		public static final String DOCKER = "docker";
 
 		/** 
 		 * Constructor. This method is intentionally left blank.
