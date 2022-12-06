@@ -40,7 +40,8 @@ public class ProfileUtility {
      */
     public boolean isDevProfile() {
         if (environment != null && environment.getActiveProfiles().length > 0) {
-            return environment.getActiveProfiles()[0].toLowerCase().contains(Constants.Profile.DEV);
+            return environment.getActiveProfiles()[0].toLowerCase().contains(Constants.Profile.DEV) || 
+            		environment.getActiveProfiles()[0].toLowerCase().contains(Constants.Profile.DOCKER);
         }
         return false;
     }
