@@ -57,7 +57,7 @@ public class FHIRSRV implements IFHIRSRV {
     		String json = createDTO.getJsonString();
     		log.debug("FHIR bundle: {}", json);
     		Bundle bundle = deserializeBundle(json);
-    		if(profileUtility.isDevProfile() && "UNKONOWN_EDS".equals(bundle.getIdentifier().getValue())) {
+    		if(profileUtility.isDevProfile() && bundle.getIdentifier().getValue().contains("UNKONOWN_EDS")) {
     			throw new UnknownException("Eccezione di test");
     		}
     		esito = fhirClient.create(bundle);
