@@ -5,25 +5,6 @@ package it.finanze.sanita.fse2.ms.srvquery.config;
 
 public class Constants {
 
-	/**
-	 *	Path scan.
-	 */
-	public static final class ComponentScan {
-
-		/**
-		 * Base path.
-		 */
-		public static final String BASE = "it.finanze.sanita.fse2.ms.srvquery";
-
-
-		/** 
-		 * This method is intentionally left blank
-		 */
-		private ComponentScan() {
-			
-		}
-
-	}
 	
 	/** 
 	 * Contains the constants for the launch profile of the SpringBoot application. 

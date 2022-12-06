@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ActiveProfiles;
 
 import it.finanze.sanita.fse2.ms.srvquery.config.Constants;
@@ -17,9 +16,8 @@ import it.finanze.sanita.fse2.ms.srvquery.enums.UIDModeEnum;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ComponentScan(basePackages = { Constants.ComponentScan.BASE })
 @ActiveProfiles(Constants.Profile.TEST)
-public class StringUtilityTest {
+class StringUtilityTest {
 
 	@Test
 	void isNullOrEmptyTest() {

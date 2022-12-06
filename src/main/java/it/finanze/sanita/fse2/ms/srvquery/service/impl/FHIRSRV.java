@@ -5,19 +5,22 @@ package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 
 import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility.deserializeBundle;
 
-import javax.annotation.PostConstruct;
-
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.UnknownException;
 import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
+import it.finanze.sanita.fse2.ms.srvquery.utility.ProfileUtility;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,9 +36,13 @@ public class FHIRSRV implements IFHIRSRV {
 	private FhirCFG fhirCFG;
 
     private FHIRClient fhirClient;
+    
+    @Autowired
+    private ProfileUtility profileUtility;
 
-    @PostConstruct
-    void init() {
+    @Async
+   	@EventListener(ApplicationStartedEvent.class)
+	void initialize() {
     	fhirClient = new FHIRClient(fhirCFG.getFhirServerUrl(),fhirCFG.getFhirServerUser() ,fhirCFG.getFhirServerPwd());
     }
 
@@ -43,11 +50,20 @@ public class FHIRSRV implements IFHIRSRV {
     public boolean create(final FhirPublicationDTO createDTO) {
     	boolean esito = false;
     	try {
+    		if(fhirClient==null) {
+    			initialize();
+    		}
+    		
     		String json = createDTO.getJsonString();
     		log.debug("FHIR bundle: {}", json);
     		Bundle bundle = deserializeBundle(json);
+    		if(profileUtility.isDevProfile() && "UNKONOWN_EDS".equals(bundle.getIdentifier().getValue())) {
+    			throw new UnknownException("Eccezione di test");
+    		}
     		esito = fhirClient.create(bundle);
-    	}catch(Exception ex) {
+    	} catch (UnknownException e) {
+    		throw e;
+		} catch(Exception ex) {
     		log.error("Error while perform create operation :", ex);
     		throw new BusinessException("Error while perform create operation :", ex);
     	}
@@ -58,6 +74,10 @@ public class FHIRSRV implements IFHIRSRV {
     public boolean delete(final String masterIdentifier) {
     	boolean output = false;
     	try {
+    		if(fhirClient==null) {
+    			initialize();
+    		}
+    		
     		DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(masterIdentifier);
     		if(documentReference!=null) {
     			String idComposition = documentReference.getContext().getRelated().get(0).getReference();
@@ -76,6 +96,10 @@ public class FHIRSRV implements IFHIRSRV {
     public boolean replace(final FhirPublicationDTO body) {
 		boolean output = false;
 		try {
+			if(fhirClient==null) {
+				initialize();
+    		}
+			
 			Bundle bundleToReplace = deserializeBundle(body.getJsonString());
 			String identifier = body.getIdentifier();
 			DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(identifier);
@@ -94,6 +118,10 @@ public class FHIRSRV implements IFHIRSRV {
     public boolean updateMetadata(final FhirPublicationDTO body) {
 		boolean output = false;
 		try {
+			if(fhirClient==null) {
+				initialize();
+    		}
+			
 			String identifier = body.getIdentifier();
 			DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(identifier);
 			FHIRUtility.prepareForUpdate(documentReference, body.getJsonString());
@@ -111,6 +139,10 @@ public class FHIRSRV implements IFHIRSRV {
 		if(StringUtility.isNullOrEmpty(masterIdentifier)) {
 			throw new BusinessException("Attenzione. Il master identifier risulta essere null");
 		}
+		
+		if(fhirClient==null) {
+			initialize();
+		}
 		 
 		Bundle bundle = fhirClient.findByMasterIdentifier(masterIdentifier);
 		if(bundle==null || bundle.getEntry().isEmpty()) {
@@ -122,6 +154,9 @@ public class FHIRSRV implements IFHIRSRV {
     
 	@Override
     public String translateCode(String code, String system, String targetSystem) {
+		if(fhirClient==null) {
+			initialize();
+		}
         String out = fhirClient.translateCode(code, system, targetSystem);
         log.info("Code translated result: {}", out);
         return out;
