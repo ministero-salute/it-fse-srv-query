@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.StringType;
 
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
@@ -170,7 +171,7 @@ public class FHIRClient {
 	public Bundle findByMasterIdentifier(final String masterIdentifier) {
 		String searchParameter = StringUtility.getSearchParameterFromMasterIdentifier(masterIdentifier);
 		
-		return client.search().forResource(DocumentReference.class)
+		return client.search().forResource(DocumentReference.class).cacheControl(CacheControlDirective.noCache())
 						.where(DocumentReference.IDENTIFIER.exactly().identifier(searchParameter)).returnBundle(Bundle.class).execute();
 	}
 
