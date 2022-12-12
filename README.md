@@ -35,29 +35,7 @@
 
 ---
 
-_it-fse-srv-dictionary_ duty description
-- duty description item
-- duty description item
-- duty description item with ✨Magic ✨
-
-## Features
-- Features1
-- Features2
-- Features3
-- ....
-- Featuresn
-
-#### Feature1
-TODO --> Feature1 description
-
-#### Feature2
-TODO --> Feature2 description
-
-#### Feature3
-TODO --> Feature3 description
-
-#### Featuren
-TODO --> Featuren description
+Il microservizio in oggetto ha la responsabilità di comunicare con il Server FHIR ed esporre interfacce REST verso gli altri microservizi.
 
 ## Repos
 - [ministero-salute-git-repo-url] - Repos Git Ministero della Salute
