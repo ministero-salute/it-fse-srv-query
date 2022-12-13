@@ -6,9 +6,7 @@ package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility.deserializeBundle;
 
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.DocumentReference;
-import org.hl7.fhir.r4.model.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
@@ -19,10 +17,8 @@ import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.UnknownException;
 import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
-import it.finanze.sanita.fse2.ms.srvquery.utility.ProfileUtility;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,9 +34,6 @@ public class FHIRSRV implements IFHIRSRV {
 	private FhirCFG fhirCFG;
 
 	private FHIRClient fhirClient;
-
-	@Autowired
-	private ProfileUtility profileUtility;
 
 	@Async
 	@EventListener(ApplicationStartedEvent.class)
@@ -59,19 +52,7 @@ public class FHIRSRV implements IFHIRSRV {
 			String json = createDTO.getJsonString();
 			log.debug("FHIR bundle: {}", json);
 			Bundle bundle = deserializeBundle(json);
-			if(profileUtility.isDevProfile()) {
-				for(BundleEntryComponent entry : bundle.getEntry()) {
-					if(ResourceType.DocumentReference.equals(entry.getResource().getResourceType())){
-						DocumentReference documentReference = (DocumentReference) entry.getResource();
-						if (documentReference.getMasterIdentifier().getValue().contains("UNKONOWN_EDS")) {
-							throw new UnknownException("Eccezione di test");
-						} 
-					}
-				}
-			}
 			esito = fhirClient.create(bundle);
-		} catch (UnknownException e) {
-			throw e;
 		} catch(Exception ex) {
 			log.error("Error while perform create operation :", ex);
 			throw new BusinessException("Error while perform create operation :", ex);

@@ -6,6 +6,7 @@ package it.finanze.sanita.fse2.ms.srvquery.utility;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.narrative2.NullNarrativeGenerator;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
@@ -20,7 +21,7 @@ public class FHIRR4Helper {
 
 	static {
 		context = FhirContext.forR4();
-//		getContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+		getContext().setNarrativeGenerator(new NullNarrativeGenerator());
 	}
 
 	public static String serializeResource(IBaseResource resource, Boolean flagPrettyPrint, Boolean flagSuppressNarratives, Boolean flagSummaryMode) {
