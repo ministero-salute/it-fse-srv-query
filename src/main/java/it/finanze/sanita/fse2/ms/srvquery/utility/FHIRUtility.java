@@ -25,7 +25,6 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Resource;
 
 import com.google.gson.internal.LinkedTreeMap;
@@ -40,7 +39,6 @@ public class FHIRUtility {
 	public static final List<Class<?>> IMMUTABLE_RESOURCES = Arrays.asList(
 			Patient.class,
 			Practitioner.class,
-			PractitionerRole.class,
 			Organization.class,
 			Location.class
 			);
@@ -112,6 +110,9 @@ public class FHIRUtility {
 		request.setMethod(HTTPVerb.DELETE);
 		request.setUrl(getUrl(entry));
 		entry.setRequest(request);
+		entry.setFullUrl(null);
+		entry.setResource(null);
+		entry.setSearch(null);
 	}
 
 	private static String getUrl(BundleEntryComponent entry) {
