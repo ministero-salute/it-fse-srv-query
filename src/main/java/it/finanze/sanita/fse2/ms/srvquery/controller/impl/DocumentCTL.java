@@ -13,6 +13,7 @@ import it.finanze.sanita.fse2.ms.srvquery.controller.IDocumentCTL;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.CreateResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.DeleteResponseDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.ReplaceResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.ResourceExistResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.UpdateResponseDTO;
@@ -38,7 +39,12 @@ public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
     
     @Override
     public CreateResponseDTO create(FhirPublicationDTO body,final HttpServletRequest request){
-    	log.info("[FHIR] Create - START");
+    	final LogTraceInfoDTO traceInfoDTO = getLogTraceInfo();
+    	
+    	log.info("[START] {}() with arguments {}={}", "create",
+    			"traceId", traceInfoDTO.getTraceID()
+    			);
+    	
     	CreateResponseDTO output = new CreateResponseDTO();
     	try {
     		boolean result = fhirSRV.create(body);
@@ -50,12 +56,23 @@ public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
     		output.setEsito(false);
     		output.setMessage(ex.getMessage());
     	}
+    	
+    	log.info("[EXIT] {}() with arguments {}={}", "create",
+    			"traceId", traceInfoDTO.getTraceID()
+    			);
+    	
     	return output;
     }
 
     @Override
     public DeleteResponseDTO delete(final String identifier,final HttpServletRequest request) {
-        log.info("[FHIR] Delete - START");
+    	final LogTraceInfoDTO traceInfoDTO = getLogTraceInfo();
+    	
+    	log.info("[START] {}() with arguments {}={}, {}={}", "delete",
+    			"traceId", traceInfoDTO.getTraceID(),
+    			"identifier", identifier
+    			);
+    	
         DeleteResponseDTO output = new DeleteResponseDTO();
         try {
         	boolean result = fhirSRV.delete(identifier);
@@ -64,12 +81,23 @@ public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
         	output.setEsito(false);
     		output.setMessage(ex.getMessage());
         }
+        
+        log.info("[EXIT] {}() with arguments {}={}, {}={}", "delete",
+    			"traceId", traceInfoDTO.getTraceID(),
+    			"identifier", identifier
+    			);
+        
         return output; 
     }
 
     @Override
     public ReplaceResponseDTO replace(FhirPublicationDTO body,final HttpServletRequest request) {
-    	log.info("[FHIR] Replace - START");
+    	final LogTraceInfoDTO traceInfoDTO = getLogTraceInfo();
+    	
+    	log.info("[START] {}() with arguments {}={}", "replace",
+    			"traceId", traceInfoDTO.getTraceID()
+    			);
+    	
     	ReplaceResponseDTO output = new ReplaceResponseDTO();
     	try {
     		boolean result = fhirSRV.replace(body);
@@ -78,13 +106,22 @@ public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
     		output.setEsito(false);
     		output.setMessage(ex.getMessage());
     	}
+    	
+    	log.info("[EXIT] {}() with arguments {}={}", "replace",
+    			"traceId", traceInfoDTO.getTraceID()
+    			);
 
     	return output;
     }
     
     @Override
     public UpdateResponseDTO updateMetadata(FhirPublicationDTO body,HttpServletRequest request) {
-        log.info("[FHIR] Update - START");
+    	final LogTraceInfoDTO traceInfoDTO = getLogTraceInfo();
+    	
+    	log.info("[START] {}() with arguments {}={}", "update",
+    			"traceId", traceInfoDTO.getTraceID()
+    			);
+    	
         UpdateResponseDTO output = new UpdateResponseDTO();
     	try {
     		boolean result = fhirSRV.updateMetadata(body);
@@ -93,14 +130,28 @@ public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
     		output.setEsito(false);
     		output.setMessage(ex.getMessage());
     	}
+    	
+    	log.info("[EXIT] {}() with arguments {}={}", "update",
+    			"traceId", traceInfoDTO.getTraceID()
+    			);
 
     	return output;
     }
     
     @Override
     public ResourceExistResDTO exist(final String id, final HttpServletRequest request) {
-        log.debug("[FHIR] Check exist - START");
+    	final LogTraceInfoDTO traceInfoDTO = getLogTraceInfo();
+    	
+    	log.info("[START] {}() with arguments {}={}", "exist",
+    			"traceId", traceInfoDTO.getTraceID()
+    			);
+    	
         boolean result = fhirSRV.checkExists(id);
+        
+        log.info("[EXIT] {}() with arguments {}={}", "exist",
+    			"traceId", traceInfoDTO.getTraceID()
+    			);
+        
         return new ResourceExistResDTO(getLogTraceInfo(), result);
     }
     
