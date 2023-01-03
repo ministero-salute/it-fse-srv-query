@@ -3,8 +3,14 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 
-import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility.deserializeBundle;
-
+import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
+import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
+import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
+import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
+import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,14 +19,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
-import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
-import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
-import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
-import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
-import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
-import lombok.extern.slf4j.Slf4j;
+import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility.deserializeBundle;
 
 /** 
  * FHIR Service Implementation 
@@ -126,7 +125,7 @@ public class FHIRSRV implements IFHIRSRV {
 	@Override
 	public boolean checkExists(final String masterIdentifier) {
 		boolean isFound = true;
-		if(StringUtility.isNullOrEmpty(masterIdentifier)) {
+		if(StringUtils.isEmpty(masterIdentifier)) {
 			throw new BusinessException("Attenzione. Il master identifier risulta essere null");
 		}
 

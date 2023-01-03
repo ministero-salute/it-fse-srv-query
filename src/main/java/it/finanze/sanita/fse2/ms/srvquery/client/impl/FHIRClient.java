@@ -3,6 +3,8 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.client.impl;
 
+import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -26,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FHIRClient {
 
-	
 	private IGenericClient client;
 
 	public FHIRClient(final String serverURL, final String username, final String pwd) {
@@ -36,7 +37,7 @@ public class FHIRClient {
 	public boolean create(final Bundle bundle) {
 		try { 
 			String id = transaction(bundle);
-			return !StringUtility.isNullOrEmpty(id);
+			return StringUtils.isNotEmpty(id);
 		} catch(Exception ex) {
 			log.error("Errore while perform create client method: ", ex);
 			throw new BusinessException("Errore while perform create client method : ", ex);
@@ -46,7 +47,7 @@ public class FHIRClient {
 	public boolean delete(Bundle bundle) {
 		try {
 			String id = transaction(bundle);
-			return !StringUtility.isNullOrEmpty(id);
+			return StringUtils.isNotEmpty(id);
 		} catch(Exception ex) {
 			log.error("Errore while perform delete client method: ", ex);
 			throw new BusinessException("Errore while perform delete client method : ", ex);
@@ -56,7 +57,7 @@ public class FHIRClient {
 	public boolean replace(Bundle bundle) {
 		try {
 			String id = transaction(bundle);
-			return !StringUtility.isNullOrEmpty(id);
+			return StringUtils.isNotEmpty(id);
 		} catch(Exception ex) {
 			log.error("Errore while perform replace client method: ", ex);
 			throw new BusinessException("Errore while perform replace client method:", ex);
@@ -73,11 +74,11 @@ public class FHIRClient {
 		}
 	}
 
-	private String transaction(final Bundle bundle) {
+	public String transaction(Bundle bundle) {
 		String id = "";
 		try {
 			Bundle response = client.transaction().withBundle(bundle).execute();
-			if(response!=null && !StringUtility.isNullOrEmpty(response.getIdElement().getIdPart())) {
+			if(response!=null && StringUtils.isNotEmpty(response.getIdElement().getIdPart())) {
 				id = response.getId();
 			}
 		} catch(Exception ex) {
@@ -94,7 +95,7 @@ public class FHIRClient {
 					.update()
 					.resource(documentReference)
 					.execute();
-			esito = !StringUtility.isNullOrEmpty(response.getId().toString()); 
+			esito = StringUtils.isNotEmpty(response.getId().toString());
 		} catch(Exception ex) {
 			log.error("Errore while perform update client method:" , ex);
 			throw new BusinessException("Errore while perform update client method:" , ex);

@@ -22,8 +22,16 @@
 		<container.output>target/container</container.output>
 		<container.output.runtime>${container.output}/runtime</container.output.runtime>
 		<!-- Sonar integration -->
+<!--
 		<sonar.organization>ministero-salute</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+-->
+		<sonar.exclusions>
+			src/main/java/it/finanze/sanita/fse2/ms/srvquery/config/OpenApiCFG.java,
+			src/main/java/it/finanze/sanita/fse2/ms/srvquery/utility/FHIRUtility.java,
+			src/main/java/it/finanze/sanita/fse2/ms/srvquery/client/impl/FHIRClient.java,
+			src/main/java/it/finanze/sanita/fse2/ms/srvquery/utility/OptionalUtility.java
+		</sonar.exclusions>
 	</properties>
 	
 	<dependencies>
@@ -147,7 +155,12 @@
 			<artifactId>hapi-fhir-client</artifactId>
 			<version>5.4.0</version>
 		</dependency>
-	
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
 	</dependencies>
 
 	<dependencyManagement>

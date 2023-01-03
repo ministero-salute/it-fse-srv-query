@@ -3,11 +3,10 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.dto.response;
 
-import javax.validation.constraints.Size;
-
-import it.finanze.sanita.fse2.ms.srvquery.dto.AbstractDTO;
 import lombok.Getter;
 import lombok.Setter;
+
+import javax.validation.constraints.Size;
 
 /**
  *
@@ -15,7 +14,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class ResponseDTO extends AbstractDTO {
+public class ResponseDTO {
 
 	/**
 	 * Serial version uid.

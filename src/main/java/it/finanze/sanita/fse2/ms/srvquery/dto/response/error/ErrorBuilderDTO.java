@@ -4,16 +4,14 @@
 package it.finanze.sanita.fse2.ms.srvquery.dto.response.error;
 
 
-import static org.apache.http.HttpStatus.SC_CONFLICT;
-import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
-import static org.apache.http.HttpStatus.SC_NOT_FOUND;
-
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.ErrorInstance.Resource;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.ErrorInstance.Server;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceAlreadyPresentException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceNotFoundException;
+
+import static org.apache.http.HttpStatus.*;
 
 /** 
  * Builds the error responses according to the given exception 

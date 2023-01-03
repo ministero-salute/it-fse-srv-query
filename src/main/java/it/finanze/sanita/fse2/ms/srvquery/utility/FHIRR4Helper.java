@@ -3,19 +3,20 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.utility;
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative2.NullNarrativeGenerator;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /** 
  * FHIR Helper Class 
  *
  */
 public class FHIRR4Helper {
+
+	private FHIRR4Helper() {}
 
 	private static FhirContext context;
 

@@ -10,6 +10,8 @@ import java.util.function.Function;
 
 public final class OptionalUtility {
 
+	private OptionalUtility() {}
+
 	public static <In> In first(List<In> in) { 
 		return getIndex(in, 0); 
 	}	

@@ -3,8 +3,6 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.config;
 
-import java.io.Serializable;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +14,7 @@ import lombok.Data;
  */
 @Data
 @Component
-public class FhirCFG implements Serializable {
+public class FhirCFG {
 
 	/**
 	 * Serial version uid.
