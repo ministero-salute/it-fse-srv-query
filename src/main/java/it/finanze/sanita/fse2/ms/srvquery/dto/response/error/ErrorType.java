@@ -11,9 +11,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Getter
 @RequiredArgsConstructor
 public enum ErrorType {
-
-    VALIDATION("/err/validation","Validation error"),
-    RESOURCE("/err/resource", "Resource error"),
     SERVER("/err/server", "Server error");
 
     private final String type;

@@ -37,7 +37,7 @@ public class FHIRSRV implements IFHIRSRV {
 	@Async
 	@EventListener(ApplicationStartedEvent.class)
 	void initialize() {
-		fhirClient = new FHIRClient(fhirCFG.getFhirServerUrl(),fhirCFG.getFhirServerUser() ,fhirCFG.getFhirServerPwd());
+		fhirClient = new FHIRClient(fhirCFG.getFhirServerUrl(), fhirCFG.getFhirServerUser(), fhirCFG.getFhirServerPwd());
 	}
 
 	@Override

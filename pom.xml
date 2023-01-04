@@ -15,19 +15,17 @@
 	<description>EDS SRV Query</description>
 	<properties>
 		<java.version>1.8</java.version>
-		<elasticsearch.version>8.4.1</elasticsearch.version>
 		<spring-cloud.version>2021.0.1</spring-cloud.version>
 		<!-- Build -->
 		<config.infra>${project.basedir}/infrastructure</config.infra>
 		<container.output>target/container</container.output>
 		<container.output.runtime>${container.output}/runtime</container.output.runtime>
 		<!-- Sonar integration -->
-<!--
 		<sonar.organization>ministero-salute</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
--->
 		<sonar.exclusions>
 			src/main/java/it/finanze/sanita/fse2/ms/srvquery/config/OpenApiCFG.java,
+			<!-- These files are excluded from coverage since server FHIR calls can not be mocked with junit -->
 			src/main/java/it/finanze/sanita/fse2/ms/srvquery/utility/FHIRUtility.java,
 			src/main/java/it/finanze/sanita/fse2/ms/srvquery/client/impl/FHIRClient.java,
 			src/main/java/it/finanze/sanita/fse2/ms/srvquery/utility/OptionalUtility.java
@@ -105,10 +103,10 @@
 		   
 		<!-- DEVTOOL -->
 		<dependency>
-			  <groupId>org.projectlombok</groupId>
-			  <artifactId>lombok</artifactId>
-			  <scope>optional</scope>
-		</dependency>	
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		 
 		<!-- FHIR -->
 		<dependency>
@@ -139,7 +137,7 @@
 			<version>1.0.3</version>
 		</dependency>
 
-				<dependency>
+		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
 			<artifactId>caffeine</artifactId>
 		</dependency>

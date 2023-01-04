@@ -67,7 +67,12 @@ public class FHIRClient {
 
 	public String translateCode(String code, String system, String targetSystem) {
 		try {
-			return _translateCode(code, system, targetSystem);
+			Parameters inParams = new Parameters();
+			inParams.addParameter().setName("code").setValue(new StringType(code));
+			inParams.addParameter().setName("system").setValue(new StringType(system));
+			inParams.addParameter().setName("targetSystem").setValue(new StringType(targetSystem));
+			Parameters outParams = translateCodeOperation(inParams);
+			return extractCodeFromParams(outParams);
 		} catch (Exception ex) {
 			log.error("Errore durante la translation del code " + code);
 			throw new BusinessException("Errore durante la translation del code " + code);
@@ -106,23 +111,14 @@ public class FHIRClient {
 	
 	public Bundle getDocument(final String idComposition, final String url) {
 		try {
-			return (Bundle)client.search().byUrl(url+"/"+idComposition+"/$document").execute(); 
+			return (Bundle)client.search().byUrl(url+"/"+idComposition+"/$document").execute();
 		} catch(Exception ex) {
 			log.error("Errore while perform getDocument client method:", ex);
 			throw new BusinessException("Errore while perform getDocument client method:", ex);
 		}
 	}
-
-	public String _translateCode(String code, String system, String targetSystem) {
-		Parameters inParams = new Parameters();
-		inParams.addParameter().setName("code").setValue(new StringType(code));
-		inParams.addParameter().setName("system").setValue(new StringType(system));
-		inParams.addParameter().setName("targetSystem").setValue(new StringType(targetSystem));
-		Parameters outParams = _translateCode(inParams);
-		return extractCodeFromParams(outParams);
-	}
 	
-	private Parameters _translateCode(Parameters params) {
+	private Parameters translateCodeOperation(Parameters params) {
 //		Class<?> conceptMapClass = client.getFhirContext().getResourceDefinition("ConceptMap").getImplementingClass();
 		return client
 				.operation()
@@ -140,7 +136,7 @@ public class FHIRClient {
 				.stream()
 				.filter(param -> param.getName().equals("match"))
 				.findFirst()
-				.map(param -> extractCodeFromParam(param))
+				.map(this::extractCodeFromParam)
 				.orElse(null);
 	}
 

@@ -11,6 +11,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Size;
 
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,8 +36,6 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.response.ResourceExistResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.ResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.UpdateResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseDTO;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceAlreadyPresentException;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceNotFoundException;
 
 /**
  * 
@@ -56,8 +55,6 @@ public interface IDocumentCTL {
 	 * @param body  The body of the request 
 	 * @return ResponseDTO  A DTO representing the response 
 	 * @throws IOException  Generic IO Exception 
-	 * @throws OperationException  Generic MongoDB Exception 
-	 * @throws ResourceAlreadyPresentException  An exception thrown when the resource is already present on FHIR Server 
 	 */
     @PostMapping(value = "/create",  produces = {MediaType.APPLICATION_JSON_VALUE })
     @Operation(summary = "Create a new bundle in a server fhir", description = "Servizio che consente di creare un nuovo bundle all'interno del Server FHIR.")
@@ -74,8 +71,7 @@ public interface IDocumentCTL {
      * @param request  The HTTP Servlet Request 
      * @param identifier  The identifier of the document to be deleted 
 	 * @return ResponseDTO  A DTO representing the response 
-     * @throws ResourceNotFoundException  An exception thrown when the resource is not found on MongoDB 
-     * @throws OperationException  Generic MongoDB Exception 
+     * @throws ResourceNotFoundException  An exception thrown when the resource is not found on MongoDB
      */
     @DeleteMapping(value = "/delete/{identifier}",  produces = { MediaType.APPLICATION_JSON_VALUE })
     @Operation(summary = "Delete a FHIR resource", description = "Servizio che consente di cancellare una risorsa FHIR dal Server FHIR.")

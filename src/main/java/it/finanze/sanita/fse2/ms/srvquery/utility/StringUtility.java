@@ -3,16 +3,9 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.utility;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import lombok.extern.slf4j.Slf4j;
-
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
 
 
 @Slf4j
@@ -39,22 +32,6 @@ public final class StringUtility {
 	 */
 	public static String toJSON(final Object obj) {
 		return new Gson().toJson(obj);
-	}
-
-	public static String toJSONJackson(final Object obj) {
-		String out = "";
-		try {
-			objectMapper.registerModule(new JavaTimeModule());
-			objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-			objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
-			objectMapper.setTimeZone(TimeZone.getDefault());
-			objectMapper.setSerializationInclusion(Include.NON_NULL);
-			out = objectMapper.writeValueAsString(obj);
-		} catch (Exception ex) {
-			log.error("Error while running to json jackson");
-			throw new BusinessException(ex);
-		}
-		return out;
 	}
 
 	public static String getSearchParameterFromMasterIdentifier(final String masterIdentifier) {

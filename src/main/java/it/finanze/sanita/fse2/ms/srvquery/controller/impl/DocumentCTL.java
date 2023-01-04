@@ -8,7 +8,6 @@ import it.finanze.sanita.fse2.ms.srvquery.controller.AbstractCTL;
 import it.finanze.sanita.fse2.ms.srvquery.controller.IDocumentCTL;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.*;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.UnknownException;
 import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,10 +43,7 @@ public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
     	try {
     		boolean result = fhirSRV.create(body);
     		output.setEsito(result);
-    	} catch (UnknownException e) {
-    		output.setEsito(false);
-    		output.setMessage("Eccezione di test");
-		} catch(Exception ex) {
+    	} catch(Exception ex) {
     		output.setEsito(false);
     		output.setMessage(ex.getMessage());
     	}
