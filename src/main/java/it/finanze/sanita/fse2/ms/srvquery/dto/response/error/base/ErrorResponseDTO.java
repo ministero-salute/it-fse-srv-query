@@ -22,12 +22,6 @@ import javax.validation.constraints.Size;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class ErrorResponseDTO extends ResponseDTO {
-
-	/**
-	 * Serial Version UID 
-	 */
-	private static final long serialVersionUID = 6423701106609931088L;
-
 	
 	/**
 	 * Trace id log.
@@ -72,11 +66,6 @@ public class ErrorResponseDTO extends ResponseDTO {
 		detail = inDetail;
 		status = inStatus;
 		instance = inInstance;
-	}
-
-	public ErrorResponseDTO(final LogTraceInfoDTO traceInfo) {
-		traceID = traceInfo.getTraceID();
-		spanID = traceInfo.getSpanID(); 
 	}
 
 }

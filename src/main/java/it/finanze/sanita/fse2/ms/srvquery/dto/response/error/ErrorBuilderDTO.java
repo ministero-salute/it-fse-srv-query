@@ -7,6 +7,8 @@ package it.finanze.sanita.fse2.ms.srvquery.dto.response.error;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.ErrorInstance.Server;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseDTO;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
 
@@ -14,14 +16,8 @@ import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
  * Builds the error responses according to the given exception 
  *
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ErrorBuilderDTO {
-
-    /**
-     * Private constructor to disallow to access from other classes
-     */
-    private ErrorBuilderDTO() {}
-
-
 
     /**
      * Builds a Generic Exception 

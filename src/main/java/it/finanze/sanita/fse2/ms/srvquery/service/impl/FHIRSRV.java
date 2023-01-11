@@ -70,7 +70,7 @@ public class FHIRSRV implements IFHIRSRV {
 			DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(masterIdentifier);
 			if(documentReference!=null) {
 				String idComposition = documentReference.getContext().getRelated().get(0).getReference();
-				Bundle bundleToDelete = fhirClient.getDocument(idComposition,fhirCFG.getFhirServerUrl());
+				Bundle bundleToDelete = fhirClient.getDocument(idComposition, fhirCFG.getFhirServerUrl());
 				FHIRUtility.prepareForDelete(bundleToDelete, documentReference);
 				output = fhirClient.delete(bundleToDelete);
 			}

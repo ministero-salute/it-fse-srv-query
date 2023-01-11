@@ -15,11 +15,6 @@ import lombok.Data;
 @Data
 @Component
 public class FhirCFG {
-
-	/**
-	 * Serial version uid.
-	 */
-	private static final long serialVersionUID = 7544807186612242808L;
  
 	/** 
 	 * FHIR Server URL. 

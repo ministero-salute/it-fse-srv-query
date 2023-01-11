@@ -4,6 +4,7 @@
 package it.finanze.sanita.fse2.ms.srvquery.dto.response;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.Size;
@@ -14,12 +15,8 @@ import javax.validation.constraints.Size;
  */
 @Getter
 @Setter
+@NoArgsConstructor
 public class ResponseDTO {
-
-	/**
-	 * Serial version uid.
-	 */
-	private static final long serialVersionUID = 3473312771318529328L;
 
 	/**
 	 * Trace id log.
@@ -32,12 +29,6 @@ public class ResponseDTO {
 	 */
 	@Size(min = 0, max = 100)
 	private String spanID;
-
-	/**
-	 * Instantiates a new response DTO.
-	 */
-	public ResponseDTO() {
-	}
 
 	/**
 	 * Instantiates a new response DTO.

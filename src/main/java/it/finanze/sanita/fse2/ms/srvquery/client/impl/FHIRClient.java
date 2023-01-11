@@ -3,7 +3,6 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.client.impl;
 
-import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;

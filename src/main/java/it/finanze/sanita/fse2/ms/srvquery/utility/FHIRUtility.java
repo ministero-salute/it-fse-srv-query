@@ -6,6 +6,8 @@ package it.finanze.sanita.fse2.ms.srvquery.utility;
 import com.google.gson.internal.LinkedTreeMap;
 import it.finanze.sanita.fse2.ms.srvquery.dto.UpdateBodyDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.*;
@@ -23,9 +25,8 @@ import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FHIRUtility {
-
-	private FHIRUtility() {}
 
 	public static final List<Class<?>> IMMUTABLE_RESOURCES = Arrays.asList(
 			Patient.class,
@@ -50,7 +51,7 @@ public class FHIRUtility {
     	addResourcesToDelete(bundle, previousDocumentReference, previousDocument);
 	}
 	
-	
+	@SuppressWarnings("unchecked")	
 	public static void prepareForUpdate(DocumentReference documentReference, String jsonString) { 
 		try {
 			LinkedTreeMap<String, Object> objT = StringUtility.fromJSON(jsonString, LinkedTreeMap.class);

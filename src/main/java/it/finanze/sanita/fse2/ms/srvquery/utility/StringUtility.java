@@ -5,18 +5,15 @@ package it.finanze.sanita.fse2.ms.srvquery.utility;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class StringUtility {
-
-	/**
-	 * Private constructor to avoid instantiation.
-	 */
-	private StringUtility() {
-		// Constructor intentionally empty.
-	}
 
 	private static ObjectMapper objectMapper = new ObjectMapper();
 
