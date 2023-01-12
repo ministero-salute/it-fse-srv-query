@@ -93,8 +93,8 @@ public class FHIRSRV implements IFHIRSRV {
 			String identifier = body.getIdentifier();
 			DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(identifier);
 			String idComposition = documentReference.getContext().getRelated().get(0).getReference();
-			Bundle bundle = fhirClient.getDocument(idComposition,fhirCFG.getFhirServerUrl());
-			FHIRUtility.prepareForReplace(bundleToReplace, documentReference, bundle);
+			Bundle previousBundle = fhirClient.getDocument(idComposition,fhirCFG.getFhirServerUrl());
+			FHIRUtility.prepareForReplace(bundleToReplace, documentReference, previousBundle);
 			output = fhirClient.replace(bundleToReplace);
 		} catch(Exception ex) {
 			log.error("Error while perform replace operation : " , ex);

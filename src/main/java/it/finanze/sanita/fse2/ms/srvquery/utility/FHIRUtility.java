@@ -103,7 +103,6 @@ public class FHIRUtility {
 		request.setUrl(getUrl(entry));
 		entry.setRequest(request);
 		entry.setFullUrl(null);
-		entry.setResource(null);
 		entry.setSearch(null);
 	}
 
