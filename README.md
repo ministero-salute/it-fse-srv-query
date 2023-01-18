@@ -1,7 +1,7 @@
 
 # Fascicolo Sanitario 2.0
 
-# _it-fse-srv-dictionary_ 
+# _it-fse-srv-query_ 
 
 Il microservizio in oggetto ha la responsabilità di comunicare con il Server FHIR ed esporre interfacce REST verso gli altri microservizi.
 
