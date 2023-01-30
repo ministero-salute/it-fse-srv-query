@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>it.finanze.sanita.fse2</groupId>
 	<artifactId>srv-query-ms</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.2.0-RELEASE</version>
 	<name>srv-query-ms</name>
 	<description>EDS SRV Query</description>
 	<properties>
