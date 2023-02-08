@@ -3,6 +3,7 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.client.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -26,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class FHIRClient {
 
-	
 	private IGenericClient client;
 
 	public FHIRClient(final String serverURL, final String username, final String pwd) {
@@ -36,7 +36,7 @@ public class FHIRClient {
 	public boolean create(final Bundle bundle) {
 		try { 
 			String id = transaction(bundle);
-			return !StringUtility.isNullOrEmpty(id);
+			return StringUtils.isNotEmpty(id);
 		} catch(Exception ex) {
 			log.error("Errore while perform create client method: ", ex);
 			throw new BusinessException("Errore while perform create client method : ", ex);
@@ -46,7 +46,7 @@ public class FHIRClient {
 	public boolean delete(Bundle bundle) {
 		try {
 			String id = transaction(bundle);
-			return !StringUtility.isNullOrEmpty(id);
+			return StringUtils.isNotEmpty(id);
 		} catch(Exception ex) {
 			log.error("Errore while perform delete client method: ", ex);
 			throw new BusinessException("Errore while perform delete client method : ", ex);
@@ -56,7 +56,7 @@ public class FHIRClient {
 	public boolean replace(Bundle bundle) {
 		try {
 			String id = transaction(bundle);
-			return !StringUtility.isNullOrEmpty(id);
+			return StringUtils.isNotEmpty(id);
 		} catch(Exception ex) {
 			log.error("Errore while perform replace client method: ", ex);
 			throw new BusinessException("Errore while perform replace client method:", ex);
@@ -66,18 +66,23 @@ public class FHIRClient {
 
 	public String translateCode(String code, String system, String targetSystem) {
 		try {
-			return _translateCode(code, system, targetSystem);
+			Parameters inParams = new Parameters();
+			inParams.addParameter().setName("code").setValue(new StringType(code));
+			inParams.addParameter().setName("system").setValue(new StringType(system));
+			inParams.addParameter().setName("targetSystem").setValue(new StringType(targetSystem));
+			Parameters outParams = translateCodeOperation(inParams);
+			return extractCodeFromParams(outParams);
 		} catch (Exception ex) {
 			log.error("Errore durante la translation del code " + code);
 			throw new BusinessException("Errore durante la translation del code " + code);
 		}
 	}
 
-	private String transaction(final Bundle bundle) {
+	public String transaction(Bundle bundle) {
 		String id = "";
 		try {
 			Bundle response = client.transaction().withBundle(bundle).execute();
-			if(response!=null && !StringUtility.isNullOrEmpty(response.getIdElement().getIdPart())) {
+			if(response!=null && StringUtils.isNotEmpty(response.getIdElement().getIdPart())) {
 				id = response.getId();
 			}
 		} catch(Exception ex) {
@@ -94,7 +99,7 @@ public class FHIRClient {
 					.update()
 					.resource(documentReference)
 					.execute();
-			esito = !StringUtility.isNullOrEmpty(response.getId().toString()); 
+			esito = StringUtils.isNotEmpty(response.getId().toString());
 		} catch(Exception ex) {
 			log.error("Errore while perform update client method:" , ex);
 			throw new BusinessException("Errore while perform update client method:" , ex);
@@ -105,23 +110,14 @@ public class FHIRClient {
 	
 	public Bundle getDocument(final String idComposition, final String url) {
 		try {
-			return (Bundle)client.search().byUrl(url+"/"+idComposition+"/$document").execute(); 
+			return (Bundle)client.search().byUrl(url+"/"+idComposition+"/$document").execute();
 		} catch(Exception ex) {
 			log.error("Errore while perform getDocument client method:", ex);
 			throw new BusinessException("Errore while perform getDocument client method:", ex);
 		}
 	}
-
-	public String _translateCode(String code, String system, String targetSystem) {
-		Parameters inParams = new Parameters();
-		inParams.addParameter().setName("code").setValue(new StringType(code));
-		inParams.addParameter().setName("system").setValue(new StringType(system));
-		inParams.addParameter().setName("targetSystem").setValue(new StringType(targetSystem));
-		Parameters outParams = _translateCode(inParams);
-		return extractCodeFromParams(outParams);
-	}
 	
-	private Parameters _translateCode(Parameters params) {
+	private Parameters translateCodeOperation(Parameters params) {
 //		Class<?> conceptMapClass = client.getFhirContext().getResourceDefinition("ConceptMap").getImplementingClass();
 		return client
 				.operation()
@@ -139,7 +135,7 @@ public class FHIRClient {
 				.stream()
 				.filter(param -> param.getName().equals("match"))
 				.findFirst()
-				.map(param -> extractCodeFromParam(param))
+				.map(this::extractCodeFromParam)
 				.orElse(null);
 	}
 

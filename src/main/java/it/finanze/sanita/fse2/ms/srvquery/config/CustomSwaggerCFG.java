@@ -3,10 +3,9 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.config;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-
-import lombok.Getter;
 
 /** 
  * Custom Swagger Config 

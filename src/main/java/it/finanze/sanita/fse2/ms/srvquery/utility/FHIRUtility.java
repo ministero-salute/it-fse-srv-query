@@ -3,37 +3,29 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.utility;
 
+import com.google.gson.internal.LinkedTreeMap;
+import it.finanze.sanita.fse2.ms.srvquery.dto.UpdateBodyDTO;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent;
+import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceRelatesToComponent;
+import org.hl7.fhir.r4.model.DocumentReference.DocumentRelationshipType;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.hl7.fhir.r4.model.CodeableConcept;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.DocumentReference;
-import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent;
-import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceRelatesToComponent;
-import org.hl7.fhir.r4.model.DocumentReference.DocumentRelationshipType;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Location;
-import org.hl7.fhir.r4.model.Organization;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Period;
-import org.hl7.fhir.r4.model.Practitioner;
-import org.hl7.fhir.r4.model.Resource;
-
-import com.google.gson.internal.LinkedTreeMap;
-
-import it.finanze.sanita.fse2.ms.srvquery.dto.UpdateBodyDTO;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
-import lombok.extern.slf4j.Slf4j;
-
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FHIRUtility {
 
 	public static final List<Class<?>> IMMUTABLE_RESOURCES = Arrays.asList(
@@ -59,7 +51,7 @@ public class FHIRUtility {
     	addResourcesToDelete(bundle, previousDocumentReference, previousDocument);
 	}
 	
-	
+	@SuppressWarnings("unchecked")	
 	public static void prepareForUpdate(DocumentReference documentReference, String jsonString) { 
 		try {
 			LinkedTreeMap<String, Object> objT = StringUtility.fromJSON(jsonString, LinkedTreeMap.class);
@@ -67,7 +59,7 @@ public class FHIRUtility {
 			
 			//Category
 			documentReference.getCategory().clear();
-			if(!StringUtility.isNullOrEmpty(obj.getTipoDocumentoLivAlto())) {
+			if(StringUtils.isNotEmpty(obj.getTipoDocumentoLivAlto())) {
 				documentReference.getCategory().add(new CodeableConcept(new Coding("http://terminology.hl7.org/CodeSystem/media-category", obj.getTipoDocumentoLivAlto() , null)));
 			}
 			
@@ -115,7 +107,7 @@ public class FHIRUtility {
 	}
 
 	private static String getUrl(BundleEntryComponent entry) {
-		IdType idType = entry.getResource().getIdElement();;
+		IdType idType = entry.getResource().getIdElement();
 		return idType.getResourceType() + "/" + idType.getIdPart();
 	}
 

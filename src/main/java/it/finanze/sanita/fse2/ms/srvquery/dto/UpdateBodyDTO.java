@@ -5,8 +5,7 @@ package it.finanze.sanita.fse2.ms.srvquery.dto;
 
 import java.util.List;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
@@ -30,4 +29,3 @@ public class UpdateBodyDTO {
 
 	private String identificativoSottomissione;
 }
-

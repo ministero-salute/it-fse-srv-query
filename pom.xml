@@ -10,12 +10,11 @@
 	</parent>
 	<groupId>it.finanze.sanita.fse2</groupId>
 	<artifactId>srv-query-ms</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.2.0-RELEASE</version>
 	<name>srv-query-ms</name>
 	<description>EDS SRV Query</description>
 	<properties>
 		<java.version>1.8</java.version>
-		<elasticsearch.version>8.4.1</elasticsearch.version>
 		<spring-cloud.version>2021.0.1</spring-cloud.version>
 		<!-- Build -->
 		<config.infra>${project.basedir}/infrastructure</config.infra>
@@ -24,6 +23,13 @@
 		<!-- Sonar integration -->
 		<sonar.organization>ministero-salute</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.exclusions>
+			src/main/java/it/finanze/sanita/fse2/ms/srvquery/config/OpenApiCFG.java,
+			<!-- These files are excluded from coverage since server FHIR calls can not be mocked with junit -->
+			src/main/java/it/finanze/sanita/fse2/ms/srvquery/utility/FHIRUtility.java,
+			src/main/java/it/finanze/sanita/fse2/ms/srvquery/client/impl/FHIRClient.java,
+			src/main/java/it/finanze/sanita/fse2/ms/srvquery/utility/OptionalUtility.java
+		</sonar.exclusions>
 	</properties>
 	
 	<dependencies>
@@ -97,10 +103,10 @@
 		   
 		<!-- DEVTOOL -->
 		<dependency>
-			  <groupId>org.projectlombok</groupId>
-			  <artifactId>lombok</artifactId>
-			  <scope>optional</scope>
-		</dependency>	
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		 
 		<!-- FHIR -->
 		<dependency>
@@ -131,7 +137,7 @@
 			<version>1.0.3</version>
 		</dependency>
 
-				<dependency>
+		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
 			<artifactId>caffeine</artifactId>
 		</dependency>
@@ -147,7 +153,12 @@
 			<artifactId>hapi-fhir-client</artifactId>
 			<version>5.4.0</version>
 		</dependency>
-	
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
 	</dependencies>
 
 	<dependencyManagement>
@@ -170,6 +181,19 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<version>7.1.2</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 			<!-- Coverage -->

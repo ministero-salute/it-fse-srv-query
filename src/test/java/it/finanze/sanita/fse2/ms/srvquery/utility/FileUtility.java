@@ -7,6 +7,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -15,18 +17,13 @@ import lombok.extern.slf4j.Slf4j;
  * Utility to manager file.
  */
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class FileUtility {
  
 	/**
 	 * Max size chunk.
 	 */
 	private static final int CHUNK_SIZE = 16384;
-
-	/**
-	 * Constructor.
-	 */
-	private FileUtility() {
-	}
 
 	/**
 	 * Metodo per il recupero del contenuto di un file dalla folder interna "/src/main/resources".

@@ -13,11 +13,11 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
  *
  *	Abstract controller.
  */
-public abstract class AbstractCTL{
+public abstract class AbstractCTL {
 
 
 	@Autowired
-	private transient Tracer tracer;
+	private Tracer tracer;
 
 
 	protected LogTraceInfoDTO getLogTraceInfo() {
