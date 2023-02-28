@@ -117,6 +117,20 @@ public class FHIRClient {
 		}
 	}
 	
+	
+	public CustomCapabilityStatement getServerCapabilities() {
+		try {
+			return client.capabilities()
+					.ofType(CustomCapabilityStatement.class)
+					.execute();
+		} catch(Exception ex) {
+			log.error("Errore while perform capabilities() client method:", ex);
+			throw new BusinessException("Errore while perform capabilities() client method:", ex);
+		}
+		
+	}
+	
+	
 	private Parameters translateCodeOperation(Parameters params) {
 //		Class<?> conceptMapClass = client.getFhirContext().getResourceDefinition("ConceptMap").getImplementingClass();
 		return client
