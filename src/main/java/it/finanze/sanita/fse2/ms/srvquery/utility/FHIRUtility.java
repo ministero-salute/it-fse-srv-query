@@ -71,10 +71,12 @@ public class FHIRUtility {
 			
 			//Events
 			List<CodeableConcept> events = new ArrayList<>();
-			for(String tipoDocLivAlto : obj.getAttiCliniciRegoleAccesso()) {
-				events.add(new CodeableConcept(new Coding("http://terminology.hl7.org/CodeSystem/media-category", tipoDocLivAlto , null)));
+			if(obj.getAttiCliniciRegoleAccesso()!=null) {
+				for(String tipoDocLivAlto : obj.getAttiCliniciRegoleAccesso()) {
+					events.add(new CodeableConcept(new Coding("http://terminology.hl7.org/CodeSystem/media-category", tipoDocLivAlto , null)));
+				}
+				drcc.setEvent(events);
 			}
-			drcc.setEvent(events);
 			
 			//Practice Setting
 			drcc.setPracticeSetting(new CodeableConcept(new Coding("urn:oid", obj.getAssettoOrganizzativo(), null)));
