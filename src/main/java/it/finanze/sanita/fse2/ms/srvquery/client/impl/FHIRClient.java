@@ -3,6 +3,14 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.client.impl;
 
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.ResourceType;
+
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -10,10 +18,6 @@ import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 
 /** 
  * FHIR Client Implementation 
@@ -57,21 +61,7 @@ public class FHIRClient {
 		}
 	}
 	
-
-	public String translateCode(String code, String system, String targetSystem) {
-		try {
-			Parameters inParams = new Parameters();
-			inParams.addParameter().setName("code").setValue(new StringType(code));
-			inParams.addParameter().setName("system").setValue(new StringType(system));
-			inParams.addParameter().setName("targetSystem").setValue(new StringType(targetSystem));
-			Parameters outParams = translateCodeOperation(inParams);
-			return extractCodeFromParams(outParams);
-		} catch (Exception ex) {
-			log.error("Errore durante la translation del code " + code);
-			throw new BusinessException("Errore durante la translation del code " + code);
-		}
-	}
-
+ 
 	public String transaction(Bundle bundle) {
 		String id = "";
 		try {
@@ -122,22 +112,7 @@ public class FHIRClient {
 				.useHttpGet()
 				.execute();
 	}
-	
-	private String extractCodeFromParams(Parameters outParams) {
-		return outParams
-				.getParameter()
-				.stream()
-				.filter(param -> param.getName().equals("match"))
-				.findFirst()
-				.map(this::extractCodeFromParam)
-				.orElse(null);
-	}
-
-	private String extractCodeFromParam(ParametersParameterComponent param) {
-		//TODO
-		return param.getPart().get(0).getValue().getNamedProperty("code").getValues().get(0).toString();
-	}
-	
+	 
 	
 	public DocumentReference getDocumentReferenceBundle(final String masterIdentifier) {
 		DocumentReference output = null;

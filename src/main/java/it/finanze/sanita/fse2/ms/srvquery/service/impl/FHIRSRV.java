@@ -141,14 +141,5 @@ public class FHIRSRV implements IFHIRSRV {
 		return isFound;
 	}
 
-	@Override
-	public String translateCode(String code, String system, String targetSystem) {
-		if(fhirClient==null) {
-			initialize();
-		}
-		String out = fhirClient.translateCode(code, system, targetSystem);
-		log.info("Code translated result: {}", out);
-		return out;
-	}
 
 }
