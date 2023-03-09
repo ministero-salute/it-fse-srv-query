@@ -3,16 +3,6 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.client.impl;
 
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.DocumentReference;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.r4.model.ResourceType;
-import org.hl7.fhir.r4.model.StringType;
-
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -20,6 +10,10 @@ import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 
 /** 
  * FHIR Client Implementation 
@@ -165,8 +159,8 @@ public class FHIRClient {
 	}
 	
 	public Bundle findByMasterIdentifier(final String masterIdentifier) {
-		String searchParameter = StringUtility.getSearchParameterFromMasterIdentifier(masterIdentifier);
-		
+		String searchParameter = StringUtility.getSearchParamFromMasterId(masterIdentifier);
+
 		return client.search().forResource(DocumentReference.class).cacheControl(CacheControlDirective.noCache())
 						.where(DocumentReference.IDENTIFIER.exactly().identifier(searchParameter)).returnBundle(Bundle.class).execute();
 	}
