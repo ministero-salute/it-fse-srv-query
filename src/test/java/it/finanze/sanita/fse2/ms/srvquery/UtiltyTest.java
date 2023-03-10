@@ -35,6 +35,7 @@ class UtiltyTest {
         assertThrows(IllegalArgumentException.class, () -> getSearchParamFromMasterId("  ^^  ^^"));
         assertEquals("cd", getSearchParamFromMasterId("ab^cd"));
         assertEquals("abcd", getSearchParamFromMasterId("abcd"));
+        assertEquals("UAT_GTW_ID162", getSearchParamFromMasterId("2.16.840.4^UAT_GTW_ID162"));
     }
 
     @Test

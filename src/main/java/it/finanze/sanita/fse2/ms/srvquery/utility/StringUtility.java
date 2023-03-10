@@ -19,7 +19,11 @@ import static org.apache.commons.lang3.StringUtils.isWhitespace;
 public final class StringUtility {
 
 	private static final String MASTER_ID_SEPARATOR = "^";
-	private static final Pattern MASTER_ID_PTT = Pattern.compile("^\\w+\\^\\w+$");
+	/**
+	 * The allowed chars are: [a-zA-Z0-9_.]
+	 * It's expected a string shape as follows: [chars][^][chars]
+	 */
+	private static final Pattern MASTER_ID_PTT = Pattern.compile("^[\\w.]+\\^[\\w.]+$");
 
 	private static ObjectMapper objectMapper = new ObjectMapper();
 
