@@ -1,6 +1,5 @@
 package it.finanze.sanita.fse2.ms.srvquery;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -68,7 +67,6 @@ class FhirSRVTest {
         when(fhirClient.update(any(DocumentReference.class))).thenReturn(true);
         when(fhirClient.delete(any(Bundle.class))).thenReturn(true);
         when(fhirClient.replace(any(Bundle.class))).thenReturn(true);
-        when(fhirClient.translateCode(anyString(), anyString(), anyString())).thenReturn("mock");
 
         bundle = mockBundle();
         documentReference = mockDocumentReference();
@@ -119,12 +117,7 @@ class FhirSRVTest {
         assertThrows(BusinessException.class, () -> fhirSRV.checkExists(null));
     }
 
-    @Test
-    void translationTest() {
-        String outcome = fhirSRV.translateCode("code", "system", "version");
-        assertEquals("mock", outcome);
-    }
-
+   
     @Test
     void createTest() {
 
