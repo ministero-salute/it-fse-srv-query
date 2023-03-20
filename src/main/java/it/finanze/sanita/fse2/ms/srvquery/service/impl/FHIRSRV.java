@@ -52,6 +52,8 @@ public class FHIRSRV implements IFHIRSRV {
 			log.debug("FHIR bundle: {}", json);
 			Bundle bundle = deserializeBundle(json);
 			esito = fhirClient.create(bundle);
+		} catch(BusinessException e) {
+			throw e;
 		} catch(Exception ex) {
 			log.error("Error while perform create operation :", ex);
 			throw new BusinessException("Error while perform create operation :", ex);

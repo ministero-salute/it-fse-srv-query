@@ -35,7 +35,11 @@ public class FHIRClient {
 		try { 
 			String id = transaction(bundle);
 			return StringUtils.isNotEmpty(id);
-		} catch(Exception ex) {
+		} 
+		catch(BusinessException e) {
+			throw e;
+		}
+		catch(Exception ex) {
 			log.error("Errore while perform create client method: ", ex);
 			throw new BusinessException("Errore while perform create client method : ", ex);
 		}
@@ -69,9 +73,10 @@ public class FHIRClient {
 			if(response!=null && StringUtils.isNotEmpty(response.getIdElement().getIdPart())) {
 				id = response.getId();
 			}
-		} catch(Exception ex) {
+		}
+		catch(Exception ex) {
 			log.error("Error while perform transaction : " , ex);
-			throw new BusinessException("Error while perform transaction : " , ex);
+			throw new BusinessException(ex.getMessage());
 		}
 		return id;
 	}
