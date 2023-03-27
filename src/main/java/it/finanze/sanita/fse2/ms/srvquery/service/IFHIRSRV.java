@@ -3,6 +3,9 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.service;
 
+import java.util.List;
+
+import it.finanze.sanita.fse2.ms.srvquery.dto.ResourceSearchParameterDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 
 /** 
@@ -48,4 +51,12 @@ public interface IFHIRSRV {
      */
     boolean checkExists(String masterIdentifier);
 
+    
+    /**
+     * Retrieve search parameters for all resources managed by the FHIR server
+     * 
+     * @return List<ResourceSearchParameterDTO> the parameters list
+     */
+    List<ResourceSearchParameterDTO> getResourcesSearchParameters();
+    
 }

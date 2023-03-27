@@ -3,23 +3,31 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 
-import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
-import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
-import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
-import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
-import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
-import lombok.extern.slf4j.Slf4j;
+import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility.deserializeBundle;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility.deserializeBundle;
+import it.finanze.sanita.fse2.ms.srvquery.client.impl.CustomCapabilityStatement;
+import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
+import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
+import it.finanze.sanita.fse2.ms.srvquery.dto.ResourceSearchParameterDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.SearchParameterDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
+import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
+import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
+import lombok.extern.slf4j.Slf4j;
 
 /** 
  * FHIR Service Implementation 
@@ -143,5 +151,30 @@ public class FHIRSRV implements IFHIRSRV {
 		return isFound;
 	}
 
+	@Override
+	public String translateCode(String code, String system, String targetSystem) {
+		if(fhirClient==null) {
+			initialize();
+		}
+		String out = fhirClient.translateCode(code, system, targetSystem);
+		log.info("Code translated result: {}", out);
+		return out;
+	}
+	
+	private List<SearchParameterDTO> parametersFromPaths(List<StringType> paths) {
+		return paths
+			.stream()
+			.map(path -> new SearchParameterDTO("", "", path.toString()))
+			.collect(Collectors.toList());
+	}
+	
+	@Override
+	public List<ResourceSearchParameterDTO> getResourcesSearchParameters() {
+		CustomCapabilityStatement capabilities = fhirClient.getServerCapabilities();
+		return capabilities.getResourceSearchPaths()
+			.stream()
+			.map(rp -> new ResourceSearchParameterDTO(rp.getType(), parametersFromPaths(rp.getSearchPath())) )
+			.collect(Collectors.toList()); 
+	}
 
 }
