@@ -1,7 +1,5 @@
 /target/
-.settings/org.eclipse.m2e.core.prefs
-.settings/org.eclipse.jdt.core.prefs
-.settings/org.eclipse.core.resources.prefs
+.settings/*
 .project
 .classpath
 *.iml
@@ -21,3 +19,4 @@ tmp/
 .settings/org.eclipse.wst.validation.prefs
 .settings/org.springframework.ide.eclipse.prefs
 /.apt_generated_tests/
+.DS_Store
