@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
@@ -23,7 +24,6 @@ import it.finanze.sanita.fse2.ms.srvquery.client.impl.CustomCapabilityStatement;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
 import it.finanze.sanita.fse2.ms.srvquery.dto.ResourceSearchParameterDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.SearchParameterDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
@@ -152,11 +152,11 @@ public class FHIRSRV implements IFHIRSRV {
 		return isFound;
 	}
  
-	private List<SearchParameterDTO> parametersFromPaths(List<StringType> paths) {
+	private List<String> parametersFromPaths(List<StringType> paths) {
 		if (paths == null) paths = new ArrayList<>();
 		return paths
 			.stream()
-			.map(path -> new SearchParameterDTO("", "", path.toString()))
+			.map(PrimitiveType::asStringValue)
 			.collect(Collectors.toList());
 	}
 	
