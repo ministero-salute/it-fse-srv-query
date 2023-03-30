@@ -20,3 +20,4 @@ tmp/
 .settings/org.springframework.ide.eclipse.prefs
 /.apt_generated_tests/
 .DS_Store
+.idea
