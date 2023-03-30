@@ -5,6 +5,7 @@ package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 
 import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility.deserializeBundle;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -152,6 +153,7 @@ public class FHIRSRV implements IFHIRSRV {
 	}
  
 	private List<SearchParameterDTO> parametersFromPaths(List<StringType> paths) {
+		if (paths == null) paths = new ArrayList<>();
 		return paths
 			.stream()
 			.map(path -> new SearchParameterDTO("", "", path.toString()))
