@@ -6,7 +6,11 @@ package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility.deserializeBundle;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +32,7 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
+import it.finanze.sanita.fse2.ms.srvquery.utility.FileUtility;
 import lombok.extern.slf4j.Slf4j;
 
 /** 
@@ -169,4 +174,53 @@ public class FHIRSRV implements IFHIRSRV {
 			.collect(Collectors.toList()); 
 	}
 
+	
+	public static void main(String[] args) {
+		Map<String,String> placeholderMap = getMapPlaceholder();
+		String bundleLDO = new String(FileUtility.getFileFromInternalResources("BundleLDO.json"));
+		System.out.println(bundleLDO);
+		bundleLDO = replacePlaceholderBundle(bundleLDO,placeholderMap);
+		System.out.println(bundleLDO);
+	}
+	
+	private static Map<String,String> getMapPlaceholder(){
+		Map<String,String> out = new HashMap<>();
+		out.put("####PLACEHOLDER_IDBUNDLE####", UUID.randomUUID().toString());
+		out.put("####ID1###", UUID.randomUUID().toString());
+		out.put("####ID2###", UUID.randomUUID().toString());
+		out.put("####ID3###", UUID.randomUUID().toString());
+		out.put("####ID4###", UUID.randomUUID().toString());
+		out.put("####ID5###", UUID.randomUUID().toString());
+		out.put("####ID6###", UUID.randomUUID().toString());
+		out.put("####ID7###", UUID.randomUUID().toString());
+		out.put("####ID8###", UUID.randomUUID().toString());
+		out.put("####ID9###", UUID.randomUUID().toString());
+		out.put("####ID10###", UUID.randomUUID().toString());
+		out.put("####ID11###", UUID.randomUUID().toString());
+		out.put("####ID12###", UUID.randomUUID().toString());
+		out.put("####ID13###", UUID.randomUUID().toString());
+		out.put("####ID14###", UUID.randomUUID().toString());
+		out.put("####ID15###", UUID.randomUUID().toString());
+		out.put("####ID16###", UUID.randomUUID().toString());
+		out.put("####ID17###", UUID.randomUUID().toString());
+		out.put("####ID18###", UUID.randomUUID().toString());
+		out.put("####ID19###", UUID.randomUUID().toString());
+		out.put("####ID20###", UUID.randomUUID().toString());
+		out.put("####ID21###", UUID.randomUUID().toString());
+		out.put("####ID22###", UUID.randomUUID().toString());
+		out.put("####ID23###", UUID.randomUUID().toString());
+		out.put("####ID24###", UUID.randomUUID().toString());
+		out.put("####ID25###", UUID.randomUUID().toString());
+		out.put("####ID26###", UUID.randomUUID().toString());
+		out.put("####ID27###", UUID.randomUUID().toString());
+		out.put("####ID28###", UUID.randomUUID().toString());
+		return out;
+	}
+	
+	private static String replacePlaceholderBundle(String bundle,Map<String,String> placeholderMap) {
+		for(Entry<String, String> entry : placeholderMap.entrySet()) {
+			bundle = bundle.replace(entry.getKey(), entry.getValue());
+		}
+		return bundle;
+	}
 }

@@ -75,7 +75,7 @@ class DocumentControllerTest {
 	void publishTest() throws Exception {
 		String bundle = new String(
 				FileUtility.getFileFromInternalResources(
-						"Files" + File.separator + "RefertoDiLaboratorioNonITI.json"),
+						"Files" + File.separator + "CreationJsonFhir.json"),
 				StandardCharsets.UTF_8);
 		FhirPublicationDTO body = new FhirPublicationDTO();
 		body.setJsonString(bundle);

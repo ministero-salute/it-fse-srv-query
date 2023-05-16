@@ -55,35 +55,35 @@ class FhirSRVTest {
     @BeforeEach
     public void setUp() throws Exception {
 
-        FhirCFG fhirCFG = Mockito.mock(FhirCFG.class);
+//        FhirCFG fhirCFG = Mockito.mock(FhirCFG.class);
 
-    	when(fhirCFG.getFhirServerUser()).thenReturn("mock");
-        when(fhirCFG.getFhirServerPwd()).thenReturn("mock");
-        when(fhirCFG.getFhirServerUrl()).thenReturn("http://localhost:8080/mock");
+//    	when(fhirCFG.getFhirServerUser()).thenReturn("mock");
+//        when(fhirCFG.getFhirServerPwd()).thenReturn("mock");
+//        when(fhirCFG.getFhirServerUrl()).thenReturn("http://localhost:8080/mock");
 
         // Create a mock of the private client
-        FHIRClient fhirClient = Mockito.mock(FHIRClient.class);
-        when(fhirClient.create(any(Bundle.class))).thenReturn(true);
-        when(fhirClient.update(any(DocumentReference.class))).thenReturn(true);
-        when(fhirClient.delete(any(Bundle.class))).thenReturn(true);
-        when(fhirClient.replace(any(Bundle.class))).thenReturn(true);
-
-        bundle = mockBundle();
-        documentReference = mockDocumentReference();
-
-        when(fhirClient.getDocument(anyString(), anyString())).thenReturn(bundle);
-        when(fhirClient.getDocumentReferenceBundle(anyString())).thenReturn(documentReference);
-        when(fhirClient.findByMasterIdentifier(anyString())).thenReturn(bundle);
-
-        fhirSRV = new FHIRSRV();
-
-        Field privateField = fhirSRV.getClass().getDeclaredField("fhirClient");
-        privateField.setAccessible(true);
-        privateField.set(fhirSRV, fhirClient);
-
-        Field configField = fhirSRV.getClass().getDeclaredField("fhirCFG");
-        configField.setAccessible(true);
-        configField.set(fhirSRV, fhirCFG);
+////        FHIRClient fhirClient = Mockito.mock(FHIRClient.class);
+////        when(fhirClient.create(any(Bundle.class))).thenReturn(true);
+////        when(fhirClient.update(any(DocumentReference.class))).thenReturn(true);
+////        when(fhirClient.delete(any(Bundle.class))).thenReturn(true);
+////        when(fhirClient.replace(any(Bundle.class))).thenReturn(true);
+//
+//        bundle = mockBundle();
+//        documentReference = mockDocumentReference();
+//
+//        when(fhirClient.getDocument(anyString(), anyString())).thenReturn(bundle);
+//        when(fhirClient.getDocumentReferenceBundle(anyString())).thenReturn(documentReference);
+//        when(fhirClient.findByMasterIdentifier(anyString())).thenReturn(bundle);
+//
+//        fhirSRV = new FHIRSRV();
+//
+//        Field privateField = fhirSRV.getClass().getDeclaredField("fhirClient");
+//        privateField.setAccessible(true);
+//        privateField.set(fhirSRV, fhirClient);
+//
+//        Field configField = fhirSRV.getClass().getDeclaredField("fhirCFG");
+//        configField.setAccessible(true);
+//        configField.set(fhirSRV, fhirCFG);
     }
 
     private DocumentReference mockDocumentReference() {

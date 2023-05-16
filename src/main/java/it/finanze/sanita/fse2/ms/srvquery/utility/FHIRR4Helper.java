@@ -55,4 +55,9 @@ public class FHIRR4Helper {
 	public static FhirContext getContext() {
 		return context;
 	}
+	
+	public static IGenericClient createClient(final String serverURL) {
+		IGenericClient client = context.newRestfulGenericClient(serverURL);
+		return client;
+	}
 }
