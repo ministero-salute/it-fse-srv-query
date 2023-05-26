@@ -1,16 +1,22 @@
 package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import it.finanze.sanita.fse2.ms.srvquery.client.IWebScrapingClient;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.TerminologyClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.TerminologyCFG;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.MetadataResourceDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.SystemUrlDTO;
+import it.finanze.sanita.fse2.ms.srvquery.enums.ResultPushEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.SubscriptionEnum;
 import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
+import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 
 /** 
@@ -24,6 +30,9 @@ public class TerminologySRV implements ITerminologySRV {
 	private TerminologyCFG terminologyCFG;
 
 	private TerminologyClient terminologyClient;
+	
+	@Autowired
+	private IWebScrapingClient client;
 	
     private TerminologyClient getTerminologyClient() {
         if (terminologyClient == null) {
@@ -56,6 +65,25 @@ public class TerminologySRV implements ITerminologySRV {
 	public String insertCodeSystem(String name, String oid, String version, List<CodeDTO> codes) {
         TerminologyClient terminologyClient = getTerminologyClient();
         return terminologyClient.insertCS(oid, name, version, codes);
+	}
+	
+	@Override
+	public List<MetadataResourceDTO> manageMetadataResource(final List<SystemUrlDTO> list) {
+		TerminologyClient terminologyClient = getTerminologyClient();
+		List<MetadataResourceDTO> out = new ArrayList<>();		
+		
+		for(SystemUrlDTO entry : list) {
+			ResultPushEnum esito = null;
+			String res = client.webScraper(entry.getUrl());
+			if(StringUtility.isNullOrEmpty(res)) {
+				esito = ResultPushEnum.RESOURCE_NOT_FOUND;
+				out.add(new MetadataResourceDTO(entry.getSystem(),entry.getUrl(),  esito));
+				continue;
+			}
+			 esito = terminologyClient.handlePullMetadataResource(res);
+			 out.add(new MetadataResourceDTO(entry.getSystem(), entry.getUrl(),esito));
+		}
+		return out;
 	}
 	
 }

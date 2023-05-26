@@ -9,7 +9,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryRequestComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
@@ -24,14 +26,18 @@ import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceRelatesToCompone
 import org.hl7.fhir.r4.model.DocumentReference.DocumentRelationshipType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.ValueSet;
 
 import com.google.gson.internal.LinkedTreeMap;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
 import it.finanze.sanita.fse2.ms.srvquery.dto.UpdateBodyDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import lombok.AccessLevel;
@@ -197,5 +203,27 @@ public class FHIRUtility {
 				.stream()
 				.anyMatch(immutableResource -> resource.getClass() == immutableResource);
 	}
+	
+	public static MetadataResource fromContentToMetadataResource(FhirContext fhirContext, String content) {
+		MetadataResource out = null;
+		if (content.toLowerCase().contains("\"codesystem\"")) {
+			out = deserializeResource(fhirContext, CodeSystem.class, content, true);
+		} else {            
+			out = deserializeResource(fhirContext, ValueSet.class, content, true);
+		}
+		return out;
+	}
+
+	private static <T> T deserializeResource(FhirContext fhirContext, Class<? extends IBaseResource> resourceClass, String input, Boolean flagJson) {
+		IParser parser = null;
+		if (flagJson!=null && flagJson) {
+			parser = fhirContext.newJsonParser();
+		} else {
+			parser = fhirContext.newXmlParser();
+		}
+		parser.setSuppressNarratives(true);
+		return (T) parser.parseResource(resourceClass, input);
+	}
+
 	
 }
