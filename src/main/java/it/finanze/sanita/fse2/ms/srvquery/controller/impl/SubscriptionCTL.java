@@ -15,8 +15,8 @@ public class SubscriptionCTL implements ISubscriptionCTL {
 	private ITerminologySRV terminologySRV;
 	
 	@Override
-	public void manageSubscription(SubscriptionEnum subscriptionEnum, SubscriptionStatus actionEnum) {
-		terminologySRV.manageSubscription(subscriptionEnum,actionEnum);		
+	public void manageSubscription(SubscriptionEnum target, SubscriptionStatus status) {
+		terminologySRV.manageSubscription(target, status);		
 	}
 
 }
