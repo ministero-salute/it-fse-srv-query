@@ -3,8 +3,9 @@ package it.finanze.sanita.fse2.ms.srvquery.controller;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,12 +22,12 @@ import it.finanze.sanita.fse2.ms.srvquery.enums.SubscriptionEnum;
 @Validated
 public interface ISubscriptionCTL {
 
-	@GetMapping(value = "")
+	@PostMapping(value = "")
 	@ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = void.class)))
 	@Operation(summary = "Controllo esistenza risorsa", description = "Controlla se su Elasticsearch è presente una risorsa con l'id fornito.")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = void.class))),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
-	void manageSubscription(SubscriptionEnum subscriptionEnum, SubscriptionStatus subscriptionStatusEnum);
+	void manageSubscription(@RequestParam SubscriptionEnum target, @RequestParam SubscriptionStatus status);
 
 
 
