@@ -11,26 +11,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.MetadataResource;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
-import org.hl7.fhir.r4.model.ResourceType;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent;
@@ -251,8 +244,19 @@ public class FHIRClient {
 	private <T> List<T> searchModified(Date start, Class<? extends MetadataResource> mr) {
 		List<T> out = new ArrayList<>();
 		try {
-			Bundle bundle = client.search().forResource(mr).cacheControl(CacheControlDirective.noCache())
-					.where(CodeSystem.DATE.afterOrEquals().millis(start)).returnBundle(Bundle.class).execute();
+			// Search for any resource, disabling cache
+			IQuery<IBaseBundle> query = client.search().forResource(mr).cacheControl(CacheControlDirective.noCache());
+			// If startDate is provided, use it otherwise returns any resource
+			if(start != null) {
+				// Include active and not active resources
+				query = query.where(
+					new DateClientParam("_lastUpdate").after().millis(start)
+				);
+			} else {
+				// Exclude all not-active resources
+				query = query.where(CodeSystem.STATUS.exactly().identifier("active"));
+			}
+			Bundle bundle = query.returnBundle(Bundle.class).execute();
 			for (BundleEntryComponent bec:bundle.getEntry()) {
 				T cs= (T) bec.getResource();
 				out.add(cs);
