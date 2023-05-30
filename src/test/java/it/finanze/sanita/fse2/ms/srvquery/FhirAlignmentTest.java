@@ -10,6 +10,8 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -81,6 +83,10 @@ class FhirAlignmentTest {
         codes.add(new CodeDTO("C", "Letter C", null));
         // Insert
         String c0 = fhir.insertCS("code-test-0", codes);
+        // Now retrieve
+        changeset = createChangeset(fhir, client, null);
+        assertEquals(changeset.getValue().get(c0).get(OP_ADD).size(), 3);
+        Date first = getCurrentTime();
         // Now register some test codes
         codes = new ArrayList<>();
         codes.add(new CodeDTO("D", "Letter D", null));
@@ -88,11 +94,15 @@ class FhirAlignmentTest {
         codes.add(new CodeDTO("F", "Letter F", null));
         // Insert
         String c1 = fhir.insertCS("code-test-1", codes);
-        changeset = createChangeset(fhir, client, null);
+        changeset = createChangeset(fhir, client, first);
         // There are NO code systems available
         Map<String, Map<String, List<String>>> map = changeset.getValue();
-        assertEquals(map.get(c0).get(OP_ADD).size(), 3);
+        assertEquals(map.size(), 1);
         assertEquals(map.get(c1).get(OP_ADD).size(), 3);
+    }
+
+    private static Date getCurrentTime() {
+        return Date.from(LocalDateTime.now().toInstant(ZoneOffset.ofHours(2)));
     }
 
 }
