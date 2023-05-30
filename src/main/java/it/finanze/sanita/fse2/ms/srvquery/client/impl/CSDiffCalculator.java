@@ -11,8 +11,9 @@ import org.jetbrains.annotations.NotNull;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.stream.Collectors;
 
-public class CodeSystemDiffCalculator {
+public class CSDiffCalculator {
 
         public static String OP_ADD = "ADD";
         public static String OP_REMOVE = "REMOVE";
@@ -29,27 +30,27 @@ public class CodeSystemDiffCalculator {
                 2023, 5, 30, 12, 3, 0
             ).toInstant(ZoneOffset.ofHours(2)));
 
-            Pair<Date, Map<CodeSystem, Map<String, List<String>>>> tNull = createChangeset(fhir, client, null);
-            Pair<Date, Map<CodeSystem, Map<String, List<String>>>> t0 = createChangeset(fhir, client, lastUpdate);
+            Pair<Date, Map<String, Map<String, List<String>>>> tNull = createChangeset(fhir, client, null);
+            Pair<Date, Map<String, Map<String, List<String>>>> t0 = createChangeset(fhir, client, lastUpdate);
 
             printChangeset(tNull);
             printChangeset(t0);
         }
 
     @NotNull
-    private static Pair<Date, Map<CodeSystem, Map<String, List<String>>>> createChangeset(FHIRClient fhir, IGenericClient client, Date lastUpdate) {
+    public static Pair<Date, Map<String, Map<String, List<String>>>> createChangeset(FHIRClient fhir, IGenericClient client, Date lastUpdate) {
         // Pair containing lastUpdate (Date) and a mapping with each changed code system and the operation to perform
-        Pair<Date, Map<CodeSystem, Map<String, List<String>>>> alignment = Pair.of(lastUpdate, new HashMap<>());
+        Pair<Date, Map<String, Map<String, List<String>>>> alignment = Pair.of(lastUpdate, new HashMap<>());
         // Find code systems modified since that time (if null, should get everything)
-        List<CodeSystem> systems = fhir.searchModifiedCodeSystem(lastUpdate);
+        List<String> systems = fhir.searchModifiedCodeSystem(lastUpdate).stream().map(CodeSystem::getId).collect(Collectors.toList());
         // Obtain map
-        Map<CodeSystem, Map<String, List<String>>> map = alignment.getValue();
+        Map<String, Map<String, List<String>>> map = alignment.getValue();
         // For each modified code-system, check what changed
-        for (CodeSystem system : systems) {
+        for (String system : systems) {
             // Obtain Map<OperationToPerform, CodesAffected> (if null, nothing changed)
-            Map<String, List<String>> codes = new CodeSystemDiffCalculator().calculateCodeSystemUpdates(
+            Map<String, List<String>> codes = new CSDiffCalculator().calculateCodeSystemUpdates(
                 client,
-                system.getId(),
+                system,
                 lastUpdate
             );
             if(codes != null) {
@@ -65,18 +66,17 @@ public class CodeSystemDiffCalculator {
         return alignment;
     }
 
-    private static void printChangeset(Pair<Date, Map<CodeSystem, Map<String, List<String>>>> alignment) {
+    private static void printChangeset(Pair<Date, Map<String, Map<String, List<String>>>> alignment) {
         Date lastUpdate = alignment.getKey();
         String date = lastUpdate != null ? lastUpdate.toInstant().atZone(ZoneOffset.ofHours(2)).toString() : "null";
         System.out.println("lastUpdate is " + date);
         System.out.println("The following code-systems were updated: " + alignment.getValue().size());
         System.out.println();
-        Map<CodeSystem, Map<String, List<String>>> cs = alignment.getValue();
-        for (Map.Entry<CodeSystem, Map<String, List<String>>> e : cs.entrySet()) {
-            CodeSystem cs0 = e.getKey();
+        Map<String, Map<String, List<String>>> cs = alignment.getValue();
+        for (Map.Entry<String, Map<String, List<String>>> e : cs.entrySet()) {
+            String cs0 = e.getKey();
             Map<String, List<String>> changeset = e.getValue();
-            System.out.println("CS Name: " + cs0.getName());
-            System.out.println("CS Identifier: " + cs0.getIdBase());
+            System.out.println("CS Id: " + cs0);
             System.out.println("Changeset");
             for (Map.Entry<String, List<String>> entry : changeset.entrySet()) {
                 String op = entry.getKey();

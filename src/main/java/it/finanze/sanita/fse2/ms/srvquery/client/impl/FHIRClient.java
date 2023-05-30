@@ -337,12 +337,7 @@ public class FHIRClient {
 		transactionBundle.addEntry(codeSystemEntry);
 
 		Bundle response = client.transaction().withBundle(transactionBundle).execute();
-		Boolean flagStatus = response.getEntryFirstRep().getResponse().getStatus().equalsIgnoreCase("201 Created");
-		String out = null;
-		if (flagStatus!=null && flagStatus) {
-			out = response.getEntryFirstRep().getResponse().getLocation().split("/")[1];
-		}
-		return out;
+		return client.getServerBase() + response.getEntryFirstRep().getResponse().getLocation();
 	}
 
 	public String insertVS(String name, final String url, Map<MetadataResource, List<CodeDTO>> codes) {
