@@ -4,26 +4,26 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
+import org.springframework.http.HttpMethod;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_NEXT;
+import static org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import static org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 
 public final class DiffUtils {
 
     public static final int STANDARD_OFFSET = 2;
 
-    public static List<String> getResources(IGenericClient client, Bundle bundle) {
-        TreeSet<String> resources = new TreeSet<>();
+    public static Map<String, DiffOpType> mapResourcesAsHistory(IGenericClient client, Bundle bundle) {
+        Map<String, DiffOpType> resources = new HashMap<>();
         while (bundle != null) {
             // Add resources
-            resources.addAll(getResources(bundle));
+            mapResources(bundle, resources, null);
             // Verify if next page is available
             if(bundle.getLink(LINK_NEXT) != null) {
                 // Request next page
@@ -32,27 +32,51 @@ public final class DiffUtils {
                 bundle = null;
             }
         }
-        return new ArrayList<>(resources);
+        return resources;
     }
 
-    private static List<String> getResources(Bundle bundle) {
-        // Working var
-        List<String> list = new ArrayList<>();
+    public static Map<String, DiffOpType> mapResourcesAs(IGenericClient client, Bundle bundle, HttpMethod method) {
+        Map<String, DiffOpType> resources = new HashMap<>();
+        while (bundle != null) {
+            // Add resources
+            mapResources(bundle, resources, method);
+            // Verify if next page is available
+            if(bundle.getLink(LINK_NEXT) != null) {
+                // Request next page
+                bundle = client.loadPage().next(bundle).execute();
+            } else {
+                bundle = null;
+            }
+        }
+        return resources;
+    }
+
+    private static void mapResources(Bundle bundle, Map<String, DiffOpType> map, HttpMethod op) {
         // Retrieve entries
-        List<Bundle.BundleEntryComponent> resources = bundle.getEntry();
+        List<BundleEntryComponent> resources = bundle.getEntry();
         // Iterate
-        for (Bundle.BundleEntryComponent entry : resources) {
+        for (BundleEntryComponent entry : resources) {
+            // Get resource
             Resource res = entry.getResource();
+            // Let me know the latest operation type
+            HTTPVerb method = entry.getRequest().getMethod();
+            // Obtain display value
+            String type;
+            // Override method if provided
+            if(op != null) {
+                type = op.name();
+            } else {
+                type = method.getDisplay();
+            }
+            // Check if resource deleted
             if(res != null) {
-                list.add(asId(res));
+                map.putIfAbsent(asId(res), DiffOpType.parse(type));
             } else {
                 // For deleted resource getResource() returns null,
                 // so we return the id from getFullUrl
-                list.add(asId(entry.getFullUrl()));
+                map.putIfAbsent(asId(entry.getFullUrl()), DiffOpType.parse(type));
             }
         }
-        // Return resources
-        return list;
     }
 
     public static String asId(String uri) {
@@ -78,10 +102,6 @@ public final class DiffUtils {
 
     public static Date getTime(LocalDateTime time, int offset) {
         return Date.from(time.toInstant(ZoneOffset.ofHours(offset)));
-    }
-
-    public static Date getTime(LocalDateTime time) {
-        return Date.from(time.toInstant(ZoneOffset.ofHours(STANDARD_OFFSET)));
     }
 
 }

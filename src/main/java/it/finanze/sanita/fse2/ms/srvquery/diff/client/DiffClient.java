@@ -7,11 +7,12 @@ import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
 
 import java.util.Date;
-import java.util.List;
 
 import static ca.uhn.fhir.rest.api.CacheControlDirective.noCache;
-import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffUtils.getResources;
+import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffUtils.mapResourcesAs;
+import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffUtils.mapResourcesAsHistory;
 import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper.createClient;
+import static org.springframework.http.HttpMethod.POST;
 
 public class DiffClient {
 
@@ -42,7 +43,11 @@ public class DiffClient {
         // Get current time
         Date currentTime = bundle.getMeta().getLastUpdated();
         // Retrieve resources
-        return new DiffResult(currentTime,null, getResources(client, bundle));
+        return new DiffResult(
+            currentTime,
+            null,
+            mapResourcesAs(client, bundle, POST)
+        );
     }
 
     private DiffResult findModifiedByDate(Date lastUpdate, Class<? extends MetadataResource> clazz) {
@@ -57,7 +62,11 @@ public class DiffClient {
         // Get current time
         Date currentTime = bundle.getMeta().getLastUpdated();
         // Retrieve resources
-        return new DiffResult(currentTime, lastUpdate, getResources(client, bundle));
+        return new DiffResult(
+            currentTime,
+            lastUpdate,
+            mapResourcesAsHistory(client, bundle)
+        );
     }
 
     public void resetFhir() {

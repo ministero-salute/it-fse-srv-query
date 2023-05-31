@@ -2,8 +2,7 @@ package it.finanze.sanita.fse2.ms.srvquery.diff.client;
 
 import lombok.RequiredArgsConstructor;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @RequiredArgsConstructor
 public class DiffResult {
@@ -12,7 +11,7 @@ public class DiffResult {
 
     private final Date lastUpdate;
 
-    private final List<String> ids;
+    private final Map<String, DiffOpType> ids;
 
     public Date currentTime() {
         return currentTime;
@@ -23,6 +22,11 @@ public class DiffResult {
     }
 
     public List<String> ids() {
-        return ids;
+        return new ArrayList<>(ids.keySet());
     }
+
+    public Map<String, DiffOpType> mapping() {
+        return new HashMap<>(ids);
+    }
+
 }
