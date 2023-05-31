@@ -1,5 +1,6 @@
 package it.finanze.sanita.fse2.ms.srvquery.diff.client;
 
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.r4.model.*;
@@ -7,6 +8,7 @@ import org.hl7.fhir.r4.model.*;
 import java.util.Date;
 import java.util.List;
 
+import static ca.uhn.fhir.rest.api.CacheControlDirective.*;
 import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffUtils.asId;
 import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffUtils.getResources;
 import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper.createClient;
@@ -34,11 +36,12 @@ public class DiffClient {
         Bundle bundle = client
             .search()
             .forResource(clazz)
+            .cacheControl(noCache())
             .returnBundle(Bundle.class)
             .execute();
 
         // Retrieve resources
-        List<Resource> resources = getResources(bundle);
+        List<Resource> resources = getResources(client, bundle);
         // Map
         return asId(resources);
     }
@@ -50,10 +53,11 @@ public class DiffClient {
             .forResource(clazz)
             // Range is treated inclusively
             .lastUpdated(new DateRangeParam(lastUpdate, null))
+            .cacheControl(noCache())
             .returnBundle(Bundle.class)
             .execute();
         // Retrieve resources
-        List<Resource> resources = getResources(bundle);
+        List<Resource> resources = getResources(client, bundle);
         // Map
         return asId(resources);
     }
