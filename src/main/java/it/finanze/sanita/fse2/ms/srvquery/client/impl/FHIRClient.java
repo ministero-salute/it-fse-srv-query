@@ -40,6 +40,9 @@ import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 
+import static org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode.*;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.*;
+
 /** 
  * FHIR Client Implementation 
  */
@@ -303,7 +306,19 @@ public class FHIRClient {
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	public String insertCS(String name, List<CodeDTO> codes) {
-		return insertCS(null, PublicationStatus.ACTIVE, CodeSystemContentMode.COMPLETE, name, null, codes);
+		return insertCS(null, ACTIVE, COMPLETE, name, null, codes);
+	}
+
+	public void updateCS(String id, List<CodeDTO> append) {
+		CodeSystem cs = client.read().resource(CodeSystem.class).withId(id).execute();
+		if(cs == null) throw new IllegalArgumentException(String.format("The CS with id %s doesn't exists", id));
+		for (CodeDTO code: append) {
+			ConceptDefinitionComponent cdc = new ConceptDefinitionComponent();
+			cdc.setDisplay(code.getDisplay());
+			cdc.setCode(code.getCode());
+			cs.getConcept().add(cdc);
+		}
+		client.update().resource(cs).execute();
 	}
 
 	private String insertCS(final String id, final PublicationStatus ps, final CodeSystemContentMode cscm, String name, String version, List<CodeDTO> codes) {
@@ -337,7 +352,7 @@ public class FHIRClient {
 		transactionBundle.addEntry(codeSystemEntry);
 
 		Bundle response = client.transaction().withBundle(transactionBundle).execute();
-		return client.getServerBase() + response.getEntryFirstRep().getResponse().getLocation();
+		return response.getEntryFirstRep().getResponse().getLocation().split("/")[1];
 	}
 
 	public String insertVS(String name, final String url, Map<MetadataResource, List<CodeDTO>> codes) {
@@ -351,7 +366,7 @@ public class FHIRClient {
 			tmpUrl = srvURL + "/ValueSet/" + UUID.randomUUID().toString();
 		}
 
-		return insertVS(null, tmpUrl, PublicationStatus.ACTIVE, name, null, codesTxt);
+		return insertVS(null, tmpUrl, ACTIVE, name, null, codesTxt);
 	}
 
 	private String insertVS(final String id, final String url, final PublicationStatus ps, String name, String version, Map<String, List<CodeDTO>> codes) {
@@ -419,7 +434,7 @@ public class FHIRClient {
 		}
 
 		// set other relevant details
-		conceptMap.setStatus(PublicationStatus.ACTIVE);
+		conceptMap.setStatus(ACTIVE);
 		conceptMap.setDate(new Date());
 
 		conceptMap.setName(name);

@@ -7,8 +7,7 @@ import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Parameters;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -21,7 +20,9 @@ import static it.finanze.sanita.fse2.ms.srvquery.client.impl.CSDiffCalculator.OP
 import static it.finanze.sanita.fse2.ms.srvquery.client.impl.CSDiffCalculator.createChangeset;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.*;
 
+@TestInstance(PER_CLASS)
 class FhirAlignmentTest {
 
     private static final String BASE_URL = "http://localhost:8080/fhir/";
@@ -36,13 +37,17 @@ class FhirAlignmentTest {
     @BeforeEach
     public void init() {
         // Reset FHIR for CodeSystem
+        reset();
+    }
+
+    private void reset() {
         client
-        .operation()
-        .onServer()
-        .named("$expunge")
-        .withParameter(
-            Parameters.class, "expungeEverything", new BooleanType(true)
-        ).execute();
+            .operation()
+            .onServer()
+            .named("$expunge")
+            .withParameter(
+                Parameters.class, "expungeEverything", new BooleanType(true)
+            ).execute();
     }
 
     @Test
@@ -67,12 +72,12 @@ class FhirAlignmentTest {
         changeset = createChangeset(fhir, client, null);
         // There are NO code systems available
         Map<String, Map<String, List<String>>> map = changeset.getValue();
-        assertEquals(map.get(c0).get(OP_ADD).size(), 3);
-        assertEquals(map.get(c1).get(OP_ADD).size(), 3);
+        assertEquals(codes.size(), map.get(c0).get(OP_ADD).size());
+        assertEquals(codes.size(), map.get(c1).get(OP_ADD).size());
     }
 
     @Test
-    public void startsEmptyThenAddOne() {
+    public void emptyThenAddOne() {
         Pair<Date, Map<String, Map<String, List<String>>>> changeset = createChangeset(fhir, client, null);
         // There are NO code systems available
         assertTrue(changeset.getValue().isEmpty());
@@ -97,8 +102,39 @@ class FhirAlignmentTest {
         changeset = createChangeset(fhir, client, first);
         // There are NO code systems available
         Map<String, Map<String, List<String>>> map = changeset.getValue();
-        assertEquals(map.size(), 1);
-        assertEquals(map.get(c1).get(OP_ADD).size(), 3);
+        assertEquals(1, map.size());
+        assertEquals(codes.size(), map.get(c1).get(OP_ADD).size());
+    }
+
+    @Test
+    public void emptyThenAddOneThenPatch() {
+        Pair<Date, Map<String, Map<String, List<String>>>> changeset = createChangeset(fhir, client, null);
+        // There are NO code systems available
+        assertTrue(changeset.getValue().isEmpty());
+        // Now register some test codes
+        List<CodeDTO> codes = new ArrayList<>();
+        codes.add(new CodeDTO("A", "Letter A", null));
+        // Insert
+        String c0 = fhir.insertCS("code-test-0", codes);
+        // Now retrieve
+        changeset = createChangeset(fhir, client, null);
+        assertEquals(1, changeset.getValue().get(c0).get(OP_ADD).size());
+        Date first = getCurrentTime();
+        // Now register some test codes
+        codes = new ArrayList<>();
+        codes.add(new CodeDTO("B", "Letter B", null));
+        // Update
+        fhir.updateCS(c0, codes);
+        changeset = createChangeset(fhir, client, first);
+        // There are NO code systems available
+        Map<String, Map<String, List<String>>> map = changeset.getValue();
+        assertEquals(1, map.size());
+        assertEquals(1, map.get(c0).get(OP_ADD).size());
+    }
+
+    @AfterAll
+    public void teardown() {
+        reset();
     }
 
     private static Date getCurrentTime() {

@@ -42,7 +42,9 @@ public class CSDiffCalculator {
         // Pair containing lastUpdate (Date) and a mapping with each changed code system and the operation to perform
         Pair<Date, Map<String, Map<String, List<String>>>> alignment = Pair.of(lastUpdate, new HashMap<>());
         // Find code systems modified since that time (if null, should get everything)
-        List<String> systems = fhir.searchModifiedCodeSystem(lastUpdate).stream().map(CodeSystem::getId).collect(Collectors.toList());
+        List<String> systems = fhir.searchModifiedCodeSystem(lastUpdate).stream().map(
+            cs -> cs.getIdElement().getIdPart()
+        ).collect(Collectors.toList());
         // Obtain map
         Map<String, Map<String, List<String>>> map = alignment.getValue();
         // For each modified code-system, check what changed
@@ -98,7 +100,7 @@ public class CSDiffCalculator {
     }
 
     private CodeSystem getCodeSystemLastVersion(IGenericClient client, String id) {
-            return client.read().resource(CodeSystem.class).withId(id).execute();
+        return client.read().resource(CodeSystem.class).withId(id).execute();
     }
 
     private CodeSystem getCodeSystemVersionByIdAndDate(IGenericClient client, String id, Date date) {
