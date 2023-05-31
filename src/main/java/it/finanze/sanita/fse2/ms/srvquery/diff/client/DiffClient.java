@@ -1,14 +1,15 @@
 package it.finanze.sanita.fse2.ms.srvquery.diff.client;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.Parameters;
 
 import java.util.Date;
 import java.util.List;
 
 import static ca.uhn.fhir.rest.api.CacheControlDirective.noCache;
-import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffUtils.asId;
 import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffUtils.getResources;
 import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper.createClient;
 
@@ -39,25 +40,20 @@ public class DiffClient {
             .returnBundle(Bundle.class)
             .execute();
         // Retrieve resources
-        List<Resource> resources = getResources(client, bundle);
-        // Map
-        return asId(resources);
+        return getResources(client, bundle);
     }
 
     private List<String> findModifiedByDate(Date lastUpdate, Class<? extends MetadataResource> clazz) {
         // Execute query by resource type and last-update date
         Bundle bundle = client
-            .search()
-            .forResource(clazz)
-            // Range is treated inclusively
-            .lastUpdated(new DateRangeParam(lastUpdate, null))
-            .cacheControl(noCache())
+            .history()
+            .onType(clazz)
             .returnBundle(Bundle.class)
+            .cacheControl(noCache())
+            .since(lastUpdate)
             .execute();
         // Retrieve resources
-        List<Resource> resources = getResources(client, bundle);
-        // Map
-        return asId(resources);
+        return getResources(client, bundle);
     }
 
     public void resetFhir() {
