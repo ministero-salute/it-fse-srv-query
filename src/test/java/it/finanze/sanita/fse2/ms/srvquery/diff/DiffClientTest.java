@@ -36,7 +36,7 @@ class DiffClientTest extends AbstractTestResources {
     @Test
     @DisplayName("Last update is null and no items")
     public void emptyServer() {
-        List<String> ids = client.findByLastUpdate(null, CodeSystem.class);
+        List<String> ids = client.findByLastUpdate(null, CodeSystem.class).ids();
         assertTrue(ids.isEmpty(), "Expecting no ids from an empty server");
     }
 
@@ -46,18 +46,18 @@ class DiffClientTest extends AbstractTestResources {
         // To insert
         CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
         // Verify emptiness
-        List<String> ids = client.findByLastUpdate(null, CodeSystem.class);
+        List<String> ids = client.findByLastUpdate(null, CodeSystem.class).ids();
         assertTrue(ids.isEmpty(), "Expecting no ids from an empty server");
         // Insert CS
         String gender = crud.createResource(cs[0]);
         // Verify again
-        ids = client.findByLastUpdate(null, CodeSystem.class);
+        ids = client.findByLastUpdate(null, CodeSystem.class).ids();
         // Check
         assertTrue(ids.contains(gender), "Expected gender id not found after findByLastUpdate(null)");
         // Insert CS
         String ore = crud.createResource(cs[1]);
         // Verify again
-        ids = client.findByLastUpdate(null, CodeSystem.class);
+        ids = client.findByLastUpdate(null, CodeSystem.class).ids();
         // Check
         assertTrue(ids.contains(gender), "Expected gender id not found after findByLastUpdate(null)");
         assertTrue(ids.contains(ore), "Expected ore id not found after findByLastUpdate(null)");
@@ -70,17 +70,17 @@ class DiffClientTest extends AbstractTestResources {
         // To insert
         CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
         // Verify emptiness
-        List<String> ids = client.findByLastUpdate(null, CodeSystem.class);
+        List<String> ids = client.findByLastUpdate(null, CodeSystem.class).ids();
         assertTrue(ids.isEmpty(), "Expecting no ids from an empty server");
         // Insert CS
         String gender = crud.createResource(cs[0]);
         // Verify again
-        ids = client.findByLastUpdate(null, CodeSystem.class);
+        ids = client.findByLastUpdate(null, CodeSystem.class).ids();
         assertTrue(ids.contains(gender), "Expected gender id not found after findByLastUpdate(null)");
         // Now remove it
         crud.deleteResource(gender, CodeSystem.class);
         // Verify again
-        ids = client.findByLastUpdate(null, CodeSystem.class);
+        ids = client.findByLastUpdate(null, CodeSystem.class).ids();
         assertTrue(ids.isEmpty(), "Expecting no ids from an empty server");
     }
 
@@ -97,12 +97,12 @@ class DiffClientTest extends AbstractTestResources {
         Date init = getCurrentTime();
         Date now = init;
         // Verify emptiness
-        List<String> ids = client.findByLastUpdate(now, CodeSystem.class);
+        List<String> ids = client.findByLastUpdate(now, CodeSystem.class).ids();
         assertTrue(ids.isEmpty(), "Expecting no ids from an empty server");
         // Insert CS
         String gender = crud.createResource(cs[0]);
         // Verify again
-        ids = client.findByLastUpdate(now, CodeSystem.class);
+        ids = client.findByLastUpdate(now, CodeSystem.class).ids();
         assertTrue(ids.contains(gender), "Expected gender id not found after findByLastUpdate(t0)");
         assertEquals(1, ids.size(), "Expected size doesn't match");
         // ================
@@ -114,7 +114,7 @@ class DiffClientTest extends AbstractTestResources {
         // Insert CS
         String ore = crud.createResource(cs[1]);
         // Verify again
-        ids = client.findByLastUpdate(now, CodeSystem.class);
+        ids = client.findByLastUpdate(now, CodeSystem.class).ids();
         assertTrue(ids.contains(ore), "Expected ore id not found after findByLastUpdate(t1)");
         assertEquals(1, ids.size(), "Expected size doesn't match");
         // ================
@@ -124,14 +124,14 @@ class DiffClientTest extends AbstractTestResources {
         // Retrieve current time
         now = getCurrentTime();
         // Verify again
-        ids = client.findByLastUpdate(now, CodeSystem.class);
+        ids = client.findByLastUpdate(now, CodeSystem.class).ids();
         assertTrue(ids.isEmpty(), "Expecting no ids from an updated server (t2)");
         // ====================
         // ===== <TO->T2> =====
         // ====================
         // => Retrieve from T0 to T2
         // Verify again
-        ids = client.findByLastUpdate(init, CodeSystem.class);
+        ids = client.findByLastUpdate(init, CodeSystem.class).ids();
         // Check
         assertTrue(ids.contains(gender), "Expected gender id not found after findByLastUpdate(t0)");
         assertTrue(ids.contains(ore), "Expected ore id not found after findByLastUpdate(t0)");
@@ -150,12 +150,12 @@ class DiffClientTest extends AbstractTestResources {
         // Retrieve current time
         Date now = getCurrentTime();
         // Verify emptiness
-        List<String> ids = client.findByLastUpdate(now, CodeSystem.class);
+        List<String> ids = client.findByLastUpdate(now, CodeSystem.class).ids();
         assertTrue(ids.isEmpty(), "Expecting no ids from an empty server");
         // Insert CS
         String gender = crud.createResource(cs[0]);
         // Verify again
-        ids = client.findByLastUpdate(now, CodeSystem.class);
+        ids = client.findByLastUpdate(now, CodeSystem.class).ids();
         assertTrue(ids.contains(gender), "Expected gender id not found after findByLastUpdate(t0)");
         assertEquals(1, ids.size(), "Expected size doesn't match");
         // ================
@@ -169,7 +169,7 @@ class DiffClientTest extends AbstractTestResources {
         builder.addCodes("U", "Unknown");
         crud.updateResource(builder.build());
         // Verify again
-        ids = client.findByLastUpdate(now, CodeSystem.class);
+        ids = client.findByLastUpdate(now, CodeSystem.class).ids();
         assertTrue(ids.contains(gender), "Expected gender id not found after findByLastUpdate(t1)");
         assertEquals(1, ids.size(), "Expected size doesn't match");
         // ================
@@ -181,7 +181,7 @@ class DiffClientTest extends AbstractTestResources {
         // Delete CS
         crud.deleteResource(gender, CodeSystem.class);
         // Verify again
-        ids = client.findByLastUpdate(now, CodeSystem.class);
+        ids = client.findByLastUpdate(now, CodeSystem.class).ids();
         assertTrue(ids.contains(gender), "Expected gender id not found after findByLastUpdate(t2)");
         assertEquals(1, ids.size(), "Expected size doesn't match");
         // ================
@@ -191,7 +191,7 @@ class DiffClientTest extends AbstractTestResources {
         // Retrieve current time
         now = getCurrentTime();
         // Verify again
-        ids = client.findByLastUpdate(now, CodeSystem.class);
+        ids = client.findByLastUpdate(now, CodeSystem.class).ids();
         // Verify emptiness
         assertTrue(ids.isEmpty(), "Expecting no ids from an updated server (t3)");
     }

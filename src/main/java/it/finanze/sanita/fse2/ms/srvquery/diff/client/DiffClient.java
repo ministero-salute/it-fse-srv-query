@@ -21,8 +21,8 @@ public class DiffClient {
         this.client = createClient(uri, user, pwd);
     }
 
-    public List<String> findByLastUpdate(Date lastUpdate, Class<? extends MetadataResource> clazz) {
-        List<String> out;
+    public DiffResult findByLastUpdate(Date lastUpdate, Class<? extends MetadataResource> clazz) {
+        DiffResult out;
         if(lastUpdate == null) {
             out = findAny(clazz);
         } else {
@@ -31,7 +31,7 @@ public class DiffClient {
         return out;
     }
 
-    private List<String> findAny(Class<? extends MetadataResource> clazz) {
+    private DiffResult findAny(Class<? extends MetadataResource> clazz) {
         // Execute query by resource type and last-update date
         Bundle bundle = client
             .search()
@@ -39,11 +39,13 @@ public class DiffClient {
             .cacheControl(noCache())
             .returnBundle(Bundle.class)
             .execute();
+        // Get current time
+        Date currentTime = bundle.getMeta().getLastUpdated();
         // Retrieve resources
-        return getResources(client, bundle);
+        return new DiffResult(currentTime,null, getResources(client, bundle));
     }
 
-    private List<String> findModifiedByDate(Date lastUpdate, Class<? extends MetadataResource> clazz) {
+    private DiffResult findModifiedByDate(Date lastUpdate, Class<? extends MetadataResource> clazz) {
         // Execute query by resource type and last-update date
         Bundle bundle = client
             .history()
@@ -52,8 +54,10 @@ public class DiffClient {
             .cacheControl(noCache())
             .since(lastUpdate)
             .execute();
+        // Get current time
+        Date currentTime = bundle.getMeta().getLastUpdated();
         // Retrieve resources
-        return getResources(client, bundle);
+        return new DiffResult(currentTime, lastUpdate, getResources(client, bundle));
     }
 
     public void resetFhir() {
