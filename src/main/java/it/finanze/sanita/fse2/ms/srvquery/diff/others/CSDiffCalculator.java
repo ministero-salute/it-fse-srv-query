@@ -1,7 +1,8 @@
-package it.finanze.sanita.fse2.ms.srvquery.client.impl;
+package it.finanze.sanita.fse2.ms.srvquery.diff.others;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
+import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.r4.model.Bundle;

@@ -1,4 +1,4 @@
-package it.finanze.sanita.fse2.ms.srvquery;
+package it.finanze.sanita.fse2.ms.srvquery.diff;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
@@ -16,8 +16,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static it.finanze.sanita.fse2.ms.srvquery.client.impl.CSDiffCalculator.OP_ADD;
-import static it.finanze.sanita.fse2.ms.srvquery.client.impl.CSDiffCalculator.createChangeset;
+import static it.finanze.sanita.fse2.ms.srvquery.diff.others.CSDiffCalculator.OP_ADD;
+import static it.finanze.sanita.fse2.ms.srvquery.diff.others.CSDiffCalculator.createChangeset;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.*;
@@ -41,6 +41,8 @@ class FhirAlignmentTest {
     }
 
     private void reset() {
+        // Inside terminology-server (AppProperties.java):
+        // allow_multiple_delete = true
         client
             .operation()
             .onServer()
