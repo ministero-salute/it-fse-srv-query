@@ -17,6 +17,14 @@ public class CSBuilder {
         addIdentifier(oid);
     }
 
+    private CSBuilder(CodeSystem cs) {
+        this.cs = cs;
+    }
+
+    public static CSBuilder from(CodeSystem cs) {
+        return new CSBuilder(cs);
+    }
+
     public void addCodes(String code, String display) {
         // Prepare
         ConceptDefinitionComponent component = new ConceptDefinitionComponent();
@@ -27,12 +35,14 @@ public class CSBuilder {
     }
 
     private void addIdentifier(String oid) {
-        // Prepare
-        Identifier id = new Identifier();
-        id.setSystem(OID_REF);
-        id.setValue(OID_PREFIX + oid);
-        // Attach
-        cs.getIdentifier().add(id);
+        if(oid != null) {
+            // Prepare
+            Identifier id = new Identifier();
+            id.setSystem(OID_REF);
+            id.setValue(OID_PREFIX + oid);
+            // Attach
+            cs.getIdentifier().add(id);
+        }
     }
 
     public CodeSystem build() {

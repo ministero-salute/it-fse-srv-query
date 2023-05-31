@@ -3,6 +3,7 @@ package it.finanze.sanita.fse2.ms.srvquery.diff;
 import it.finanze.sanita.fse2.ms.srvquery.diff.base.AbstractTestResources;
 import it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffClient;
 import it.finanze.sanita.fse2.ms.srvquery.diff.crud.FhirCrudClient;
+import it.finanze.sanita.fse2.ms.srvquery.diff.crud.dto.CSBuilder;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.jupiter.api.*;
 
@@ -149,6 +150,10 @@ class DiffClientTest extends AbstractTestResources {
         // ================
         // Retrieve current time
         now = getCurrentTime();
+        // Update CS
+        CSBuilder builder = CSBuilder.from(crud.readResource(gender, CodeSystem.class));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
         // Delete CS
         crud.deleteResource(gender, CodeSystem.class);
         // Verify again

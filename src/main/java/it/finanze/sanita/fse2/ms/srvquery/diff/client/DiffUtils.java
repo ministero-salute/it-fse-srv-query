@@ -10,6 +10,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_NEXT;
@@ -19,7 +20,7 @@ public final class DiffUtils {
     public static final int STANDARD_OFFSET = 2;
 
     public static List<String> getResources(IGenericClient client, Bundle bundle) {
-        List<String> resources = new ArrayList<>();
+        TreeSet<String> resources = new TreeSet<>();
         while (bundle != null) {
             // Add resources
             resources.addAll(getResources(bundle));
@@ -31,7 +32,7 @@ public final class DiffUtils {
                 bundle = null;
             }
         }
-        return resources;
+        return new ArrayList<>(resources);
     }
 
     private static List<String> getResources(Bundle bundle) {
