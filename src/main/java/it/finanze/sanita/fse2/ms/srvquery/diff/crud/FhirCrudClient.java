@@ -3,7 +3,6 @@ package it.finanze.sanita.fse2.ms.srvquery.diff.crud;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.IdType;
 
 import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffUtils.asId;
 import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper.createClient;
@@ -29,8 +28,8 @@ public class FhirCrudClient {
         client.update().resource(resource).execute();
     }
 
-    public void deleteResource(String id) {
-        client.delete().resourceById(new IdType(id)).execute();
+    public <T extends IBaseResource> void deleteResource(String id, Class<T> clazz) {
+        client.delete().resourceById(clazz.getSimpleName(), id).execute();
     }
 
 }
