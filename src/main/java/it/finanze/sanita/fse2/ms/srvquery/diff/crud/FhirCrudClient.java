@@ -29,7 +29,7 @@ public class FhirCrudClient {
     }
 
     public <T extends IBaseResource> void deleteResource(String id, Class<T> clazz) {
-        client.delete().resource(readResource(id, clazz)).execute();
+        deleteResource(readResource(id, clazz));
     }
 
     public <T extends IBaseResource> void deleteResource(T resource) {
