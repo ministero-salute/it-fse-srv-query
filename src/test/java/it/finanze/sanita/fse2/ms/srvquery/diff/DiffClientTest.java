@@ -90,6 +90,7 @@ class DiffClientTest extends AbstractTestResources {
         // ================
         // ===== <T0> =====
         // ================
+        // => Check emptiness, then add one resource and verify
         // To insert
         CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
         // Retrieve current time
@@ -107,6 +108,7 @@ class DiffClientTest extends AbstractTestResources {
         // ================
         // ===== <T1> =====
         // ================
+        // => Add one resource and verify
         // Retrieve current time
         now = getCurrentTime();
         // Insert CS
@@ -116,8 +118,18 @@ class DiffClientTest extends AbstractTestResources {
         assertTrue(ids.contains(ore), "Expected ore id not found after findByLastUpdate(t1)");
         assertEquals(1, ids.size(), "Expected size doesn't match");
         // ================
-        // ===== <T0> =====
+        // ===== <T2> =====
         // ================
+        // => Given an updated server, verify no ids returns
+        // Retrieve current time
+        now = getCurrentTime();
+        // Verify again
+        ids = client.findByLastUpdate(now, CodeSystem.class);
+        assertTrue(ids.isEmpty(), "Expecting no ids from an updated server (t2)");
+        // ====================
+        // ===== <TO->T2> =====
+        // ====================
+        // => Retrieve from T0 to T2
         // Verify again
         ids = client.findByLastUpdate(init, CodeSystem.class);
         // Check
@@ -132,6 +144,7 @@ class DiffClientTest extends AbstractTestResources {
         // ================
         // ===== <T0> =====
         // ================
+        // => Check emptiness, then add one resource and verify
         // To insert
         CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
         // Retrieve current time
@@ -148,27 +161,39 @@ class DiffClientTest extends AbstractTestResources {
         // ================
         // ===== <T1> =====
         // ================
+        // => Update one resource and verify
         // Retrieve current time
         now = getCurrentTime();
         // Update CS
         CSBuilder builder = CSBuilder.from(crud.readResource(gender, CodeSystem.class));
         builder.addCodes("U", "Unknown");
         crud.updateResource(builder.build());
-        // Delete CS
-        crud.deleteResource(gender, CodeSystem.class);
         // Verify again
         ids = client.findByLastUpdate(now, CodeSystem.class);
-        assertTrue(ids.contains(gender), "Expected gender id found after findByLastUpdate(t1)");
+        assertTrue(ids.contains(gender), "Expected gender id not found after findByLastUpdate(t1)");
         assertEquals(1, ids.size(), "Expected size doesn't match");
         // ================
         // ===== <T2> =====
         // ================
+        // => Delete one resource and verify
+        // Retrieve current time
+        now = getCurrentTime();
+        // Delete CS
+        crud.deleteResource(gender, CodeSystem.class);
+        // Verify again
+        ids = client.findByLastUpdate(now, CodeSystem.class);
+        assertTrue(ids.contains(gender), "Expected gender id not found after findByLastUpdate(t2)");
+        assertEquals(1, ids.size(), "Expected size doesn't match");
+        // ================
+        // ===== <T3> =====
+        // ================
+        // => Given an updated server, verify no ids returns
         // Retrieve current time
         now = getCurrentTime();
         // Verify again
         ids = client.findByLastUpdate(now, CodeSystem.class);
         // Verify emptiness
-        assertTrue(ids.isEmpty(), "Expecting no ids from an updated server (t2)");
+        assertTrue(ids.isEmpty(), "Expecting no ids from an updated server (t3)");
     }
 
     @AfterAll
