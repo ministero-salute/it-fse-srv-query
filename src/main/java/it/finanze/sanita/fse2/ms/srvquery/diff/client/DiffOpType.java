@@ -7,7 +7,7 @@ public enum DiffOpType {
     UPDATE,
     DELETE;
 
-    public static DiffOpType parse(String method) {
+    public static DiffOpType parseOpType(String method) {
         HttpMethod m = HttpMethod.resolve(method);
         if(m == null) {
             throw new IllegalArgumentException("Unknown operation type: " + method);

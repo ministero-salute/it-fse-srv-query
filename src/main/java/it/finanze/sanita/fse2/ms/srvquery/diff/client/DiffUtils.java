@@ -11,6 +11,7 @@ import java.time.ZoneOffset;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffOpType.*;
 import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_NEXT;
 import static org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb;
@@ -19,11 +20,11 @@ public final class DiffUtils {
 
     public static final int STANDARD_OFFSET = 2;
 
-    public static Map<String, DiffOpType> mapResourcesAsHistory(IGenericClient client, Bundle bundle) {
+    public static Map<String, DiffOpType> mapResourcesAsHistory(IGenericClient client, Bundle bundle, Date lastUpdate) {
         Map<String, DiffOpType> resources = new HashMap<>();
         while (bundle != null) {
             // Add resources
-            mapResources(bundle, resources, null);
+            mapResources(bundle, resources, null, lastUpdate);
             // Verify if next page is available
             if(bundle.getLink(LINK_NEXT) != null) {
                 // Request next page
@@ -35,11 +36,11 @@ public final class DiffUtils {
         return resources;
     }
 
-    public static Map<String, DiffOpType> mapResourcesAs(IGenericClient client, Bundle bundle, HttpMethod method) {
+    public static Map<String, DiffOpType> mapResourcesAs(IGenericClient client, Bundle bundle, HttpMethod method,  Date lastUpdate) {
         Map<String, DiffOpType> resources = new HashMap<>();
         while (bundle != null) {
             // Add resources
-            mapResources(bundle, resources, method);
+            mapResources(bundle, resources, method, lastUpdate);
             // Verify if next page is available
             if(bundle.getLink(LINK_NEXT) != null) {
                 // Request next page
@@ -51,7 +52,7 @@ public final class DiffUtils {
         return resources;
     }
 
-    private static void mapResources(Bundle bundle, Map<String, DiffOpType> map, HttpMethod op) {
+    private static void mapResources(Bundle bundle, Map<String, DiffOpType> map, HttpMethod op, Date lastUpdate) {
         // Retrieve entries
         List<BundleEntryComponent> resources = bundle.getEntry();
         // Iterate
@@ -61,20 +62,32 @@ public final class DiffUtils {
             // Let me know the latest operation type
             HTTPVerb method = entry.getRequest().getMethod();
             // Obtain display value
-            String type;
+            DiffOpType type;
             // Override method if provided
             if(op != null) {
-                type = op.name();
+                type = parseOpType(op.name());
             } else {
-                type = method.getDisplay();
+                type = parseOpType(method.getDisplay());
             }
             // Check if resource deleted
             if(res != null) {
-                map.putIfAbsent(asId(res), DiffOpType.parse(type));
+                // Get id
+                String id = asId(res);
+                map.putIfAbsent(id, type);
+                // If we reached the POST operation of a DELETED resource
+                if(map.get(id) == DELETE && type == INSERT && lastUpdate != null) {
+                    // Retrieve creation date
+                    Date insertionDate = res.getMeta().getLastUpdated();
+                    // If defined and deleted in between the lastUpdate, throw it away
+                    if(insertionDate.after(lastUpdate)) {
+                        // Remove it
+                        map.remove(id);
+                    }
+                }
             } else {
                 // For deleted resource getResource() returns null,
                 // so we return the id from getFullUrl
-                map.putIfAbsent(asId(entry.getFullUrl()), DiffOpType.parse(type));
+                map.putIfAbsent(asId(entry.getFullUrl()), type);
             }
         }
     }

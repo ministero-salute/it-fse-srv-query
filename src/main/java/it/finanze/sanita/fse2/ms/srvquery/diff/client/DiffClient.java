@@ -46,7 +46,7 @@ public class DiffClient {
         return new DiffResult(
             currentTime,
             null,
-            mapResourcesAs(client, bundle, POST)
+            mapResourcesAs(client, bundle, POST, null)
         );
     }
 
@@ -65,7 +65,7 @@ public class DiffClient {
         return new DiffResult(
             currentTime,
             lastUpdate,
-            mapResourcesAsHistory(client, bundle)
+            mapResourcesAsHistory(client, bundle, lastUpdate)
         );
     }
 
