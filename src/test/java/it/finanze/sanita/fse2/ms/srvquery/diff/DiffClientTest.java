@@ -160,6 +160,15 @@ class DiffClientTest extends AbstractTestResources {
         ids = client.findByLastUpdate(now, CodeSystem.class);
         assertTrue(ids.contains(gender), "Expected gender id found after findByLastUpdate(t1)");
         assertEquals(1, ids.size(), "Expected size doesn't match");
+        // ================
+        // ===== <T2> =====
+        // ================
+        // Retrieve current time
+        now = getCurrentTime();
+        // Verify again
+        ids = client.findByLastUpdate(now, CodeSystem.class);
+        // Verify emptiness
+        assertTrue(ids.isEmpty(), "Expecting no ids from an updated server (t2)");
     }
 
     @AfterAll
