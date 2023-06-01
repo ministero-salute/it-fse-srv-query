@@ -1,24 +1,25 @@
 package it.finanze.sanita.fse2.ms.srvquery.client.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
-import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
@@ -26,389 +27,159 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.CacheControlDirective;
-import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.UriClientParam;
 import ca.uhn.fhir.util.ParametersUtil;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.ValidateCodeResultDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.ResultPushEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.SubscriptionEnum;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class TerminologyClient {
+public class TerminologyClient extends AbstractTerminologyClient {
 
-	private IGenericClient terminologyClient;
+	private IGenericClient tc;
 
-
+	private String srvURL;
+	
 	public TerminologyClient(final String serverURL, final String username, final String pwd) {
 		log.info("Terminology client initialize");
-		terminologyClient = FHIRR4Helper.createClient(serverURL, username, pwd);
+		tc = FHIRR4Helper.createClient(serverURL, username, pwd);
+		srvURL = serverURL;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
-	//											SUBSCRIPTION
+	//									SVCM: Query Value Set [ITI-95]
 	///////////////////////////////////////////////////////////////////////////////////////////////
-
-	public void manageSubscription(SubscriptionEnum s, SubscriptionStatus subscriptionStatus, String url) {
-		String criteria = s.getRisorsa() + "?status=" + s.getCriteria();
-		Subscription existingSubscription = findExistingSubscription(criteria);
-		if (existingSubscription != null) {
-			updateSubscription(existingSubscription, subscriptionStatus, url);
-		} else {
-			Subscription subscription = buildSubscription(s.getRisorsa(), s.getCriteria(), url, subscriptionStatus);
-			createSubscription(subscription);
-		}
-	}
-
-	private void createSubscription(final Subscription subscription) {
-		terminologyClient.create().resource(subscription).execute();
-	}
-
-	private Subscription findExistingSubscription(String criteria) {
-		Bundle bundle = terminologyClient
-				.search()
-				.forResource(Subscription.class)
-				.where(Subscription.CRITERIA.matches().value(criteria))
-				.returnBundle(Bundle.class)
-				.execute();
-
-		for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
-			if (entry.getResource() instanceof Subscription) {
-				Subscription subscription = (Subscription) entry.getResource();
-				return subscription;  
-			}
-		}
-
-		return null; 
-	}
-
-	private void updateSubscription(Subscription subscription, SubscriptionStatus subscriptionStatus, String url) {
-		subscription.setStatus(subscriptionStatus);
-		subscription.getChannel().setEndpoint(url + "/" + subscription.getCriteria().split("=")[1]);
-		terminologyClient.update().resource(subscription).execute();
-	}
-
-	private Subscription buildSubscription(String risorsa,String stato,String url,SubscriptionStatus subscriptionStatus) {
-		Subscription subscription = new Subscription();
-		subscription.setCriteria(risorsa+"?status="+ stato);
-		subscription.setStatus(subscriptionStatus);
-		subscription.setReason(risorsa+ " " + stato);
-		Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
-		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
-		channel.setEndpoint(url+ "/" + stato);
-		channel.setPayload("application/json");
-		subscription.setChannel(channel);
-		return subscription;
-	}
-
-
-	///////////////////////////////////////////////////////////////////////////////////////////////
-	//									READ METADATA RESOURCE
-	///////////////////////////////////////////////////////////////////////////////////////////////
-
-	private <T> T read(String id, Class<? extends MetadataResource> mr) {
-		try {
-			return (T) terminologyClient.read().resource(mr).withId(id).execute();
-		} catch(Exception ex) {
-			log.error("Errore while perform read client method:", ex);
-			throw new BusinessException("Errore while perform read client method:", ex);
-		}
-	}
 
 	public ValueSet readVS(String id) {
-		return read(id, ValueSet.class);
-	}
-
-	public CodeSystem readCS(String id) {
-		return read(id, CodeSystem.class);
-	}
-
-	public ConceptMap readCM(String id) {
-		return read(id, ConceptMap.class);
-	}
-
-	///////////////////////////////////////////////////////////////////////////////////////////////
-	//									DELETE METADATA RESOURCE
-	///////////////////////////////////////////////////////////////////////////////////////////////
-
-	private <T> void delete(String id, Class<? extends MetadataResource> mr) {
-		T res = (T) read(id, mr);
-		terminologyClient.delete().resource((MetadataResource)res).execute();
-	}
-
-	public void deleteVS(String id) {
-		delete(id, ValueSet.class);
-	}
-
-	public void deleteCS(String id) {
-		delete(id, CodeSystem.class);
-	}
-
-	public void deleteCM(String id) {
-		delete(id, ConceptMap.class);
-	}
-
-	///////////////////////////////////////////////////////////////////////////////////////////////
-	//									SEARCH METADATA RESOURCE
-	///////////////////////////////////////////////////////////////////////////////////////////////
-
-	private <T> List<T> searchActive(Class<? extends MetadataResource> mr) {
-		List<T> out = new ArrayList<>();
-		try {
-			Bundle bundle = terminologyClient.search().forResource(mr).cacheControl(CacheControlDirective.noCache())
-					.where(CodeSystem.STATUS.exactly().identifier("active")).returnBundle(Bundle.class).execute();
-			for (BundleEntryComponent bec:bundle.getEntry()) {
-				T cs= (T) bec.getResource();
-				out.add(cs);
-			}
-			return out;
-		} catch(Exception ex) {
-			log.error("Errore while perform searchActive client method:", ex);
-			throw new BusinessException("Errore while perform searchActive client method:", ex);
-		}
+		return read(tc, id, ValueSet.class);
 	}
 
 	public List<ValueSet> searchActiveValueSet() {
-		return searchActive(ValueSet.class);
-	}
-
-	public List<CodeSystem> searchActiveCodeSystem() {
-		return searchActive(CodeSystem.class);
-	}
-
-	private <T> List<T> searchModified(Date start, Class<? extends MetadataResource> mr) {
-		List<T> out = new ArrayList<>();
-		try {
-			Bundle bundle = terminologyClient.search().forResource(mr).cacheControl(CacheControlDirective.noCache())
-					.where(CodeSystem.DATE.afterOrEquals().millis(start)).returnBundle(Bundle.class).execute();
-			for (BundleEntryComponent bec:bundle.getEntry()) {
-				T cs= (T) bec.getResource();
-				out.add(cs);
-			}
-			return out;
-		} catch(Exception ex) {
-			log.error("Errore while perform searchModified client method:", ex);
-			throw new BusinessException("Errore while perform searchModified client method:", ex);
-		}
+		return searchActive(tc, ValueSet.class);
 	}
 
 	public List<ValueSet> searchModifiedValueSet(Date start) {
-		return searchModified(start, ValueSet.class);
+		return searchModified(tc, start, ValueSet.class);
+	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	//									SVCM: Query Code System [ITI-96]
+	///////////////////////////////////////////////////////////////////////////////////////////////
+
+	public CodeSystem readCS(String id) {
+		return read(tc, id, CodeSystem.class);
+	}
+
+	public List<CodeSystem> searchActiveCodeSystem() {
+		return searchActive(tc, CodeSystem.class);
 	}
 
 	public List<CodeSystem> searchModifiedCodeSystem(Date start) {
-		return searchModified(start, CodeSystem.class);
-	}
-
-	public List<ConceptMap> searchConceptMapBySourceSystem(MetadataResource mr) {
-		List<ConceptMap> out = new ArrayList<>();
-
-		if (mr!=null) {
-			String sourceSystem = mr.getId().split("/_history")[0];
-
-			Bundle bundle = terminologyClient.search()
-					.forResource(ConceptMap.class)
-					.where(new UriClientParam("source-system").matches().value(sourceSystem))
-					.returnBundle(Bundle.class)
-					.execute();
-
-			for (BundleEntryComponent entry : bundle.getEntry()) {
-				if (entry.getResource() instanceof ConceptMap) {
-					ConceptMap conceptMap = (ConceptMap) entry.getResource();
-					out.add(conceptMap);
-				}
-			}
-		}				
-		return out;
+		return searchModified(tc, start, CodeSystem.class);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
-	//											INSERT
+	//									SVCM: Expand Value Set [ITI-97]
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
-	public String insertCS(String oid, String name, String version, List<CodeDTO> codes) {
-		return insertCS(null, PublicationStatus.DRAFT, CodeSystemContentMode.COMPLETE, oid, name, version, codes);
-	}
+	/*		
+	String uuid = UUID.randomUUID().toString();
+	String codeSystem = "{\"resourceType\":\"CodeSystem\",\"id\":\"example-codesystem" + uuid + "\",\"url\":\"http://localhost:8080/fhir/CodeSystem/example-codesystem" + uuid + "\",\"version\":\"1.0.0\",\"name\":\"Example CodeSystem\",\"status\":\"active\",\"content\":\"complete\",\"concept\":[{\"code\":\"gold\",\"display\":\"Gold\"},{\"code\":\"silver\",\"display\":\"Silver\"},{\"code\":\"bronze\",\"display\":\"Bronze\"}]}";
+	tc.handlePullMetadataResource(codeSystem);
+	String valueSetInclude = "{\"resourceType\":\"ValueSet\",\"id\":\"example-valueset" + uuid + "\",\"url\":\"http://localhost:8080/fhir/ValueSet/example-valueset" + uuid + "\",\"version\":\"1.0.0\",\"name\":\"Example ValueSet\",\"status\":\"active\",\"compose\":{\"include\":[{\"system\":\"http://localhost:8080/fhir/CodeSystem/example-codesystem" + uuid + "\"}]}}";
+	tc.handlePullMetadataResource(valueSetInclude);
 
-	private String insertCS(final String id, final PublicationStatus ps, final CodeSystemContentMode cscm, String oid, String name, String version, List<CodeDTO> codes) {
-		CodeSystem codeSystem = new CodeSystem();
-		codeSystem.setId(id);
-		codeSystem.setName(name);
-		String ver = "1.0.0";
-		if (version!=null && version.length()>0 ) {
-			ver = version;
-		}
-		codeSystem.setVersion(ver);
-		codeSystem.setStatus(ps);
-		codeSystem.setContent(cscm);
-
-		if (oid!=null && !oid.isEmpty()) {
-			List<Identifier> ids = new ArrayList<>();
-			Identifier identifier = new Identifier();
-			identifier.setSystem("urn:ietf:rfc:3986");
-			identifier.setValue("urn:oid:" + oid);
-			ids.add(identifier);
-			codeSystem.setIdentifier(ids);
-		}
-
-		List<ConceptDefinitionComponent> concepts = new ArrayList<>();
-
-		for (CodeDTO code:codes) {
-			ConceptDefinitionComponent cdc = new ConceptDefinitionComponent();
-			cdc.setDisplay(code.getDisplay());
-			cdc.setCode(code.getCode());
-			concepts.add(cdc);
-		}
-
-		codeSystem.setConcept(concepts);
-		codeSystem.setDate(new Date());
-
-		Bundle transactionBundle = new Bundle();
-		transactionBundle.setType(Bundle.BundleType.TRANSACTION);
-		Bundle.BundleEntryComponent codeSystemEntry = new Bundle.BundleEntryComponent();
-		codeSystemEntry.setResource(codeSystem).getRequest().setMethod(HTTPVerb.POST).setUrl(codeSystem.getUrl());
-		transactionBundle.addEntry(codeSystemEntry);
-
-		Bundle response = terminologyClient.transaction().withBundle(transactionBundle).execute();
-		Boolean flagStatus = response.getEntryFirstRep().getResponse().getStatus().equalsIgnoreCase("201 Created");
-		String out = null;
-		if (flagStatus!=null && flagStatus) {			
-			out = response.getEntryFirstRep().getResponse().getLocation().split("/")[1];
-		}
-		return out;
-	}
-
-	/*
-	public String insertVS(String name, final String url, Map<MetadataResource, List<CodeDTO>> codes) {
-		Map<String, List<CodeDTO>> codesTxt = new HashMap<>();
-		for (Entry<MetadataResource, List<CodeDTO>> entry:codes.entrySet()) {
-			String system = entry.getKey().getId().split("/_history")[0];
-			codesTxt.put(system, entry.getValue());
-		}
-		String tmpUrl = url;
-		if (tmpUrl==null || tmpUrl.isEmpty()) {
-			tmpUrl = srvURL + "/ValueSet/" + UUID.randomUUID().toString();
-		}
-
-		return insertVS(null, tmpUrl, PublicationStatus.ACTIVE, name, null, codesTxt);
-	}
-
-	private String insertVS(final String id, final String url, final PublicationStatus ps, String name, String version, Map<String, List<CodeDTO>> codes) {
-		ValueSet valueSet = new ValueSet();
-		valueSet.setId(id);
-		valueSet.setName(name);
-		valueSet.setUrl(url);
-		String ver = "1.0.0";
-		if (version!=null && version.length()>0 ) {
-			ver = version;
-		}
-		valueSet.setVersion(ver);
-		valueSet.setStatus(ps);
-		valueSet.setDate(new Date());
-
-		ValueSetComposeComponent compose = new ValueSetComposeComponent();
-
-		for (Entry<String, List<CodeDTO>> entryCodes:codes.entrySet()) {
-			String system = entryCodes.getKey();
-			ConceptSetComponent csc = new ConceptSetComponent();
-			csc.setSystem(system);
-			for (CodeDTO systemCode:entryCodes.getValue()) {
-				ConceptReferenceComponent concept = new ConceptReferenceComponent();
-				concept.setCode(systemCode.getCode());
-				concept.setDisplay(systemCode.getDisplay());
-
-				csc.addConcept(concept);
-			}
-			compose.addInclude(csc);			
-		}
-		valueSet.setCompose(compose);
-
-		List<IBaseResource> resourceList = new ArrayList<>();
-		resourceList.add(valueSet);
-		ArrayList<IBaseResource> resources = (ArrayList) terminologyClient.transaction().withResources(resourceList).execute();
-		String out = ((ValueSet)resources.get(0)).getId();
-		return out.split("/_history")[0];
-	}
-
-	public String insertCM(String name, final String url, MetadataResource mrSource, MetadataResource mrTarget, Map<String, String> sourceToTargetCodes) {
-
-		ConceptMap conceptMap = new ConceptMap();
-
-		String tmpUrl = url;
-		if (tmpUrl==null || tmpUrl.isEmpty()) {
-			tmpUrl = srvURL + "/ConceptMap/" + UUID.randomUUID().toString();
-		}
-
-		conceptMap.setUrl(tmpUrl);
-
-		String systemSource = mrSource.getId().split("/_history")[0];
-		String systemTarget = mrTarget.getId().split("/_history")[0];
-
-		// set source and target uri
-		conceptMap.setSource(new IdType(systemSource));
-		conceptMap.setTarget(new IdType(systemTarget));
-
-		// add concept mappings
-		ConceptMap.ConceptMapGroupComponent group = conceptMap.addGroup();
-		group.setSource(systemSource);
-		group.setTarget(systemTarget);
-
-		for (Entry<String, String> entry:sourceToTargetCodes.entrySet()) {
-			group.addElement().setCode(entry.getKey()).addTarget().setCode(entry.getValue());		
-		}
-
-		// set other relevant details
-		conceptMap.setStatus(PublicationStatus.ACTIVE);
-		conceptMap.setDate(new Date());
-
-		conceptMap.setName(name);
-		conceptMap.setDate(new Date());
-
-		List<IBaseResource> resourceList = new ArrayList<>();
-		resourceList.add(conceptMap);
-		ArrayList<IBaseResource> resources = (ArrayList) terminologyClient.transaction().withResources(resourceList).execute();
-		String out = ((ConceptMap)resources.get(0)).getId();
-		return out.split("/_history")[0];
+	Map<String, String> out = tc.expandVS("54104");
+	for (Entry<String, String> c:out.entrySet()) {
+		System.out.println(c.getKey() + " " + c.getValue());
 	}
 	 */
 
+	public Map<String, String> expandVS(String id) {
+		Map<String, String> out = new HashMap<>();
+
+        Parameters response = tc
+			.operation()
+			.onInstance("ValueSet/"+id)
+			.named("expand")
+			.withNoParameters(Parameters.class)
+			.execute();  
+        
+		ValueSet expandedValueSet = (ValueSet) response.getParameter().get(0).getResource();
+		List<ValueSet.ValueSetExpansionContainsComponent> concepts = expandedValueSet.getExpansion().getContains();
+		for (ValueSet.ValueSetExpansionContainsComponent concept : concepts) {
+		    String code = concept.getCode();
+		    String display = concept.getDisplay();
+		    // Process each concept as needed
+		    out.put(code, display);
+		}		
+		return out;
+	}
+	
 	///////////////////////////////////////////////////////////////////////////////////////////////
-	//											OPERATION
+	//									SVCM: Lookup Code [ITI-98]
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
+//	tc.handlePullMetadataResource("{\"resourceType\":\"CodeSystem\",\"id\":\"loinc-codes\",\"url\":\"http://loinc.org\",\"version\":\"2.68\",\"name\":\"LOINC Codes\",\"title\":\"LOINC Codes\",\"status\":\"active\",\"content\":\"complete\",\"concept\":[{\"code\":\"LA6751-7\",\"display\":\"Glucose [Moles/volume] in Urine\"}]}");
+//	tc.lookupMetadataResource("http://loinc.org", "LA6751-7");
+	public Map<String, String> lookupMetadataResource(String url, String code) {
+		
+		IBaseParameters params = ParametersUtil.newInstance(tc.getFhirContext());
+		ParametersUtil.addParameterToParametersString(tc.getFhirContext(), params, "code", code);
+		ParametersUtil.addParameterToParametersUri(tc.getFhirContext(), params, "system", url);
+
+
+        // Perform the lookup operation
+		IBaseParameters output = tc
+                .operation()
+                .onType(CodeSystem.class)
+                .named("$lookup")
+                .withParameters(params)
+                .execute();
+		Parameters out = (Parameters) output;
+		
+		Map<String, String> hashMap = new HashMap<>();
+        for (ParametersParameterComponent ppc:out.getParameter()) {
+            String name = ppc.getName();
+            String value = ((IPrimitiveType<?>) ppc.getValue()).getValueAsString();
+
+            hashMap.put(name, value);
+        }
+        
+        System.out.println(hashMap);
+		return hashMap;
+	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	//									SVCM: Validate Code [ITI-99]
+	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	public ValidateCodeResultDTO validateMetadataResource(String theSystem, String theCode, MetadataResource mr) {
 		ValidateCodeResultDTO result = null;
 
+		IBaseParameters params = ParametersUtil.newInstance(tc.getFhirContext());
+		ParametersUtil.addParameterToParametersString(tc.getFhirContext(), params, "code", theCode);//G
+		ParametersUtil.addParameterToParametersUri(tc.getFhirContext(), params, "system", theSystem);//"http://hapi.fhir.org/baseR4/CodeSystem/PatientTaxSituation"
 		if (mr.getUrl()!=null && !mr.getUrl().isEmpty()) {
-			IBaseParameters params = ParametersUtil.newInstance(terminologyClient.getFhirContext());
 
-			ParametersUtil.addParameterToParametersUri(terminologyClient.getFhirContext(), params, "url", mr.getUrl());//http://hapi.fhir.org/baseR4/ValueSet/PatientTaxSituation2
-			ParametersUtil.addParameterToParametersString(terminologyClient.getFhirContext(), params, "code", theCode);//G
-			ParametersUtil.addParameterToParametersUri(terminologyClient.getFhirContext(), params, "system", theSystem);//"http://hapi.fhir.org/baseR4/CodeSystem/PatientTaxSituation"
+			ParametersUtil.addParameterToParametersUri(tc.getFhirContext(), params, "url", mr.getUrl());//http://hapi.fhir.org/baseR4/ValueSet/PatientTaxSituation2
 
 			IBaseParameters output = null;
 
 			if (mr instanceof ValueSet) {
-				output = terminologyClient
+				output = tc
 						.operation()
 						.onType("ValueSet")
 						.named("validate-code")
 						.withParameters(params)
 						.execute();
 			} else {
-				output = terminologyClient
+				output = tc
 						.operation()
 						.onType("CodeSystem")
 						.named("validate-code")
@@ -424,22 +195,17 @@ public class TerminologyClient {
 
 			result = new ValidateCodeResultDTO(value, msg);			
 		} else {
-			IBaseParameters params = ParametersUtil.newInstance(terminologyClient.getFhirContext());
-
-			ParametersUtil.addParameterToParametersString(terminologyClient.getFhirContext(), params, "code", theCode);//G
-			ParametersUtil.addParameterToParametersUri(terminologyClient.getFhirContext(), params, "system", theSystem);//"http://hapi.fhir.org/baseR4/CodeSystem/PatientTaxSituation"
-
 			IBaseParameters output = null;
 
 			if (mr instanceof ValueSet) {
-				output = terminologyClient
+				output = tc
 						.operation()
 						.onInstance("ValueSet/"+mr.getId())
 						.named("validate-code")
 						.withParameters(params)
 						.execute();
 			} else {
-				output = terminologyClient
+				output = tc
 						.operation()
 						.onInstance("CodeSystem/"+mr.getId())
 						.named("validate-code")
@@ -459,18 +225,51 @@ public class TerminologyClient {
 		return result;
 	}
 
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	//									SVCM: Query Concept Map [ITI-100]
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	
+	public ConceptMap readCM(String id) {
+		return read(tc, id, ConceptMap.class);
+	}
+
+	public List<ConceptMap> searchConceptMapBySourceSystem(MetadataResource mr) {
+		List<ConceptMap> out = new ArrayList<>();
+
+		if (mr!=null) {
+			String sourceSystem = mr.getId().split("/_history")[0];
+
+			Bundle bundle = tc.search()
+					.forResource(ConceptMap.class)
+					.where(new UriClientParam("source-system").matches().value(sourceSystem))
+					.returnBundle(Bundle.class)
+					.execute();
+
+			for (BundleEntryComponent entry : bundle.getEntry()) {
+				if (entry.getResource() instanceof ConceptMap) {
+					ConceptMap conceptMap = (ConceptMap) entry.getResource();
+					out.add(conceptMap);
+				}
+			}
+		}				
+		return out;
+	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	//									SVCM: Translate Code [ITI-101]
+	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	public CodeDTO translate(String system, String code, MetadataResource target) {
 
-		IBaseParameters params = ParametersUtil.newInstance(terminologyClient.getFhirContext());
+		IBaseParameters params = ParametersUtil.newInstance(tc.getFhirContext());
 
 		String targetID = target.getId().split("/_history")[0];
 
-		ParametersUtil.addParameterToParametersUri(terminologyClient.getFhirContext(), params, "target", targetID);//http://hapi.fhir.org/baseR4/ValueSet/PatientTaxSituation2
-		ParametersUtil.addParameterToParametersString(terminologyClient.getFhirContext(), params, "code", code);//G
-		ParametersUtil.addParameterToParametersUri(terminologyClient.getFhirContext(), params, "system", system);//"http://hapi.fhir.org/baseR4/CodeSystem/PatientTaxSituation"
+		ParametersUtil.addParameterToParametersUri(tc.getFhirContext(), params, "target", targetID);//http://hapi.fhir.org/baseR4/ValueSet/PatientTaxSituation2
+		ParametersUtil.addParameterToParametersString(tc.getFhirContext(), params, "code", code);//G
+		ParametersUtil.addParameterToParametersUri(tc.getFhirContext(), params, "system", system);//"http://hapi.fhir.org/baseR4/CodeSystem/PatientTaxSituation"
 
-		IBaseParameters output = terminologyClient
+		IBaseParameters output = tc
 				.operation()
 				.onType("ConceptMap")
 				.named("translate")
@@ -488,53 +287,110 @@ public class TerminologyClient {
 		}
 		return out;
 	}
-
+	
 	///////////////////////////////////////////////////////////////////////////////////////////////
-	//											LOGGING
+	//											CUSTOM: INSERT
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
-	class LoggingInterceptor implements IClientInterceptor {
+	public String insertCS(String oid, String name, String version, List<CodeDTO> codes) {
+		return insertCS(tc, null, PublicationStatus.DRAFT, CodeSystemContentMode.COMPLETE, oid, name, version, codes);
+	}
 
-		private final ThreadLocal<UUID> uniqueIdThreadLocal = new ThreadLocal<>();
-
-		@Override
-		public void interceptRequest(IHttpRequest theRequest) {
-			String req = theRequest.toString();
-			String body = "";
-			try {
-				body = theRequest.getRequestBodyFromStream();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-			UUID uniqueId = UUID.randomUUID();
-			uniqueIdThreadLocal.set(uniqueId);
-			log.debug("\n==== REQUEST ===");
-			log.debug("Unique ID: " + uniqueId);
-			log.debug(req);
-			if (body!=null) {
-				log.debug(body);
-			}
-			log.debug("================\n");
+	public String insertVS(String name, final String url, Map<MetadataResource, List<CodeDTO>> codes) {
+		Map<String, List<CodeDTO>> codesTxt = new HashMap<>();
+		for (Entry<MetadataResource, List<CodeDTO>> entry:codes.entrySet()) {
+			String system = entry.getKey().getId().split("/_history")[0];
+			codesTxt.put(system, entry.getValue());
+		}
+		String tmpUrl = url;
+		if (tmpUrl==null || tmpUrl.isEmpty()) {
+			tmpUrl = srvURL + "/ValueSet/" + UUID.randomUUID().toString();
 		}
 
-		@Override
-		public void interceptResponse(IHttpResponse theResponse) throws IOException {
-			UUID uniqueId = uniqueIdThreadLocal.get();
-			uniqueIdThreadLocal.remove();
-			log.debug("\n==== RESPONSE ===");
-			log.debug("Unique ID: " + uniqueId);
-			log.debug("" + theResponse.getStatus());
-			log.debug("================\n");
+		return insertVS(tc, null, tmpUrl, PublicationStatus.ACTIVE, name, null, codesTxt);
+	}
+
+	public String insertCM(String name, final String url, MetadataResource mrSource, MetadataResource mrTarget, Map<String, String> sourceToTargetCodes) {
+
+		ConceptMap conceptMap = new ConceptMap();
+
+		String tmpUrl = url;
+		if (tmpUrl==null || tmpUrl.isEmpty()) {
+			tmpUrl = srvURL + "/ConceptMap/" + UUID.randomUUID().toString();
+		}
+		
+		conceptMap.setUrl(tmpUrl);
+
+		String systemSource = mrSource.getId().split("/_history")[0];
+		String systemTarget = mrTarget.getId().split("/_history")[0];
+
+		// set source and target uri
+		conceptMap.setSource(new IdType(systemSource));
+		conceptMap.setTarget(new IdType(systemTarget));
+
+		// add concept mappings
+		ConceptMap.ConceptMapGroupComponent group = conceptMap.addGroup();
+		group.setSource(systemSource);
+		group.setTarget(systemTarget);
+
+		for (Entry<String, String> entry:sourceToTargetCodes.entrySet()) {
+			group.addElement().setCode(entry.getKey()).addTarget().setCode(entry.getValue());		
+		}
+		
+		// set other relevant details
+		conceptMap.setStatus(PublicationStatus.ACTIVE);
+		conceptMap.setDate(new Date());
+		
+		conceptMap.setName(name);
+		conceptMap.setDate(new Date());
+
+		List<IBaseResource> resourceList = new ArrayList<>();
+		resourceList.add(conceptMap);
+		ArrayList<IBaseResource> resources = (ArrayList) tc.transaction().withResources(resourceList).execute();
+		String out = ((ConceptMap)resources.get(0)).getId();
+		return out.split("/_history")[0];
+	}
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	//									CUSTOM: SUBSCRIPTION
+	///////////////////////////////////////////////////////////////////////////////////////////////
+
+	public void manageSubscription(SubscriptionEnum s, SubscriptionStatus subscriptionStatus, String url) {
+		String criteria = s.getRisorsa() + "?status=" + s.getCriteria();
+		Subscription existingSubscription = findSubscriptionForCriteria(tc, criteria);
+		if (existingSubscription != null) {
+			updateSubscription(tc, existingSubscription, subscriptionStatus, url);
+		} else {
+			Subscription subscription = buildSubscription(tc, s.getRisorsa(), s.getCriteria(), url, subscriptionStatus);
+			createSubscription(tc, subscription);
 		}
 	}
 
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	//									CUSTOM: DELETE METADATA RESOURCE
+	///////////////////////////////////////////////////////////////////////////////////////////////
+
+	public void deleteVS(String id) {
+		delete(tc, id, ValueSet.class);
+	}
+
+	public void deleteCS(String id) {
+		delete(tc, id, CodeSystem.class);
+	}
+
+	public void deleteCM(String id) {
+		delete(tc, id, ConceptMap.class);
+	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	//									CUSTOM: DICTIONARY PULL
+	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	public ResultPushEnum handlePullMetadataResource(final String content) {
 		ResultPushEnum out = null;
 		try {
-			MetadataResource mr = FHIRUtility.fromContentToMetadataResource(terminologyClient.getFhirContext(), content);
-			if (!existMetadataResource(mr)) {
-				if (storeMetadataResource(mr)) {
+			MetadataResource mr = FHIRUtility.fromContentToMetadataResource(tc.getFhirContext(), content);
+			if (!existMetadataResource(tc, mr)) {
+				if (storeMetadataResource(tc, mr)) {
 					out = ResultPushEnum.SAVED;
 				}
 			} else {
@@ -551,18 +407,5 @@ public class TerminologyClient {
 		
 		return out;
 	}
-
-	private boolean storeMetadataResource(MetadataResource mr) {
-		return terminologyClient.create().resource(mr).execute().getId().getValue()!=null;
-	}
-
-	private boolean existMetadataResource(MetadataResource mr) {
-
-		Bundle response = terminologyClient.search().forResource(mr.getClass())
-				.where(new StringClientParam("url").matches().value(mr.getUrl()))
-				.and(new StringClientParam("version").matches().value(mr.getVersion())).returnBundle(Bundle.class)
-				.execute();            
-		return response.getEntry()!=null && !response.getEntry().isEmpty();
-	}
-
+	
 }
