@@ -1,6 +1,7 @@
 package it.finanze.sanita.fse2.ms.srvquery.client.impl;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -288,12 +289,43 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		return out;
 	}
 	
+	public CodeDTO translate(String system, String code, MetadataResource source, MetadataResource target) {
+
+		IBaseParameters params = ParametersUtil.newInstance(tc.getFhirContext());
+
+		String targetID = target.getId().split("/_history")[0];
+		String sourceID = source.getId().split("/_history")[0];
+
+		ParametersUtil.addParameterToParametersUri(tc.getFhirContext(), params, "source", sourceID);
+		ParametersUtil.addParameterToParametersUri(tc.getFhirContext(), params, "target", targetID);
+		ParametersUtil.addParameterToParametersString(tc.getFhirContext(), params, "code", code);
+		ParametersUtil.addParameterToParametersUri(tc.getFhirContext(), params, "system", system);
+
+		IBaseParameters output = tc
+				.operation()
+				.onType("ConceptMap")
+				.named("translate")
+				.withParameters(params)
+				.execute();
+
+		Parameters pars = (Parameters) output;
+		CodeDTO out = null;
+		for (ParametersParameterComponent ppc:pars.getParameter()) {
+			if (ppc.getName().equalsIgnoreCase("match")) {
+				Coding coding = (Coding) ppc.getPart().get(0).getValue();
+				out = new CodeDTO(coding.getCode(), null, coding.getSystem());
+				break;
+			}
+		}
+		return out;
+	}
+	
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	//											CUSTOM: INSERT
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	public String insertCS(String oid, String name, String version, List<CodeDTO> codes) {
-		return insertCS(tc, null, PublicationStatus.DRAFT, CodeSystemContentMode.COMPLETE, oid, name, version, codes);
+		return insertCS(tc, null, PublicationStatus.DRAFT, CodeSystemContentMode.FRAGMENT, oid, name, version, codes);
 	}
 
 	public String insertVS(String name, final String url, Map<MetadataResource, List<CodeDTO>> codes) {
@@ -389,6 +421,7 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		ResultPushEnum out = null;
 		try {
 			MetadataResource mr = FHIRUtility.fromContentToMetadataResource(tc.getFhirContext(), content);
+			mr.setStatus(PublicationStatus.DRAFT);
 			if (!existMetadataResource(tc, mr)) {
 				if (storeMetadataResource(tc, mr)) {
 					out = ResultPushEnum.SAVED;
