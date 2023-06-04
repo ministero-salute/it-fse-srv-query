@@ -1,7 +1,6 @@
 package it.finanze.sanita.fse2.ms.srvquery.client.impl;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +16,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
+import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
@@ -29,6 +29,7 @@ import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.UriClientParam;
 import ca.uhn.fhir.util.ParametersUtil;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
@@ -83,6 +84,25 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	public List<CodeSystem> searchModifiedCodeSystem(Date start) {
 		return searchModified(tc, start, CodeSystem.class);
 	}
+	
+	public CodeSystem getCodeSystemVersionByIdAndDate(String id, Date date) {
+        CodeSystem out = null;
+        Bundle resultBundle = tc
+            .search()
+            .forResource(CodeSystem.class)
+            .where(CodeSystem.RES_ID.exactly().code(id))
+            .and(new DateClientParam("_lastUpdated").beforeOrEquals().millis(date))
+            .sort().descending("_lastUpdated")
+            .returnBundle(Bundle.class)
+            .execute();
+
+        List<Bundle.BundleEntryComponent> entries = resultBundle.getEntry();
+        if (!entries.isEmpty()) {
+            out = (CodeSystem) entries.get(0).getResource();
+        }
+        return out;
+    }
+
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	//									SVCM: Expand Value Set [ITI-97]
@@ -382,6 +402,23 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		String out = ((ConceptMap)resources.get(0)).getId();
 		return out.split("/_history")[0];
 	}
+	
+	///////////////////////////////////////////////////////////////////////////////////////////////
+	//											CUSTOM: UPDATE
+	///////////////////////////////////////////////////////////////////////////////////////////////
+
+	public void updateCS(String id, List<CodeDTO> append) {
+		CodeSystem cs = tc.read().resource(CodeSystem.class).withId(id).execute();
+		if(cs == null) throw new IllegalArgumentException(String.format("The CS with id %s doesn't exists", id));
+		for (CodeDTO code: append) {
+			ConceptDefinitionComponent cdc = new ConceptDefinitionComponent();
+			cdc.setDisplay(code.getDisplay());
+			cdc.setCode(code.getCode());
+			cs.getConcept().add(cdc);
+		}
+		tc.update().resource(cs).execute();
+	}
+
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	//									CUSTOM: SUBSCRIPTION
 	///////////////////////////////////////////////////////////////////////////////////////////////

@@ -150,7 +150,7 @@ public class FHIRClient {
 
 	}
 
-
+/*
 	private Parameters translateCodeOperation(Parameters params) {
 		//		Class<?> conceptMapClass = client.getFhirContext().getResourceDefinition("ConceptMap").getImplementingClass();
 		return client
@@ -163,7 +163,7 @@ public class FHIRClient {
 				.execute();
 	}
 
-
+*/
 	public DocumentReference getDocumentReferenceBundle(final String masterIdentifier) {
 		DocumentReference output = null;
 		try {
@@ -190,7 +190,7 @@ public class FHIRClient {
 				.where(DocumentReference.IDENTIFIER.exactly().identifier(searchParameter)).returnBundle(Bundle.class).execute();
 	}
 
-
+/*
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	// READ METADATA RESOURCE
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -552,6 +552,6 @@ public class FHIRClient {
 		}
 		return out;
 	}
-
+*/
 
 }

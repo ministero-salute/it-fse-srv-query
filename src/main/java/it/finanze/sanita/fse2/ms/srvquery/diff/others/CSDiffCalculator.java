@@ -3,6 +3,7 @@ package it.finanze.sanita.fse2.ms.srvquery.diff.others;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
+import it.finanze.sanita.fse2.ms.srvquery.client.impl.TerminologyClient;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.r4.model.Bundle;
@@ -24,22 +25,21 @@ public class CSDiffCalculator {
 
             String server = "http://localhost:8080/fhir/";
 
-            FHIRClient fhir = new FHIRClient(server, "admin", "admin");
-            IGenericClient client = FHIRR4Helper.createClient(server, "admin", "admin");
+            TerminologyClient fhir = new TerminologyClient(server, "admin", "admin");
 
             Date lastUpdate = Date.from(LocalDateTime.of(
                 2023, 5, 30, 12, 3, 0
             ).toInstant(ZoneOffset.ofHours(2)));
 
-            Pair<Date, Map<String, Map<String, List<String>>>> tNull = createChangeset(fhir, client, null);
-            Pair<Date, Map<String, Map<String, List<String>>>> t0 = createChangeset(fhir, client, lastUpdate);
+            Pair<Date, Map<String, Map<String, List<String>>>> tNull = createChangeset(fhir, null);
+            Pair<Date, Map<String, Map<String, List<String>>>> t0 = createChangeset(fhir, lastUpdate);
 
             printChangeset(tNull);
             printChangeset(t0);
         }
 
     @NotNull
-    public static Pair<Date, Map<String, Map<String, List<String>>>> createChangeset(FHIRClient fhir, IGenericClient client, Date lastUpdate) {
+    public static Pair<Date, Map<String, Map<String, List<String>>>> createChangeset(TerminologyClient fhir, Date lastUpdate) {
         // Pair containing lastUpdate (Date) and a mapping with each changed code system and the operation to perform
         Pair<Date, Map<String, Map<String, List<String>>>> alignment = Pair.of(lastUpdate, new HashMap<>());
         // Find code systems modified since that time (if null, should get everything)
@@ -52,7 +52,7 @@ public class CSDiffCalculator {
         for (String system : systems) {
             // Obtain Map<OperationToPerform, CodesAffected> (if null, nothing changed)
             Map<String, List<String>> codes = new CSDiffCalculator().calculateCodeSystemUpdates(
-                client,
+            	fhir,
                 system,
                 lastUpdate
             );
@@ -100,28 +100,6 @@ public class CSDiffCalculator {
         }
     }
 
-    private CodeSystem getCodeSystemLastVersion(IGenericClient client, String id) {
-        return client.read().resource(CodeSystem.class).withId(id).execute();
-    }
-
-    private CodeSystem getCodeSystemVersionByIdAndDate(IGenericClient client, String id, Date date) {
-        CodeSystem out = null;
-        Bundle resultBundle = client
-            .search()
-            .forResource(CodeSystem.class)
-            .where(CodeSystem.RES_ID.exactly().code(id))
-            .and(new DateClientParam("_lastUpdated").beforeOrEquals().millis(date))
-            .sort().descending("_lastUpdated")
-            .returnBundle(Bundle.class)
-            .execute();
-
-        List<Bundle.BundleEntryComponent> entries = resultBundle.getEntry();
-        if (!entries.isEmpty()) {
-            out = (CodeSystem) entries.get(0).getResource();
-        }
-        return out;
-    }
-
     private List<String> getCodeList(CodeSystem codeSystem) {
         List<String> codes = new ArrayList<>();
         if (codeSystem!=null && codeSystem.hasConcept()) {
@@ -132,7 +110,7 @@ public class CSDiffCalculator {
         return codes;
     }
 
-    public Map<String, List<String>> calculateCodeSystemUpdates(IGenericClient client, String id, Date date) {
+    public Map<String, List<String>> calculateCodeSystemUpdates(TerminologyClient client, String id, Date date) {
         Map<String, List<String>> codes;
         if(date != null) {
             codes = calculateCodeSystemUpdatesWithDate(client, id, date);
@@ -142,14 +120,14 @@ public class CSDiffCalculator {
         return codes;
     }
 
-    public Map<String, List<String>> calculateCodeSystemUpdatesWithDate(IGenericClient client, String id, Date date) {
+    public Map<String, List<String>> calculateCodeSystemUpdatesWithDate(TerminologyClient client, String id, Date date) {
         Map<String, List<String>> out;
         // Old version of CodeSystem
-        CodeSystem oldCS = getCodeSystemVersionByIdAndDate(client, id, date);
+        CodeSystem oldCS = client.getCodeSystemVersionByIdAndDate(id, date);
         List<String> codesOldCS = getCodeList(oldCS);
 
         // Last version of CodeSystem
-        CodeSystem lastCS = getCodeSystemLastVersion(client, id);
+        CodeSystem lastCS = client.readCS(id);
         List<String> codesLastCS = getCodeList(lastCS);
 
         // Codes to ADD: present in the last version but not in previous version
@@ -171,9 +149,9 @@ public class CSDiffCalculator {
         return out;
     }
 
-    public Map<String, List<String>> calculateCodeSystemUpdatesNoDate(IGenericClient client, String id) {
+    public Map<String, List<String>> calculateCodeSystemUpdatesNoDate(TerminologyClient client, String id) {
         // Last version of CodeSystem
-        CodeSystem lastCS = getCodeSystemLastVersion(client, id);
+        CodeSystem lastCS = client.readCS(id);
         List<String> codesLastCS = getCodeList(lastCS);
 
         Map<String, List<String>> out = new HashMap<>();
