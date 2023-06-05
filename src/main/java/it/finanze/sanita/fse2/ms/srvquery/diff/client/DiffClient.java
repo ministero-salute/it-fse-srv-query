@@ -1,12 +1,10 @@
 package it.finanze.sanita.fse2.ms.srvquery.diff.client;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.MetadataResource;
-import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.*;
 
 import java.util.Date;
+import java.util.Map;
 
 import static ca.uhn.fhir.rest.api.CacheControlDirective.noCache;
 import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffUtils.mapResourcesAs;
@@ -22,7 +20,11 @@ public class DiffClient {
         this.client = createClient(uri, user, pwd);
     }
 
-    public DiffResult findByLastUpdate(Date lastUpdate, Class<? extends MetadataResource> clazz) {
+    public Map<String, DiffOpType> getChangesetCS(Date lastUpdate) {
+        return findByLastUpdate(lastUpdate, CodeSystem.class).changeset();
+    }
+
+    private DiffResult findByLastUpdate(Date lastUpdate, Class<? extends MetadataResource> clazz) {
         DiffResult out;
         if(lastUpdate == null) {
             out = findAny(clazz);

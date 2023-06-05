@@ -11,7 +11,7 @@ public class DiffResult {
 
     private final Date lastUpdate;
 
-    private final Map<String, DiffOpType> ids;
+    private final Map<String, DiffOpType> changeset;
 
     public Date currentTime() {
         return currentTime;
@@ -21,12 +21,11 @@ public class DiffResult {
         return lastUpdate;
     }
 
-    public List<String> ids() {
-        return new ArrayList<>(ids.keySet());
+    public Map<String, DiffOpType> changeset() {
+        return new HashMap<>(changeset);
     }
 
-    public Map<String, DiffOpType> mapping() {
-        return new HashMap<>(ids);
+    public boolean isEmpty() {
+        return changeset.isEmpty();
     }
-
 }

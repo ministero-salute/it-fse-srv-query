@@ -73,6 +73,7 @@ public final class DiffUtils {
             if(res != null) {
                 // Get id
                 String id = asId(res);
+                // Register operation type
                 map.putIfAbsent(id, type);
                 // If we reached the POST operation of a DELETED resource
                 if(map.get(id) == DELETE && type == INSERT) {
