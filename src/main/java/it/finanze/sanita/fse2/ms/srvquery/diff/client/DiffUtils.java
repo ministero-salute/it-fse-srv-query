@@ -75,13 +75,23 @@ public final class DiffUtils {
                 String id = asId(res);
                 map.putIfAbsent(id, type);
                 // If we reached the POST operation of a DELETED resource
-                if(map.get(id) == DELETE && type == INSERT && lastUpdate != null) {
+                if(map.get(id) == DELETE && type == INSERT) {
                     // Retrieve creation date
                     Date insertionDate = res.getMeta().getLastUpdated();
                     // If defined and deleted in between the lastUpdate, throw it away
                     if(insertionDate.after(lastUpdate)) {
                         // Remove it
                         map.remove(id);
+                    }
+                }
+                // If we reached the POST operation of an UPDATED resource
+                else if(map.get(id) == UPDATE && type == INSERT) {
+                    // Retrieve creation date
+                    Date insertionDate = res.getMeta().getLastUpdated();
+                    // If defined and updated in between the lastUpdate, define as INSERT instead of UPDATE
+                    if(insertionDate.after(lastUpdate)) {
+                        // Replace it
+                        map.replace(id, INSERT);
                     }
                 }
             } else {

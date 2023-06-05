@@ -229,6 +229,30 @@ class DiffClientTest extends AbstractTestResources {
         assertTrue(ids.isEmpty(), "Expecting no ids from an empty server");
     }
 
+    @Test
+    @DisplayName("Last update is not null then add/remove items in-between the time-range")
+    public void resourceIsCreatedAndUpdated() {
+        // To insert
+        CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
+        // Verify emptiness
+        List<String> ids = client.findByLastUpdate(null, CodeSystem.class).ids();
+        assertTrue(ids.isEmpty(), "Expecting no ids from an empty server");
+        // Get time
+        Date now = getCurrentTime();
+        // Insert CS
+        String gender = crud.createResource(cs[0]);
+        // Now update it
+        CSBuilder builder = CSBuilder.from(crud.readResource(gender, CodeSystem.class));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Verify again
+        DiffResult res = client.findByLastUpdate(now, CodeSystem.class);
+        ids = res.ids();
+        Map<String, DiffOpType> map = res.mapping();
+        assertTrue(ids.contains(gender), "Expected gender id not found after findByLastUpdate(t0)");
+        assertEquals(INSERT, map.get(gender), "Expected and insert type for created and updated only files (t0)");
+    }
+
     @AfterAll
     public void teardown() {
         client.resetFhir();
