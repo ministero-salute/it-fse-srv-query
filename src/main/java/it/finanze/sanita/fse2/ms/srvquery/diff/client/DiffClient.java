@@ -14,6 +14,8 @@ import static org.springframework.http.HttpMethod.POST;
 
 public class DiffClient {
 
+    private static final int CHUNK_SIZE = 1;
+
     private final IGenericClient client;
 
     public DiffClient(String uri, String user, String pwd) {
@@ -41,6 +43,7 @@ public class DiffClient {
             .forResource(clazz)
             .cacheControl(noCache())
             .returnBundle(Bundle.class)
+            .count(CHUNK_SIZE)
             .execute();
         // Get current time
         Date currentTime = bundle.getMeta().getLastUpdated();
@@ -60,6 +63,7 @@ public class DiffClient {
             .returnBundle(Bundle.class)
             .cacheControl(noCache())
             .since(lastUpdate)
+            .count(CHUNK_SIZE)
             .execute();
         // Get current time
         Date currentTime = bundle.getMeta().getLastUpdated();
