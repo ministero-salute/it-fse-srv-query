@@ -11,7 +11,7 @@ import org.junit.jupiter.api.*;
 import java.util.Date;
 import java.util.Map;
 
-import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffOpType.INSERT;
+import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffOpType.*;
 import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffUtils.getCurrentTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -35,6 +35,9 @@ class DiffClientTest extends AbstractTestResources {
         client.resetFhir();
     }
 
+    /**
+     * Verify an empty server doesn't return any changeset
+     */
     @Test
     @DisplayName("Last update is null and no items")
     public void emptyServer() {
@@ -42,6 +45,11 @@ class DiffClientTest extends AbstractTestResources {
         assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
     }
 
+    /**
+     * Verify the flow null->INSERT->null->INSERT
+     * At first changeset is expected one insertion,
+     * at the second one are expected two insertions
+     */
     @Test
     @DisplayName("Last update is null then add items")
     public void emptyServerThenAddMore() {
@@ -69,6 +77,11 @@ class DiffClientTest extends AbstractTestResources {
         assertEquals(cs.length, changes.size(), "Expected size doesn't match current one");
     }
 
+    /**
+     * Verify the flow null->INSERT+DELETE returns an empty changeset
+     * because if an element has been inserted and deleted before an alignment
+     * there is no point into returning it
+     */
     @Test
     @DisplayName("Last update is null then add/remove items")
     public void emptyServerThenAddRemove() {
@@ -90,6 +103,12 @@ class DiffClientTest extends AbstractTestResources {
         assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
     }
 
+    /**
+     * Verify the flow T0->INSERT->T1->INSERT->T2->NO-OP
+     * does return an appropriate changeset reflecting
+     * t0 as two insertions, t1 as one insertion and t2 as no changes
+     * (because it's updated)
+     */
     @Test
     @DisplayName("Last update is not null then add items")
     public void dateWithAddItems() {
@@ -148,6 +167,10 @@ class DiffClientTest extends AbstractTestResources {
         assertEquals(cs.length, changes.size(), "Expected size doesn't match current one");
     }
 
+    /**
+     * Verify the flow T0->INSERT->T1->UPDATE->T2-DELETE
+     * At t0 it's expected one insertion, at t2 one update and then at t3 one delete
+     */
     @Test
     @DisplayName("Last update is not null then add/remove items")
     public void dateWithAddRemoveItems() {
@@ -168,6 +191,7 @@ class DiffClientTest extends AbstractTestResources {
         changes = client.getChangesetCS(now);
         assertTrue(changes.containsKey(gender), "Expected gender id not found after findByLastUpdate(t0)");
         assertEquals(1, changes.size(), "Expected size doesn't match");
+        assertEquals(INSERT, changes.get(gender), "Expected gender as an insert op after findByLastUpdate(t0)");
         // ================
         // ===== <T1> =====
         // ================
@@ -181,6 +205,7 @@ class DiffClientTest extends AbstractTestResources {
         // Verify again
         changes = client.getChangesetCS(now);
         assertTrue(changes.containsKey(gender), "Expected gender id not found after findByLastUpdate(t1)");
+        assertEquals(UPDATE, changes.get(gender), "Expected gender as an update op after findByLastUpdate(t1)");
         assertEquals(1, changes.size(), "Expected size doesn't match");
         // ================
         // ===== <T2> =====
@@ -194,6 +219,7 @@ class DiffClientTest extends AbstractTestResources {
         changes = client.getChangesetCS(now);
         assertTrue(changes.containsKey(gender), "Expected gender id not found after findByLastUpdate(t2)");
         assertEquals(1, changes.size(), "Expected size doesn't match");
+        assertEquals(DELETE, changes.get(gender), "Expected gender as a delete op after findByLastUpdate(t2)");
         // ================
         // ===== <T3> =====
         // ================
@@ -206,8 +232,13 @@ class DiffClientTest extends AbstractTestResources {
         assertTrue(changes.isEmpty(), "Expecting no ids from an updated server (t3)");
     }
 
+    /**
+     * Verify the flow t0->INSERT+DELETE returns an empty changeset
+     * because if an element has been inserted and deleted before an alignment
+     * there is no point into returning it
+     */
     @Test
-    @DisplayName("Last update is not null then add/remove items in-between the time-range")
+    @DisplayName("Last update is not null then add/remove item in-between the time-range")
     public void omitCreatedAndRemovedResources() {
         // To insert
         CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
@@ -225,8 +256,14 @@ class DiffClientTest extends AbstractTestResources {
         assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
     }
 
+    /**
+     * Verify the flow t0->INSERT+UPDATE returns an insert operation
+     * because if an element has been inserted and updated before an alignment
+     * there is no point into making a diff if it wasn't on the server in the first place
+     * just treat it as an insertion
+     */
     @Test
-    @DisplayName("Last update is not null then add/remove items in-between the time-range")
+    @DisplayName("Last update is not null then add/update item in-between the time-range")
     public void resourceIsCreatedAndUpdated() {
         // To insert
         CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
