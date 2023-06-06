@@ -284,6 +284,22 @@ class DiffClientTest extends AbstractTestResources {
         assertEquals(INSERT, changes.get(gender), "Expected and insert type for created and updated only files (t0)");
     }
 
+    @Test
+    @DisplayName("Check hyper-test cs")
+    public void resourceIsBig() {
+        // To insert
+        CodeSystem[] cs = new CodeSystem[]{createHyperTestCS()};
+        // Verify emptiness
+        Map<String, DiffOpType> changes = client.getChangesetCS(null);
+        assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
+        // Insert CS
+        String gender = crud.createResource(cs[0]);
+        // Verify again
+        changes = client.getChangesetCS(null);
+        assertTrue(changes.containsKey(gender), "Expected hyper id not found after findByLastUpdate(null)");
+        assertEquals(INSERT, changes.get(gender), "Expected hyper as an insert op after findByLastUpdate(null)");
+    }
+
     @AfterAll
     public void teardown() {
         client.resetFhir();

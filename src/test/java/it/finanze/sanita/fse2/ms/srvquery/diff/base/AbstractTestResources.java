@@ -18,4 +18,13 @@ public abstract class AbstractTestResources {
         builder.addCodes("G", "Gold");
         return builder.build();
     }
+
+    protected CodeSystem createHyperTestCS() {
+        CSBuilder builder = new CSBuilder("2.16.840.1.113883.5.3");
+        for (int i = 0; i < 1000; ++i) {
+            builder.addCodes("code" + i, "dis" + i);
+        }
+        return builder.build();
+    }
+
 }
