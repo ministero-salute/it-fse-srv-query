@@ -3,6 +3,8 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.utility;
 
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -47,11 +49,21 @@ public class FHIRR4Helper {
 	}
 
 	public static IGenericClient createClient(final String serverURL, final String username, final String pwd) {
+	    int timeoutMS = 600000;
+		RequestConfig requestConfig = RequestConfig.custom()
+	            .setConnectTimeout(timeoutMS)
+	            .setSocketTimeout(timeoutMS)
+	            .build();
+		
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create().setDefaultRequestConfig(requestConfig);
+        context.getRestfulClientFactory().setHttpClient(httpClientBuilder.build());
+
 		IGenericClient client = context.newRestfulGenericClient(serverURL);
 		client.registerInterceptor(new BasicAuthInterceptor(username, pwd));
+		
 		return client;
 	}
-
+	
 	public static FhirContext getContext() {
 		return context;
 	}
