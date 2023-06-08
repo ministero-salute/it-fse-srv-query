@@ -2,6 +2,7 @@ package it.finanze.sanita.fse2.ms.srvquery.controller.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class TerminologyCTL extends AbstractCTL implements ITerminologyCTL {
         }
         converted.addAll(converter.listToCsv(resources));
 
-        return new CodeSystemsResDTO(converted.stream().map(x->x.getMessage()).toList());
+        return new CodeSystemsResDTO(converted.stream().map(x->x.getMessage()).collect(Collectors.toList()));
     }
     
 }
