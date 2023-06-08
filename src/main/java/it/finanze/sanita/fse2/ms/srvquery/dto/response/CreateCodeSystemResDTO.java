@@ -11,7 +11,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class CreateCodeSystemResDTO extends ResponseDTO{
+	
 	private String id;
+	
 	
 	public CreateCodeSystemResDTO(final LogTraceInfoDTO traceInfo, final String inID) {
 		super(traceInfo);

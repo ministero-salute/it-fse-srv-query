@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MetadataResource;
@@ -28,8 +29,10 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.r4.model.ValueSet;
 
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.UriClientParam;
 import ca.uhn.fhir.util.ParametersUtil;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
@@ -407,16 +410,50 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	//											CUSTOM: UPDATE
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
-	public void updateCS(String id, List<CodeDTO> append) {
-		CodeSystem cs = tc.read().resource(CodeSystem.class).withId(id).execute();
-		if(cs == null) throw new IllegalArgumentException(String.format("The CS with id %s doesn't exists", id));
-		for (CodeDTO code: append) {
-			ConceptDefinitionComponent cdc = new ConceptDefinitionComponent();
-			cdc.setDisplay(code.getDisplay());
-			cdc.setCode(code.getCode());
-			cs.getConcept().add(cdc);
+	public void updateCS(CodeSystem cs, List<CodeDTO> append) {
+	    for (CodeDTO code : append) {
+	        if (!isConceptAlreadyExists(cs, code.getCode())) {
+	            ConceptDefinitionComponent cdc = new ConceptDefinitionComponent();
+	            cdc.setDisplay(code.getDisplay());
+	            cdc.setCode(code.getCode());
+	            cs.getConcept().add(cdc);
+	        }
+	    }
+	    tc.update().resource(cs).execute();
+	}
+
+	private boolean isConceptAlreadyExists(CodeSystem cs, String code) {
+	    for (ConceptDefinitionComponent concept : cs.getConcept()) {
+	        if (concept.getCode().equals(code)) {
+	            return true; // Concept with the same code already exists
+	        }
+	    }
+	    return false; // Concept with the same code doesn't exist
+	}
+	
+	public CodeSystem getCodeSystemById(final String id) {
+		CodeSystem out = null;
+		Bundle results = tc
+				.search()
+				.forResource(CodeSystem.class).cacheControl(CacheControlDirective.noCache())
+				.where(CodeSystem.IDENTIFIER.exactly().identifier(id))
+				.returnBundle(Bundle.class)
+				.execute();
+
+		// Process the search results
+		if (results != null && results.hasEntry()) {
+			// Access the code system resources
+			for (Bundle.BundleEntryComponent entry : results.getEntry()) {
+				if (entry.getResource() instanceof CodeSystem) {
+					out = (CodeSystem) entry.getResource();
+					break;
+				}
+			}
 		}
-		tc.update().resource(cs).execute();
+		
+		return out;
+
+//		return tc.read().resource(CodeSystem.class).withId(id).execute();
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////

@@ -146,6 +146,7 @@ public abstract class AbstractTerminologyClient {
 		codeSystem.setVersion(ver);
 		codeSystem.setStatus(ps);
 		codeSystem.setContent(cscm);
+		codeSystem.setCopyright("Copyright");
 
 		if (oid!=null && !oid.isEmpty()) {
 			List<Identifier> ids = new ArrayList<>();

@@ -7,6 +7,8 @@ import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.MetadataResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.SystemUrlDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.request.CreateCodeSystemReqDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.CreateCodeSystemResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.SubscriptionEnum;
 
 public interface ITerminologySRV {
@@ -16,4 +18,6 @@ public interface ITerminologySRV {
 	String insertCodeSystem(String name, String oid, String version, List<CodeDTO> codes);
 	
 	List<MetadataResourceDTO> manageMetadataResource(List<SystemUrlDTO> list);
+	
+	CreateCodeSystemResDTO manageCodeSystem(CreateCodeSystemReqDTO dto);
 }

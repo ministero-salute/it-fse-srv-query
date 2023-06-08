@@ -21,8 +21,10 @@ public class CodeSystemCTL extends AbstractCTL implements ICodeSystemCTL {
 	@Override
 	public ResponseEntity<CreateCodeSystemResDTO> insertCodeSystem(CreateCodeSystemReqDTO dto) {
 		LogTraceInfoDTO traceInfoDTO = getLogTraceInfo();
-		String msg = terminologySRV.insertCodeSystem(dto.getName(), dto.getOid(), dto.getVersion(), dto.getCodes());		
-		return new ResponseEntity<>(new CreateCodeSystemResDTO(traceInfoDTO, msg), HttpStatus.OK);
+		CreateCodeSystemResDTO out = terminologySRV.manageCodeSystem(dto);
+		out.setSpanID(traceInfoDTO.getSpanID());
+		out.setTraceID(traceInfoDTO.getTraceID());
+		return new ResponseEntity<>(out, HttpStatus.OK);
 	}
 
 }

@@ -3,6 +3,8 @@ package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,8 @@ import it.finanze.sanita.fse2.ms.srvquery.config.TerminologyCFG;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.MetadataResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.SystemUrlDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.request.CreateCodeSystemReqDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.CreateCodeSystemResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.ResultPushEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.SubscriptionEnum;
 import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
@@ -65,6 +69,34 @@ public class TerminologySRV implements ITerminologySRV {
 	public String insertCodeSystem(String name, String oid, String version, List<CodeDTO> codes) {
         TerminologyClient terminologyClient = getTerminologyClient();
         return terminologyClient.insertCS(oid, name, version, codes);
+	}
+	
+	
+	@Override
+	public CreateCodeSystemResDTO manageCodeSystem(final CreateCodeSystemReqDTO dto) {
+		CreateCodeSystemResDTO out = new CreateCodeSystemResDTO();
+		
+		CodeSystem codeSystem = getCodeSystemById("urn:oid:"+dto.getOid());
+		
+		if(codeSystem==null) {
+			String id = insertCodeSystem(dto.getName(), dto.getOid(), dto.getVersion(), dto.getCodes()); 
+			out.setId(id);
+		} else if(PublicationStatus.DRAFT.equals(codeSystem.getStatusElement().getValue())) {
+			 updateCodeSystem(codeSystem, dto.getCodes());
+			 out.setId(codeSystem.getId());
+		}
+		
+		return out;
+	}
+	
+	private CodeSystem getCodeSystemById(final String oid) {
+		TerminologyClient terminologyClient = getTerminologyClient();
+		return terminologyClient.getCodeSystemById(oid);
+	}
+	
+	private void updateCodeSystem(final CodeSystem codeSystem, List<CodeDTO> codes) {
+		TerminologyClient terminologyClient = getTerminologyClient();
+		terminologyClient.updateCS(codeSystem, codes);
 	}
 	
 	@Override
