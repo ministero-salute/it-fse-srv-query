@@ -19,10 +19,10 @@ import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 @RestController
 public class TerminologyCTL extends AbstractCTL implements ITerminologyCTL {
 
-    @Autowired
+//    @Autowired
     private TerminologyClient terminology;
 
-    @Autowired
+//    @Autowired
     private ConverterClient converter;
 
     @Override
