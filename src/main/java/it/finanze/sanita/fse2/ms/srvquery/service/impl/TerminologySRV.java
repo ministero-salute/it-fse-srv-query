@@ -1,5 +1,7 @@
 package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,18 +10,25 @@ import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import it.finanze.sanita.fse2.ms.srvquery.client.IConverterClient;
 import it.finanze.sanita.fse2.ms.srvquery.client.IWebScrapingClient;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.TerminologyClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.TerminologyCFG;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.MetadataResourceDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.RequestDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.SystemUrlDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.CreateCodeSystemReqDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.ConversionResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.CreateCodeSystemResDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.UploadResponseDTO;
+import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.ResultPushEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.SubscriptionEnum;
 import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
+import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,6 +43,9 @@ public class TerminologySRV implements ITerminologySRV {
 	private TerminologyCFG terminologyCFG;
 
 	private TerminologyClient terminologyClient;
+	
+	@Autowired
+    private IConverterClient converter;
 	
 	@Autowired
 	private IWebScrapingClient client;
@@ -118,4 +130,31 @@ public class TerminologySRV implements ITerminologySRV {
 		return out;
 	}
 	
+	@Override
+	public UploadResponseDTO uploadTerminology(FormatEnum formatEnum,RequestDTO creationInfo, MultipartFile file) throws IOException {
+		log.info("Upload terminology with format:" + formatEnum);
+		TerminologyClient terminologyClient = getTerminologyClient();
+		
+		String fhirBundle = new String(file.getBytes() ,StandardCharsets.UTF_8);
+		if(!FormatEnum.FHIR_R4_XML.equals(formatEnum)) {
+			ConversionResponseDTO res = converter.callConvertToFhirJson(formatEnum,creationInfo,file);
+			fhirBundle = res.getResult();
+		}
+		
+		CodeSystem codeSystem = FHIRR4Helper.deserializeResource(CodeSystem.class, fhirBundle, true);
+		String location = terminologyClient.transaction(codeSystem);
+		
+		UploadResponseDTO out = new UploadResponseDTO();
+		out.setLocation(location);
+		out.setInsertedItems(codeSystem.getConcept().size());
+		return out;
+	}
+
+	
+	@Override
+	public boolean isPresent(String oid, String version) {
+		TerminologyClient terminologyClient = getTerminologyClient();
+		CodeSystem codeSystem = terminologyClient.getCodeSystemByIdAndVersion(oid, version);
+		return codeSystem != null;
+	}
 }

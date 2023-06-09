@@ -1,42 +1,43 @@
 package it.finanze.sanita.fse2.ms.srvquery.controller.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.io.IOException;
 
-import org.hl7.fhir.r4.model.CodeSystem;
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import it.finanze.sanita.fse2.ms.srvquery.client.impl.ConverterClient;
-import it.finanze.sanita.fse2.ms.srvquery.client.impl.TerminologyClient;
 import it.finanze.sanita.fse2.ms.srvquery.controller.AbstractCTL;
 import it.finanze.sanita.fse2.ms.srvquery.controller.ITerminologyCTL;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.CodeSystemsResDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.ConversionResponseDTO;
-import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
+import it.finanze.sanita.fse2.ms.srvquery.dto.RequestDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.GetResponseDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.UploadResponseDTO;
+import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
+import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
 
 @RestController
 public class TerminologyCTL extends AbstractCTL implements ITerminologyCTL {
 
-//    @Autowired
-    private TerminologyClient terminology;
+	@Autowired
+	private ITerminologySRV terminologySRV;
 
-//    @Autowired
-    private ConverterClient converter;
 
-    @Override
-    public CodeSystemsResDTO getActiveCodeSystems() {
-        List<CodeSystem> list = terminology.searchActiveCodeSystem();
-        List<String> resources = new ArrayList<>();
-        List<ConversionResponseDTO> converted = new ArrayList<>();
+	@Override
+	public UploadResponseDTO uploadTerminology(FormatEnum format, RequestDTO creationInfo, MultipartFile file, HttpServletRequest request) throws IOException {
+		LogTraceInfoDTO traceInfoDTO = getLogTraceInfo();
+		UploadResponseDTO out = terminologySRV.uploadTerminology(format,creationInfo,file);
+		out.setSpanID(traceInfoDTO.getSpanID());
+		out.setTraceID(traceInfoDTO.getTraceID());
+		return out;
+	}
 
-        for(CodeSystem codeSystem: list) {
-            resources.add(FHIRR4Helper.serializeResource(codeSystem, true, false, false));
-        }
-        converted.addAll(converter.listToCsv(resources));
 
-        return new CodeSystemsResDTO(converted.stream().map(x->x.getMessage()).collect(Collectors.toList()));
-    }
-    
+	@Override
+	public GetResponseDTO getTerminology(String oid, String version, HttpServletRequest request) {
+		boolean isPresent = terminologySRV.isPresent(oid, version);
+		return new GetResponseDTO(getLogTraceInfo(), isPresent);
+	}
+
 }

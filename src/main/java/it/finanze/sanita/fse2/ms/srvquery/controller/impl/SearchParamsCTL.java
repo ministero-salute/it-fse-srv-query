@@ -13,11 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @Slf4j
 public class SearchParamsCTL extends AbstractCTL implements ISearchParamsCTL {
-
 	
 	@Autowired
 	private IFHIRSRV fhirSRV;
-	
 	
 	@Override
 	public SearchParameterResponseDTO getAll() {

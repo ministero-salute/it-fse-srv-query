@@ -8,18 +8,20 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.Bundle.BundleType;
+import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MetadataResource;
@@ -32,13 +34,14 @@ import org.hl7.fhir.r4.model.ValueSet;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.UriClientParam;
 import ca.uhn.fhir.util.ParametersUtil;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.ValidateCodeResultDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.ResultPushEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.SubscriptionEnum;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
 import lombok.extern.slf4j.Slf4j;
@@ -432,28 +435,35 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	}
 	
 	public CodeSystem getCodeSystemById(final String id) {
-		CodeSystem out = null;
-		Bundle results = tc
-				.search()
-				.forResource(CodeSystem.class).cacheControl(CacheControlDirective.noCache())
-				.where(CodeSystem.IDENTIFIER.exactly().identifier(id))
-				.returnBundle(Bundle.class)
-				.execute();
+		return getCodeSystemByIdAndVersion(id, null);
+	}
+	
+	public CodeSystem getCodeSystemByIdAndVersion(final String id, final String version) {
+	    CodeSystem out = null;
+	    IQuery<IBaseBundle> entry = tc
+	            .search()
+	            .forResource(CodeSystem.class)
+	            .cacheControl(CacheControlDirective.noCache())
+	            .where(CodeSystem.IDENTIFIER.exactly().identifier("urn:oid:"+id));
 
-		// Process the search results
-		if (results != null && results.hasEntry()) {
-			// Access the code system resources
-			for (Bundle.BundleEntryComponent entry : results.getEntry()) {
-				if (entry.getResource() instanceof CodeSystem) {
-					out = (CodeSystem) entry.getResource();
-					break;
-				}
-			}
-		}
-		
-		return out;
+	    if (version != null) {
+	        entry = entry.and(CodeSystem.VERSION.exactly().identifier(version));
+	    }
 
-//		return tc.read().resource(CodeSystem.class).withId(id).execute();
+	    Bundle results = entry.returnBundle(Bundle.class).execute();
+
+	    // Process the search results
+	    if (results != null && results.hasEntry()) {
+	        // Access the code system resources
+	        for (Bundle.BundleEntryComponent bundleEntry : results.getEntry()) {
+	            if (bundleEntry.getResource() instanceof CodeSystem) {
+	                out = (CodeSystem) bundleEntry.getResource();
+	                break;
+	            }
+	        }
+	    }
+
+	    return out;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -515,4 +525,32 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		return out;
 	}
 	
+	
+	public String transaction(CodeSystem codeSystem) {
+		String location = "";
+		try {
+			Bundle transactionBundle = new Bundle();
+			transactionBundle.setType(BundleType.TRANSACTION);
+
+			// Aggiungi l'operazione per creare il CodeSystem al Bundle di transazione
+			Bundle.BundleEntryComponent codeSystemEntry = new Bundle.BundleEntryComponent();
+			codeSystemEntry.setResource(codeSystem);
+			codeSystemEntry.getRequest().setMethod(HTTPVerb.POST);
+			codeSystemEntry.getRequest().setUrl("CodeSystem");
+			transactionBundle.addEntry(codeSystemEntry);
+
+			Bundle response = tc.transaction().withBundle(transactionBundle).execute();
+			// Process the search results
+			if (response != null && response.hasEntry()) {
+				location = response.getEntry().get(0).getResponse().getLocation();
+			}
+		} catch (Exception ex) {
+			log.error("Error while performing transaction: ", ex);
+			throw new BusinessException(ex.getMessage());
+		}
+		return location;
+	}
+
+
+
 }

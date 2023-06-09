@@ -123,7 +123,6 @@ public abstract class AbstractTerminologyClient {
 
 	protected boolean storeMetadataResource(IGenericClient tc, MetadataResource mr) {
 		IIdType id = tc.create().resource(mr).execute().getId();
-		System.out.println(id);
 		return id.getValue()!=null;
 	}
 

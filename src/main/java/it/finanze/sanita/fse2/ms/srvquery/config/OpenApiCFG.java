@@ -7,12 +7,14 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -105,5 +107,13 @@ public class OpenApiCFG {
 	    try { return clazz.cast(schema); }
 	    catch(ClassCastException e) { return null; }
 	}
+	
+	@Bean
+    public MappingJackson2HttpMessageConverter octetStreamJsonConverter() {
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setSupportedMediaTypes(
+                Collections.singletonList(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM));
+        return converter;
+    }
 
 }

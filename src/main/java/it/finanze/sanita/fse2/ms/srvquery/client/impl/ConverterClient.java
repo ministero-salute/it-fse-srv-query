@@ -1,40 +1,58 @@
 package it.finanze.sanita.fse2.ms.srvquery.client.impl;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
-import it.finanze.sanita.fse2.ms.srvquery.client.GenericClient;
+import it.finanze.sanita.fse2.ms.srvquery.client.IConverterClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.MsUrlCFG;
+import it.finanze.sanita.fse2.ms.srvquery.dto.RequestDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.ConversionResponseDTO;
+import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
 
-public class ConverterClient extends GenericClient {
-    
-    @Autowired
+@Component
+public class ConverterClient implements IConverterClient {
+
+	@Autowired
 	private MsUrlCFG msUrlCFG;
 
-    @Autowired
+	@Autowired
 	private RestTemplate restTemplate;
 
-    public List<ConversionResponseDTO> listToCsv(List<String> resources) {
-        List<ConversionResponseDTO> converted = new ArrayList<>();
+	@Override
+	public ConversionResponseDTO callConvertToFhirJson(FormatEnum format, RequestDTO creationInfo, MultipartFile file) throws IOException {
 
-        for(String resource : resources) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+	    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+	    body.add("creationInfo", creationInfo);
+	    body.add("file", new ByteArrayResource(file.getBytes()) {
+	        @Override
+	        public String getFilename() {
+	            return file.getOriginalFilename();
+	        }
+	    });
 
-            final String url = msUrlCFG.getMsConverterHost() + "/v1/from-fhir-json/to/{format}";
-            ResponseEntity<ConversionResponseDTO> response = restTemplate.postForEntity(url, resource, ConversionResponseDTO.class, headers);
-        
-            converted.add(response.getBody());
-        }
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+	    HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
 
-        return converted;
-    }
-    
+	    String url = msUrlCFG.getMsConverterHost() + "/v1/metadata-resource/from/"+format.toString()+"/to-fhir-json";
+	    ConversionResponseDTO out = null;
+	    try {
+	    	out = restTemplate.postForObject(url, entity, ConversionResponseDTO.class);
+	    } catch (ResourceAccessException ex) {
+			//TODO - Gestisci il timeout
+		}
+	    
+	    return out;
+	}
 }
