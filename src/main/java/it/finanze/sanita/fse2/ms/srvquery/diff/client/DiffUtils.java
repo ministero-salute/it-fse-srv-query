@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffOpType.*;
+import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffResource.NO_VERSION;
 import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_NEXT;
 import static org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb;
@@ -20,8 +21,8 @@ public final class DiffUtils {
 
     public static final int STANDARD_OFFSET = 2;
 
-    public static Map<String, DiffOpType> mapResourcesAsHistory(IGenericClient client, Bundle bundle, Date lastUpdate) {
-        Map<String, DiffOpType> resources = new HashMap<>();
+    public static Map<String, DiffResource> mapResourcesAsHistory(IGenericClient client, Bundle bundle, Date lastUpdate) {
+        Map<String, DiffResource> resources = new HashMap<>();
         while (bundle != null) {
             // Add resources
             mapResources(bundle, resources, null, lastUpdate);
@@ -36,8 +37,8 @@ public final class DiffUtils {
         return resources;
     }
 
-    public static Map<String, DiffOpType> mapResourcesAs(IGenericClient client, Bundle bundle, HttpMethod method,  Date lastUpdate) {
-        Map<String, DiffOpType> resources = new HashMap<>();
+    public static Map<String, DiffResource> mapResourcesAs(IGenericClient client, Bundle bundle, HttpMethod method,  Date lastUpdate) {
+        Map<String, DiffResource> resources = new HashMap<>();
         while (bundle != null) {
             // Add resources
             mapResources(bundle, resources, method, lastUpdate);
@@ -52,14 +53,14 @@ public final class DiffUtils {
         return resources;
     }
 
-    private static void mapResources(Bundle bundle, Map<String, DiffOpType> map, HttpMethod op, Date lastUpdate) {
+    private static void mapResources(Bundle bundle, Map<String, DiffResource> map, HttpMethod op, Date lastUpdate) {
         // Retrieve entries
         List<BundleEntryComponent> resources = bundle.getEntry();
         // Iterate
         for (BundleEntryComponent entry : resources) {
             // Get resource
             Resource res = entry.getResource();
-            // Let me know the latest operation type
+            // Let me know the latest operation op
             HTTPVerb method = entry.getRequest().getMethod();
             // Obtain display value
             DiffOpType type;
@@ -73,10 +74,12 @@ public final class DiffUtils {
             if(res != null) {
                 // Get id
                 String id = asId(res);
-                // Register operation type
-                map.putIfAbsent(id, type);
+                // Get version
+                String version = asVersionId(res);
+                // Register operation op
+                map.putIfAbsent(id, new DiffResource(version, type));
                 // If we reached the POST operation of a DELETED resource
-                if(map.get(id) == DELETE && type == INSERT) {
+                if(map.get(id).op() == DELETE && type == INSERT) {
                     // Retrieve creation date
                     Date insertionDate = res.getMeta().getLastUpdated();
                     // If defined and deleted in between the lastUpdate, throw it away
@@ -86,19 +89,20 @@ public final class DiffUtils {
                     }
                 }
                 // If we reached the POST operation of an UPDATED resource
-                else if(map.get(id) == UPDATE && type == INSERT) {
+                else if(map.get(id).op() == UPDATE && type == INSERT) {
                     // Retrieve creation date
                     Date insertionDate = res.getMeta().getLastUpdated();
                     // If defined and updated in between the lastUpdate, define as INSERT instead of UPDATE
                     if(insertionDate.after(lastUpdate)) {
                         // Replace it
-                        map.replace(id, INSERT);
+                        String root = map.get(id).version();
+                        map.replace(id, new DiffResource(root, INSERT));
                     }
                 }
             } else {
                 // For deleted resource getResource() returns null,
                 // so we return the id from getFullUrl
-                map.putIfAbsent(asId(entry.getFullUrl()), type);
+                map.putIfAbsent(asId(entry.getFullUrl()), new DiffResource(NO_VERSION, type));
             }
         }
     }
@@ -110,6 +114,10 @@ public final class DiffUtils {
 
     public static String asId(IBaseResource res) {
         return res.getIdElement().getIdPart();
+    }
+
+    public static String asVersionId(IBaseResource res) {
+        return res.getMeta().getVersionId();
     }
 
     public static List<String> asId(List<Resource> res) {

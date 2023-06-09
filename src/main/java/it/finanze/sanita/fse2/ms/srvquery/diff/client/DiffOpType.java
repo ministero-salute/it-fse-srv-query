@@ -10,7 +10,7 @@ public enum DiffOpType {
     public static DiffOpType parseOpType(String method) {
         HttpMethod m = HttpMethod.resolve(method);
         if(m == null) {
-            throw new IllegalArgumentException("Unknown operation type: " + method);
+            throw new IllegalArgumentException("Unknown operation op: " + method);
         }
         DiffOpType op;
         switch (m) {
@@ -25,7 +25,7 @@ public enum DiffOpType {
                 op = DELETE;
                 break;
             default:
-                throw new IllegalArgumentException("Unsupported operation type: " + m.name());
+                throw new IllegalArgumentException("Unsupported operation op: " + m.name());
         }
         return op;
     }
