@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import it.finanze.sanita.fse2.ms.srvquery.controller.AbstractCTL;
 import it.finanze.sanita.fse2.ms.srvquery.controller.ITerminologyCTL;
 import it.finanze.sanita.fse2.ms.srvquery.dto.RequestDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.DelDocsResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.GetResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.UploadResponseDTO;
@@ -45,8 +46,9 @@ public class TerminologyCTL extends AbstractCTL implements ITerminologyCTL {
 
 
 	@Override
-	public void deleteTerminology(String idResource, HttpServletRequest request) {
-		terminologySRV.deleteById(idResource);	
+	public DelDocsResDTO deleteTerminology(String idResource, HttpServletRequest request) {
+		terminologySRV.deleteById(idResource);
+		return new DelDocsResDTO(getLogTraceInfo());
 	}
 
 }

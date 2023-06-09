@@ -31,5 +31,5 @@ public interface ITerminologySRV {
 	
 	GetResponseDTO isPresent(String oid, String version);
 	
-	boolean deleteById(String id) ;
+	void deleteById(String id);
 }

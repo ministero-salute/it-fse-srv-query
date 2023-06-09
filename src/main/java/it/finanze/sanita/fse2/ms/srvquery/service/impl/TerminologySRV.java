@@ -137,7 +137,7 @@ public class TerminologySRV implements ITerminologySRV {
 		TerminologyClient terminologyClient = getTerminologyClient();
 		
 		String fhirBundle = new String(file.getBytes() ,StandardCharsets.UTF_8);
-		if(!FormatEnum.FHIR_R4_XML.equals(formatEnum)) {
+		if(!FormatEnum.FHIR_R4_JSON.equals(formatEnum)) {
 			ConversionResponseDTO res = converter.callConvertToFhirJson(formatEnum,creationInfo,file);
 			fhirBundle = res.getResult();
 		}
@@ -158,14 +158,14 @@ public class TerminologySRV implements ITerminologySRV {
 		TerminologyClient terminologyClient = getTerminologyClient();
 		CodeSystem codeSystem = terminologyClient.getCodeSystemByIdAndVersion(oid, version);
 		out.setPresent(codeSystem!=null);
+		out.setCounter(codeSystem!=null ? codeSystem.getCount() : null);
 		out.setId(codeSystem!=null ? codeSystem.getIdElement().getIdPartAsLong().toString() : null);
 		return out;
 	}
 	
 	@Override
-	public boolean deleteById(String id) {
+	public void deleteById(String id) {
 		TerminologyClient terminologyClient = getTerminologyClient();
 		terminologyClient.deleteCS(id);
-		return true;
 	}
 }

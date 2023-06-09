@@ -11,13 +11,14 @@ import lombok.NoArgsConstructor;
 public class GetResponseDTO extends ResponseDTO {
 
 	private boolean isPresent;
-	
 	private String id;
+	private Integer counter;
 	
-	public GetResponseDTO(final LogTraceInfoDTO traceInfo, final boolean inIsPresent, final String inId) {
+	public GetResponseDTO(final LogTraceInfoDTO traceInfo, final boolean inIsPresent, final String inId, final Integer inCounter) {
 		super(traceInfo);
 		isPresent = inIsPresent;
 		id = inId;
+		counter = inCounter;
 	}
 	
 }
