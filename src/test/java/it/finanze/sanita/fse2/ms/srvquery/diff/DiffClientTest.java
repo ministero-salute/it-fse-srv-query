@@ -284,6 +284,9 @@ class DiffClientTest extends AbstractTestResources {
         assertEquals(INSERT, changes.get(gender), "Expected and insert type for created and updated only files (t0)");
     }
 
+    /**
+     * Given a big resource, data should be omitted from the changeset response
+     */
     @Test
     @DisplayName("Check hyper-test cs")
     public void resourceIsBig() {
@@ -295,7 +298,7 @@ class DiffClientTest extends AbstractTestResources {
         // Insert CS
         String gender = crud.createResource(cs[0]);
         // Verify again
-        changes = client.getChangesetCS(null);
+        changes = client.getChangesetCS(null, true);
         assertTrue(changes.containsKey(gender), "Expected hyper id not found after findByLastUpdate(null)");
         assertEquals(INSERT, changes.get(gender), "Expected hyper as an insert op after findByLastUpdate(null)");
     }
