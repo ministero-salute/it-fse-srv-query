@@ -26,11 +26,11 @@ public class DiffClient {
         this.client = createClient(uri, user, pwd);
     }
 
-    public Map<String, DiffOpType> getChangesetCS(Date lastUpdate, boolean debug) {
+    public Map<String, DiffResource> getChangesetCS(Date lastUpdate, boolean debug) {
         return findByLastUpdate(lastUpdate, CodeSystem.class, debug).changeset();
     }
 
-    public Map<String, DiffOpType> getChangesetCS(Date lastUpdate) {
+    public Map<String, DiffResource> getChangesetCS(Date lastUpdate) {
         return findByLastUpdate(lastUpdate, CodeSystem.class, false).changeset();
     }
 
@@ -45,7 +45,7 @@ public class DiffClient {
     }
 
     private DiffResult findAny(Class<? extends MetadataResource> clazz, boolean debug) {
-        // Execute query by resource type and last-update date
+        // Execute query by resource op and last-update date
         Bundle bundle = client
             .search()
             .forResource(clazz)
@@ -67,7 +67,7 @@ public class DiffClient {
     }
 
     private DiffResult findModifiedByDate(Date lastUpdate, Class<? extends MetadataResource> clazz, boolean debug) {
-        // Execute query by resource type and last-update date
+        // Execute query by resource op and last-update date
         Bundle bundle = client
             .history()
             .onType(clazz)
