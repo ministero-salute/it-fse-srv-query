@@ -18,7 +18,7 @@ import static org.springframework.http.HttpMethod.POST;
 
 public class DiffClient {
 
-    private static final int CHUNK_SIZE = 1;
+    private static final int CHUNK_SIZE = 10;
 
     private final IGenericClient client;
 
