@@ -36,8 +36,17 @@ public class TerminologyCTL extends AbstractCTL implements ITerminologyCTL {
 
 	@Override
 	public GetResponseDTO getTerminology(String oid, String version, HttpServletRequest request) {
-		boolean isPresent = terminologySRV.isPresent(oid, version);
-		return new GetResponseDTO(getLogTraceInfo(), isPresent);
+		LogTraceInfoDTO trace = getLogTraceInfo();
+		GetResponseDTO out = terminologySRV.isPresent(oid, version);
+		out.setSpanID(trace.getSpanID());
+		out.setTraceID(trace.getTraceID());
+		return out;
+	}
+
+
+	@Override
+	public void deleteTerminology(String idResource, HttpServletRequest request) {
+		terminologySRV.deleteById(idResource);	
 	}
 
 }

@@ -23,6 +23,7 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.SystemUrlDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.CreateCodeSystemReqDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.ConversionResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.CreateCodeSystemResDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.GetResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.UploadResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.ResultPushEnum;
@@ -152,9 +153,19 @@ public class TerminologySRV implements ITerminologySRV {
 
 	
 	@Override
-	public boolean isPresent(String oid, String version) {
+	public GetResponseDTO isPresent(String oid, String version) {
+		GetResponseDTO out = new GetResponseDTO(); 
 		TerminologyClient terminologyClient = getTerminologyClient();
 		CodeSystem codeSystem = terminologyClient.getCodeSystemByIdAndVersion(oid, version);
-		return codeSystem != null;
+		out.setPresent(codeSystem!=null);
+		out.setId(codeSystem!=null ? codeSystem.getIdElement().getIdPartAsLong().toString() : null);
+		return out;
+	}
+	
+	@Override
+	public boolean deleteById(String id) {
+		TerminologyClient terminologyClient = getTerminologyClient();
+		terminologyClient.deleteCS(id);
+		return true;
 	}
 }
