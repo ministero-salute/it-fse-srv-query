@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -444,7 +445,8 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	            .search()
 	            .forResource(CodeSystem.class)
 	            .cacheControl(CacheControlDirective.noCache())
-	            .where(CodeSystem.IDENTIFIER.exactly().identifier("urn:oid:"+id));
+	            .where(CodeSystem.IDENTIFIER.exactly().identifier("urn:oid:"+id))
+				.summaryMode(SummaryEnum.TRUE);
 
 	    if (version != null) {
 	        entry = entry.and(CodeSystem.VERSION.exactly().identifier(version));
