@@ -116,17 +116,30 @@ public class TerminologySRV implements ITerminologySRV {
 	public List<MetadataResourceDTO> manageMetadataResource(final List<SystemUrlDTO> list) {
 		TerminologyClient terminologyClient = getTerminologyClient();
 		List<MetadataResourceDTO> out = new ArrayList<>();		
-		
+
 		for(SystemUrlDTO entry : list) {
 			ResultPushEnum esito = null;
+			
+			if(entry.isToDelete()) {
+				CodeSystem codeSystem = getCodeSystemById(entry.getSystem());
+				if(codeSystem!=null) {
+					terminologyClient.deleteCS(codeSystem.getIdElement().getIdPartAsLong().toString());
+					esito = ResultPushEnum.DELETED;
+				} else {
+					esito = ResultPushEnum.RESOURCE_NOT_FOUND;
+				}
+				out.add(new MetadataResourceDTO(entry.getSystem(), entry.getUrl(),esito));
+				continue;
+			}
+			
 			String res = client.webScraper(entry.getUrl());
 			if(StringUtility.isNullOrEmpty(res)) {
 				esito = ResultPushEnum.RESOURCE_NOT_FOUND;
 				out.add(new MetadataResourceDTO(entry.getSystem(),entry.getUrl(),  esito));
 				continue;
 			}
-			 esito = terminologyClient.handlePullMetadataResource(res);
-			 out.add(new MetadataResourceDTO(entry.getSystem(), entry.getUrl(),esito));
+			esito = terminologyClient.handlePullMetadataResource(res);
+			out.add(new MetadataResourceDTO(entry.getSystem(), entry.getUrl(),esito));
 		}
 		return out;
 	}

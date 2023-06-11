@@ -5,5 +5,6 @@ public enum ResultPushEnum {
 	RESOURCE_NOT_FOUND,
 	ALREADY_PRESENT,
 	SAVED,
+	DELETED,
 	ERROR
 }
