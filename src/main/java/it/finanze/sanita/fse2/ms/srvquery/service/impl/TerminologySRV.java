@@ -138,7 +138,7 @@ public class TerminologySRV implements ITerminologySRV {
 				out.add(new MetadataResourceDTO(entry.getSystem(),entry.getUrl(),  esito));
 				continue;
 			}
-			esito = terminologyClient.handlePullMetadataResource(res);
+			 esito = terminologyClient.handlePullMetadataResource(res, entry.getForceDraft());
 			out.add(new MetadataResourceDTO(entry.getSystem(), entry.getUrl(),esito));
 		}
 		return out;
