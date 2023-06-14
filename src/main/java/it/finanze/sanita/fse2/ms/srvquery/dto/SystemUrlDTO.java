@@ -18,6 +18,5 @@ public class SystemUrlDTO {
 	
 	private Boolean forceDraft;
  
-	private Boolean forceDraft;
 
 }
