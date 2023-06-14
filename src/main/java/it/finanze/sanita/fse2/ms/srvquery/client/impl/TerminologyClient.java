@@ -503,11 +503,11 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	//									CUSTOM: DICTIONARY PULL
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
-	public ResultPushEnum handlePullMetadataResource(final String content, final boolean forceDraft) {
+	public ResultPushEnum handlePullMetadataResource(final String content, final Boolean forceDraft) {
 		ResultPushEnum out = null;
 		try {
 			MetadataResource mr = FHIRUtility.fromContentToMetadataResource(tc.getFhirContext(), content);
-			if(forceDraft) {
+			if (forceDraft!=null && forceDraft) {
 				mr.setStatus(PublicationStatus.DRAFT);
 			}
 			if (!existMetadataResource(tc, mr)) {
