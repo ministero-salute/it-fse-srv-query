@@ -127,9 +127,19 @@ public abstract class AbstractTerminologyClient {
 	}
 
 	protected boolean existMetadataResource(IGenericClient tc, MetadataResource mr) {
+		String identifier = "";
+		String version = mr.getVersion();
+		if(mr instanceof CodeSystem) {
+			CodeSystem cs = (CodeSystem)mr;
+			identifier = cs.getIdentifier().get(0).getId();
+		} else if(mr instanceof ValueSet) {
+			ValueSet vs = (ValueSet)mr;
+			identifier = vs.getIdentifier().get(0).getId();
+		}
+		
 		Bundle response = tc.search().forResource(mr.getClass())
-				.where(new StringClientParam("url").matches().value(mr.getUrl()))
-				.and(new StringClientParam("version").matches().value(mr.getVersion())).returnBundle(Bundle.class)
+				.where(new StringClientParam("identifier").matches().value(identifier))
+				.and(new StringClientParam("version").matches().value(version)).returnBundle(Bundle.class)
 				.execute();            
 		return response.getEntry()!=null && !response.getEntry().isEmpty();
 	}
