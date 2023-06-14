@@ -155,7 +155,7 @@ class DiffClientTest extends AbstractTestResources {
 
     /**
      * Verify the flow T0->INSERT->T1->UPDATE->T2-DELETE
-     * At t0 it's expected one insertion, at t2 one update and then at t3 one delete
+     * At t0 it's expected one insertion, at t1 one update and then at t2 one delete
      */
     @Test
     @DisplayName("Last update is not null then add/remove items")
@@ -213,6 +213,130 @@ class DiffClientTest extends AbstractTestResources {
         changes = client.getChangesetCS(now);
         // Verify emptiness
         assertEmptyServer(changes, "t3");
+    }
+
+    /**
+     * Verify the flow T0->INSERT(1)->T1->UPDATE(2)+UPDATE(3)+UPDATE(4)->T2-DELETE(4)
+     * At t0 it's expected one insertion, at t1 multiple updates and then at t2 one delete
+     */
+    @Test
+    @DisplayName("Last update is not null then add/update/delete items")
+    public void dateWithUpdatedThenDeleteItems() {
+        // ================
+        // ===== <T0> =====
+        // ================
+        // => Check emptiness, then add one resource and verify
+        // To insert
+        CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
+        // Retrieve current time
+        Date now = getCurrentTime();
+        // Verify emptiness
+        Map<String, DiffResource> changes = client.getChangesetCS(now);
+        assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
+        // Insert CS
+        String gender = crud.createResource(cs[0]);
+        // Verify again
+        changes = client.getChangesetCS(now);
+        assertResource(changes, "gender", gender, "1", INSERT, "t0");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T1> =====
+        // ================
+        // => Update one resource and verify
+        // Retrieve current time
+        now = getCurrentTime();
+        // Update CS
+        CSBuilder builder = CSBuilder.from(crud.readResource(gender, CodeSystem.class));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        builder = CSBuilder.from(crud.readResource(gender, CodeSystem.class));
+        builder.addCodes("T", "Test");
+        crud.updateResource(builder.build());
+        builder = CSBuilder.from(crud.readResource(gender, CodeSystem.class));
+        builder.addCodes("X", "XTest");
+        crud.updateResource(builder.build());
+        // Verify again
+        changes = client.getChangesetCS(now);
+        assertResource(changes, "gender", gender, "4", UPDATE, "t1");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T2> =====
+        // ================
+        // => Delete one resource and verify
+        // Retrieve current time
+        now = getCurrentTime();
+        // Delete CS
+        crud.deleteResource(gender, CodeSystem.class);
+        // Verify again
+        changes = client.getChangesetCS(now);
+        assertResource(changes, "gender", gender, NO_VERSION, DELETE, "t2");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T3> =====
+        // ================
+        // => Given an updated server, verify no ids returns
+        // Retrieve current time
+        now = getCurrentTime();
+        // Verify again
+        changes = client.getChangesetCS(now);
+        // Verify emptiness
+        assertEmptyServer(changes, "t3");
+    }
+
+    /**
+     * Verify the flow T0->INSERT(1)+UPDATE(2)+UPDATE(3)->T1->EMPTY
+     * At t0 it's expected one insertion, at t1 one insert and multiple updates
+     * and then at t2 one must be synchronised
+     */
+    @Test
+    @DisplayName("Last update is not null then add/update items")
+    public void dateWithUpdatedItems() {
+        // ================
+        // ===== <T0> =====
+        // ================
+        // => Check emptiness, then add one resource and verify
+        // To insert
+        CodeSystem[] cs = new CodeSystem[]{createGenderTestCS()};
+        // Retrieve current time
+        Date now = getCurrentTime();
+        // Verify emptiness
+        Map<String, DiffResource> changes = client.getChangesetCS(now);
+        assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
+        // ================
+        // ===== <T1> =====
+        // ================
+        // Retrieve current time
+        now = getCurrentTime();
+        // Insert CS
+        String gender = crud.createResource(cs[0]);
+        // Verify again
+        changes = client.getChangesetCS(now);
+        assertResource(changes, "gender", gender, "1", INSERT, "t0");
+        assertResourceSize(1, changes);
+        // Update CS
+        CSBuilder builder = CSBuilder.from(crud.readResource(gender, CodeSystem.class));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        builder = CSBuilder.from(crud.readResource(gender, CodeSystem.class));
+        builder.addCodes("T", "Test");
+        crud.updateResource(builder.build());
+        builder = CSBuilder.from(crud.readResource(gender, CodeSystem.class));
+        builder.addCodes("X", "XTest");
+        crud.updateResource(builder.build());
+        // Verify again
+        changes = client.getChangesetCS(now);
+        assertResource(changes, "gender", gender, "4", INSERT, "t1");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T2> =====
+        // ================
+        // => Given an updated server, verify no ids returns
+        // Retrieve current time
+        now = getCurrentTime();
+        // Verify again
+        changes = client.getChangesetCS(now);
+        // Verify emptiness
+        assertEmptyServer(changes, "t2");
     }
 
     /**
