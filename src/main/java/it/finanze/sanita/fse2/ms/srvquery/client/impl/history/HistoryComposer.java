@@ -1,7 +1,6 @@
 package it.finanze.sanita.fse2.ms.srvquery.client.impl.history;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Resource;
@@ -13,7 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO.NO_VERSION;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO.*;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO.HistoryDetailsDTO.*;
 import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.*;
 import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.INSERT;
 import static org.hl7.fhir.r4.model.Bundle.*;
@@ -22,7 +22,7 @@ public class HistoryComposer {
 
     private final IGenericClient client;
     private Bundle bundle;
-    private final Map<String, HistoryResourceDTO> map;
+    private final Map<String, HistoryDetailsDTO> map;
 
     public HistoryComposer(IGenericClient client, Bundle bundle) {
         this.client = client;
@@ -30,7 +30,7 @@ public class HistoryComposer {
         this.map = new HashMap<>();
     }
 
-    public Map<String, HistoryResourceDTO> compose(@Nullable HttpMethod method, Date lastUpdate) {
+    public Map<String, HistoryDetailsDTO> compose(@Nullable HttpMethod method, Date lastUpdate) {
         // Iterate for each page of the bundle
         while (bundle != null) {
             // Add resources
@@ -77,7 +77,7 @@ public class HistoryComposer {
         if(insertionDate.after(lastUpdate)) {
             // Replace it
             String root = map.get(id).getVersion();
-            map.replace(id, new HistoryResourceDTO(root, INSERT));
+            map.replace(id, new HistoryDetailsDTO(root, INSERT));
         }
     }
 
@@ -96,14 +96,14 @@ public class HistoryComposer {
     }
 
     private void registerDeletedResIfAbsent(BundleEntryComponent entry, HistoryOperationEnum type) {
-        map.putIfAbsent(HistoryUtils.asId(entry.getFullUrl()), new HistoryResourceDTO(NO_VERSION, type));
+        map.putIfAbsent(HistoryUtils.asId(entry.getFullUrl()), new HistoryDetailsDTO(NO_VERSION, type));
     }
 
     private String registerResIfAbsent(Resource res, HistoryOperationEnum type) {
         // Get id
         String id = HistoryUtils.asId(res);
         // Register operation op
-        map.putIfAbsent(id, new HistoryResourceDTO(HistoryUtils.asVersionId(res), type));
+        map.putIfAbsent(id, new HistoryDetailsDTO(HistoryUtils.asVersionId(res), type));
         // Return id
         return id;
     }

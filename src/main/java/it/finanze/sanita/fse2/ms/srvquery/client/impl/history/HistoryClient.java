@@ -3,7 +3,6 @@ package it.finanze.sanita.fse2.ms.srvquery.client.impl.history;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.TerminologyCFG;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,6 +12,7 @@ import java.util.Map;
 
 import static ca.uhn.fhir.rest.api.CacheControlDirective.noCache;
 import static ca.uhn.fhir.rest.api.SummaryEnum.TRUE;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO.*;
 import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper.createClient;
 import static org.springframework.http.HttpMethod.POST;
 
@@ -34,7 +34,7 @@ public class HistoryClient {
         return findByLastUpdate(lastUpdate);
     }
 
-    public Map<String, HistoryResourceDTO> getHistoryMap(Date lastUpdate) {
+    public Map<String, HistoryDetailsDTO> getHistoryMap(Date lastUpdate) {
         return findByLastUpdate(lastUpdate).getHistory();
     }
 

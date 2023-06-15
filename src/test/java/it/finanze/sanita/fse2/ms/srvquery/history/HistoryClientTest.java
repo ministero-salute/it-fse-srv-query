@@ -2,7 +2,6 @@ package it.finanze.sanita.fse2.ms.srvquery.history;
 
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.HistoryClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.history.base.AbstractTestResources;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.FhirCrudClient;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.CSBuilder;
@@ -16,7 +15,8 @@ import java.util.Date;
 import java.util.Map;
 
 import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Profile.TEST;
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO.NO_VERSION;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO.*;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO.HistoryDetailsDTO.NO_VERSION;
 import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.*;
 import static it.finanze.sanita.fse2.ms.srvquery.client.impl.history.HistoryUtils.getCurrentTime;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -69,7 +69,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Insert CS
         String gender = crud.createResource(cs[0]);
         // Verify again
-        Map<String, HistoryResourceDTO> changes = client.getHistoryMap(null);
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(null);
         // Check
         assertResource(changes, "gender", gender, "1", INSERT);
         // Insert CS
@@ -97,7 +97,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Insert CS
         String gender = crud.createResource(cs[0]);
         // Verify again
-        Map<String, HistoryResourceDTO> changes = client.getHistoryMap(null);
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(null);
         assertResource(changes, "gender", gender, "1", INSERT);
         // Now remove it
         crud.deleteResource(gender, CodeSystem.class);
@@ -128,7 +128,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Insert CS
         String gender = crud.createResource(cs[0]);
         // Verify again
-        Map<String, HistoryResourceDTO> changes = client.getHistoryMap(now);
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
         assertResource(changes, "gender", gender, "1", INSERT, "t0");
         assertResourceSize(1, changes);
         // ================
@@ -179,7 +179,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Retrieve current time
         Date now = getCurrentTime();
         // Verify emptiness
-        Map<String, HistoryResourceDTO> changes = client.getHistoryMap(now);
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
         assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
         // Insert CS
         String gender = crud.createResource(cs[0]);
@@ -241,7 +241,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Retrieve current time
         Date now = getCurrentTime();
         // Verify emptiness
-        Map<String, HistoryResourceDTO> changes = client.getHistoryMap(now);
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
         assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
         // Insert CS
         String gender = crud.createResource(cs[0]);
@@ -310,7 +310,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Retrieve current time
         Date now = getCurrentTime();
         // Verify emptiness
-        Map<String, HistoryResourceDTO> changes = client.getHistoryMap(now);
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
         assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
         // ================
         // ===== <T1> =====
@@ -393,7 +393,7 @@ class HistoryClientTest extends AbstractTestResources {
         builder.addCodes("U", "Unknown");
         crud.updateResource(builder.build());
         // Verify again
-        Map<String, HistoryResourceDTO> changes = client.getHistoryMap(now);
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
         assertResource(changes, "gender", gender, "2", INSERT, "t0");
     }
 

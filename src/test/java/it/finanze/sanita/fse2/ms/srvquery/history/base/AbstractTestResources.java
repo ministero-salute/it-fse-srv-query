@@ -1,12 +1,12 @@
 package it.finanze.sanita.fse2.ms.srvquery.history.base;
 
 import it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.CSBuilder;
 import org.hl7.fhir.r4.model.CodeSystem;
 
 import java.util.Map;
 
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO.HistoryDetailsDTO;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,16 +27,16 @@ public abstract class AbstractTestResources {
         return builder.build();
     }
 
-    protected void assertEmptyServer(Map<String, HistoryResourceDTO> changes) {
+    protected void assertEmptyServer(Map<String, HistoryDetailsDTO> changes) {
         assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
     }
 
-    protected void assertEmptyServer(Map<String, HistoryResourceDTO> changes, String delta) {
+    protected void assertEmptyServer(Map<String, HistoryDetailsDTO> changes, String delta) {
         assertTrue(changes.isEmpty(), "Expecting no ids from server at " + delta);
     }
 
     protected void assertResource(
-        Map<String, HistoryResourceDTO> changes,
+        Map<String, HistoryDetailsDTO> changes,
         String name,
         String id,
         String version,
@@ -46,7 +46,7 @@ public abstract class AbstractTestResources {
     }
 
     protected void assertResource(
-        Map<String, HistoryResourceDTO> changes,
+        Map<String, HistoryDetailsDTO> changes,
         String name,
         String id,
         String version,
@@ -58,7 +58,7 @@ public abstract class AbstractTestResources {
         assertEquals(version, changes.get(id).getVersion(), format("Expected %s version doesn't match", name));
     }
 
-    protected void assertResourceSize(int size, Map<String, HistoryResourceDTO> changes) {
+    protected void assertResourceSize(int size, Map<String, HistoryDetailsDTO> changes) {
         assertEquals(size, changes.size(), "Expected size doesn't match current one");
     }
 
