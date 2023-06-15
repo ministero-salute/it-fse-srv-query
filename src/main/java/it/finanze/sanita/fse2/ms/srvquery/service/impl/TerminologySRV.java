@@ -11,8 +11,6 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,7 +31,6 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.UploadRespons
 import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.ResultPushEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.SubscriptionEnum;
-import it.finanze.sanita.fse2.ms.srvquery.enums.TypeEnum;
 import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
@@ -177,10 +174,14 @@ public class TerminologySRV implements ITerminologySRV {
 	}
 
 	@Override
-	public List<String> getIdOfActiveResource(Date lastUpdateDate) {
+	public List<String> getIdOfActiveResource(Date lastUpdateDate,boolean withoutCopyright) {
 		TerminologyClient terminologyClient = getTerminologyClient();
-		List<CodeSystem> codeSystems = terminologyClient.searchModifiedCodeSystem(lastUpdateDate);
-		return codeSystems.stream().map(e-> e.getIdElement().getIdPartAsLong().toString()).collect(Collectors.toList());
+		List<CodeSystem> codeSystems = terminologyClient.searchModifiedCodeSystem(lastUpdateDate,false);
+
+		return codeSystems.stream()
+				.filter(e -> Boolean.TRUE.equals(withoutCopyright) ? e.getCopyright() == null : true)
+				.map(e -> e.getIdElement().getIdPartAsLong().toString())
+				.collect(Collectors.toList());
 	}
 	
 	@Override
@@ -191,7 +192,7 @@ public class TerminologySRV implements ITerminologySRV {
 		String resource = FHIRR4Helper.serializeResource(codeSystem, true, true, true);
 
 		try {
-			String oid = "vi";
+			String oid = codeSystem.getIdentifier().get(0).getValue();
 			if(FormatEnum.FHIR_R4_JSON.equals(format)) {
 				out.setContent(resource.getBytes());
 				out.setOid(oid);

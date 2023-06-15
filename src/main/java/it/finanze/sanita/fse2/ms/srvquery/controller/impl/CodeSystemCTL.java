@@ -36,8 +36,8 @@ public class CodeSystemCTL extends AbstractCTL implements ICodeSystemCTL {
 	}
 
 	@Override
-	public GetActiveResDTO getActiveResource(Date lastUpdateDate,HttpServletRequest request) {
-		List<String> ids = terminologySRV.getIdOfActiveResource(lastUpdateDate);
+	public GetActiveResDTO getActiveResource(Date lastUpdateDate,Boolean withoutCopyright,HttpServletRequest request) {
+		List<String> ids = terminologySRV.getIdOfActiveResource(lastUpdateDate,withoutCopyright);
 		return new GetActiveResDTO(getLogTraceInfo(), ids);
 	}
 	 

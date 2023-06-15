@@ -63,7 +63,7 @@ public class ConverterClient implements IConverterClient {
 	    body.add("file", new ByteArrayResource(file) {
 	        @Override
 	        public String getFilename() {
-	            return "TestOid.json";
+	            return oid+".json";
 	        }
 	    });
 

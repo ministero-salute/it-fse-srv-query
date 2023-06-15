@@ -35,7 +35,7 @@ public interface ITerminologySRV {
 	
 	void deleteById(String id);
 	
-	List<String> getIdOfActiveResource(Date lastUpdateDate);
+	List<String> getIdOfActiveResource(Date lastUpdateDate,boolean withoutCopyright);
 	
 	GetResDTO export(String id, FormatEnum format);
 }

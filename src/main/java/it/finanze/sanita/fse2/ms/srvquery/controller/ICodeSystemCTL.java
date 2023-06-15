@@ -59,7 +59,8 @@ public interface ICodeSystemCTL {
     GetActiveResDTO getActiveResource(
     		@RequestParam(value="lastUpdateDate", required = false)
     		@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    		Date lastUpdateDate,HttpServletRequest request);
+    		Date lastUpdateDate, @RequestParam(value="withoutCopyright", required = false)
+    		Boolean withoutCopyright,HttpServletRequest request);
 
 
     /** 

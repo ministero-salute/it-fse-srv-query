@@ -6,14 +6,9 @@ package it.finanze.sanita.fse2.ms.srvquery.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import brave.Tracer;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.TranslateResponseDTO;
-import it.finanze.sanita.fse2.ms.srvquery.enums.LanguageEnum;
-import it.finanze.sanita.fse2.ms.srvquery.enums.TypeEnum; 
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO; 
 
 /**
- * 
- *
  *	Abstract controller.
  */
 public abstract class AbstractCTL {
