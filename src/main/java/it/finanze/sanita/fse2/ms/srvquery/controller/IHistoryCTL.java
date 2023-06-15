@@ -11,6 +11,7 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO;
 import it.finanze.sanita.fse2.ms.srvquery.validators.NoFutureDate;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -21,6 +22,7 @@ import static it.finanze.sanita.fse2.ms.srvquery.utility.RoutesUtility.*;
 import static org.springframework.format.annotation.DateTimeFormat.ISO.*;
 
 @Tag(name = API_HISTORY_TAG)
+@Validated
 public interface IHistoryCTL {
 
     @GetMapping(value = API_GET_HISTORY)
