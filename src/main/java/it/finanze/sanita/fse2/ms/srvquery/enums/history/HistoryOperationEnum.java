@@ -1,18 +1,18 @@
-package it.finanze.sanita.fse2.ms.srvquery.diff.client;
+package it.finanze.sanita.fse2.ms.srvquery.enums.history;
 
 import org.springframework.http.HttpMethod;
 
-public enum DiffOpType {
+public enum HistoryOperationEnum {
     INSERT,
     UPDATE,
     DELETE;
 
-    public static DiffOpType parseOpType(String method) {
+    public static HistoryOperationEnum parseHistoryOp(String method) {
         HttpMethod m = HttpMethod.resolve(method);
         if(m == null) {
             throw new IllegalArgumentException("Unknown operation op: " + method);
         }
-        DiffOpType op;
+        HistoryOperationEnum op;
         switch (m) {
             case POST:
                 op = INSERT;

@@ -1,4 +1,4 @@
-package it.finanze.sanita.fse2.ms.srvquery.diff.crud.dto;
+package it.finanze.sanita.fse2.ms.srvquery.history.crud.dto;
 
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Identifier;

@@ -1,8 +1,8 @@
-package it.finanze.sanita.fse2.ms.srvquery.diff.base;
+package it.finanze.sanita.fse2.ms.srvquery.history.base;
 
-import it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffOpType;
-import it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffResource;
-import it.finanze.sanita.fse2.ms.srvquery.diff.crud.dto.CSBuilder;
+import it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
+import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.CSBuilder;
 import org.hl7.fhir.r4.model.CodeSystem;
 
 import java.util.Map;
@@ -27,38 +27,38 @@ public abstract class AbstractTestResources {
         return builder.build();
     }
 
-    protected void assertEmptyServer(Map<String, DiffResource> changes) {
+    protected void assertEmptyServer(Map<String, HistoryResourceDTO> changes) {
         assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
     }
 
-    protected void assertEmptyServer(Map<String, DiffResource> changes, String delta) {
+    protected void assertEmptyServer(Map<String, HistoryResourceDTO> changes, String delta) {
         assertTrue(changes.isEmpty(), "Expecting no ids from server at " + delta);
     }
 
     protected void assertResource(
-        Map<String, DiffResource> changes,
+        Map<String, HistoryResourceDTO> changes,
         String name,
         String id,
         String version,
-        DiffOpType op
+        HistoryOperationEnum op
     ) {
        assertResource(changes, name, id, version, op, "lastUpdate=null");
     }
 
     protected void assertResource(
-        Map<String, DiffResource> changes,
+        Map<String, HistoryResourceDTO> changes,
         String name,
         String id,
         String version,
-        DiffOpType op,
+        HistoryOperationEnum op,
         String delta
     ) {
         assertTrue(changes.containsKey(id), format("Expected %s id not found after %s", name, delta));
-        assertEquals(op, changes.get(id).op(), format("Expected %s as an %s op after %s", name, op.name(), delta));
-        assertEquals(version, changes.get(id).version(), format("Expected %s version doesn't match", name));
+        assertEquals(op, changes.get(id).getOp(), format("Expected %s as an %s op after %s", name, op.name(), delta));
+        assertEquals(version, changes.get(id).getVersion(), format("Expected %s version doesn't match", name));
     }
 
-    protected void assertResourceSize(int size, Map<String, DiffResource> changes) {
+    protected void assertResourceSize(int size, Map<String, HistoryResourceDTO> changes) {
         assertEquals(size, changes.size(), "Expected size doesn't match current one");
     }
 

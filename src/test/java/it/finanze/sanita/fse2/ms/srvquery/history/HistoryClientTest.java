@@ -1,33 +1,43 @@
-package it.finanze.sanita.fse2.ms.srvquery.diff;
+package it.finanze.sanita.fse2.ms.srvquery.history;
 
-import it.finanze.sanita.fse2.ms.srvquery.diff.base.AbstractTestResources;
-import it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffClient;
-import it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffResource;
-import it.finanze.sanita.fse2.ms.srvquery.diff.crud.FhirCrudClient;
-import it.finanze.sanita.fse2.ms.srvquery.diff.crud.dto.CSBuilder;
+import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.HistoryClient;
+import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
+import it.finanze.sanita.fse2.ms.srvquery.history.base.AbstractTestResources;
+import it.finanze.sanita.fse2.ms.srvquery.history.crud.FhirCrudClient;
+import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.CSBuilder;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Date;
 import java.util.Map;
 
-import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffOpType.*;
-import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffResource.NO_VERSION;
-import static it.finanze.sanita.fse2.ms.srvquery.diff.client.DiffUtils.getCurrentTime;
+import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Profile.TEST;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO.NO_VERSION;
+import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.*;
+import static it.finanze.sanita.fse2.ms.srvquery.client.impl.history.HistoryUtils.getCurrentTime;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.*;
 
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+@ActiveProfiles(TEST)
 @TestInstance(PER_CLASS)
-class DiffClientTest extends AbstractTestResources {
+class HistoryClientTest extends AbstractTestResources {
 
-    private static final String BASE_URL = "http://localhost:8080/fhir/";
-
-    private final DiffClient client;
+    private final HistoryClient client;
     private final FhirCrudClient crud;
 
-    public DiffClientTest() {
-        this.client = new DiffClient(BASE_URL, "admin", "admin");
-        this.crud = new FhirCrudClient(BASE_URL, "admin", "admin");
+    public HistoryClientTest(@Autowired HistoryClient client, @Autowired FhirCFG fhir) {
+        this.client = client;
+        this.crud = new FhirCrudClient(
+            fhir.getFhirServerUrl(),
+            fhir.getFhirServerUser(),
+            fhir.getFhirServerPwd()
+        );
     }
 
     @BeforeEach
@@ -41,7 +51,7 @@ class DiffClientTest extends AbstractTestResources {
     @Test
     @DisplayName("Last update is null and no items")
     public void emptyServer() {
-        assertEmptyServer(client.getChangesetCS(null));
+        assertEmptyServer(client.getHistory(null));
     }
 
     /**
@@ -55,17 +65,17 @@ class DiffClientTest extends AbstractTestResources {
         // To insert
         CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
         // Verify emptiness
-        assertEmptyServer(client.getChangesetCS(null));
+        assertEmptyServer(client.getHistory(null));
         // Insert CS
         String gender = crud.createResource(cs[0]);
         // Verify again
-        Map<String, DiffResource> changes = client.getChangesetCS(null);
+        Map<String, HistoryResourceDTO> changes = client.getHistory(null);
         // Check
         assertResource(changes, "gender", gender, "1", INSERT);
         // Insert CS
         String ore = crud.createResource(cs[1]);
         // Verify again
-        changes = client.getChangesetCS(null);
+        changes = client.getHistory(null);
         // Check
         assertResource(changes, "gender", gender, "1", INSERT);
         assertResource(changes, "ore", ore, "1", INSERT);
@@ -83,16 +93,16 @@ class DiffClientTest extends AbstractTestResources {
         // To insert
         CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
         // Verify emptiness
-        assertEmptyServer(client.getChangesetCS(null));
+        assertEmptyServer(client.getHistory(null));
         // Insert CS
         String gender = crud.createResource(cs[0]);
         // Verify again
-        Map<String, DiffResource> changes = client.getChangesetCS(null);
+        Map<String, HistoryResourceDTO> changes = client.getHistory(null);
         assertResource(changes, "gender", gender, "1", INSERT);
         // Now remove it
         crud.deleteResource(gender, CodeSystem.class);
         // Verify again
-        assertEmptyServer(client.getChangesetCS(null));
+        assertEmptyServer(client.getHistory(null));
     }
 
     /**
@@ -114,11 +124,11 @@ class DiffClientTest extends AbstractTestResources {
         Date init = getCurrentTime();
         Date now = init;
         // Verify emptiness
-        assertEmptyServer(client.getChangesetCS(now));
+        assertEmptyServer(client.getHistory(now));
         // Insert CS
         String gender = crud.createResource(cs[0]);
         // Verify again
-        Map<String, DiffResource> changes = client.getChangesetCS(now);
+        Map<String, HistoryResourceDTO> changes = client.getHistory(now);
         assertResource(changes, "gender", gender, "1", INSERT, "t0");
         assertResourceSize(1, changes);
         // ================
@@ -130,7 +140,7 @@ class DiffClientTest extends AbstractTestResources {
         // Insert CS
         String ore = crud.createResource(cs[1]);
         // Verify again
-        changes = client.getChangesetCS(now);
+        changes = client.getHistory(now);
         assertResource(changes, "ore", ore, "1", INSERT, "t1");
         // ================
         // ===== <T2> =====
@@ -139,14 +149,14 @@ class DiffClientTest extends AbstractTestResources {
         // Retrieve current time
         now = getCurrentTime();
         // Verify again
-        changes = client.getChangesetCS(now);
+        changes = client.getHistory(now);
         assertEmptyServer(changes, "t2");
         // ====================
         // ===== <TO->T2> =====
         // ====================
         // => Retrieve from T0 to T2
         // Verify again
-        changes = client.getChangesetCS(init);
+        changes = client.getHistory(init);
         // Check
         assertResource(changes, "gender", gender, "1", INSERT, "t2");
         assertResource(changes, "ore", ore, "1", INSERT, "t2");
@@ -169,12 +179,12 @@ class DiffClientTest extends AbstractTestResources {
         // Retrieve current time
         Date now = getCurrentTime();
         // Verify emptiness
-        Map<String, DiffResource> changes = client.getChangesetCS(now);
+        Map<String, HistoryResourceDTO> changes = client.getHistory(now);
         assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
         // Insert CS
         String gender = crud.createResource(cs[0]);
         // Verify again
-        changes = client.getChangesetCS(now);
+        changes = client.getHistory(now);
         assertResource(changes, "gender", gender, "1", INSERT, "t0");
         assertResourceSize(1, changes);
         // ================
@@ -188,7 +198,7 @@ class DiffClientTest extends AbstractTestResources {
         builder.addCodes("U", "Unknown");
         crud.updateResource(builder.build());
         // Verify again
-        changes = client.getChangesetCS(now);
+        changes = client.getHistory(now);
         assertResource(changes, "gender", gender, "2", UPDATE, "t1");
         assertResourceSize(1, changes);
         // ================
@@ -200,7 +210,7 @@ class DiffClientTest extends AbstractTestResources {
         // Delete CS
         crud.deleteResource(gender, CodeSystem.class);
         // Verify again
-        changes = client.getChangesetCS(now);
+        changes = client.getHistory(now);
         assertResource(changes, "gender", gender, NO_VERSION, DELETE, "t2");
         assertResourceSize(1, changes);
         // ================
@@ -210,7 +220,7 @@ class DiffClientTest extends AbstractTestResources {
         // Retrieve current time
         now = getCurrentTime();
         // Verify again
-        changes = client.getChangesetCS(now);
+        changes = client.getHistory(now);
         // Verify emptiness
         assertEmptyServer(changes, "t3");
     }
@@ -231,12 +241,12 @@ class DiffClientTest extends AbstractTestResources {
         // Retrieve current time
         Date now = getCurrentTime();
         // Verify emptiness
-        Map<String, DiffResource> changes = client.getChangesetCS(now);
+        Map<String, HistoryResourceDTO> changes = client.getHistory(now);
         assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
         // Insert CS
         String gender = crud.createResource(cs[0]);
         // Verify again
-        changes = client.getChangesetCS(now);
+        changes = client.getHistory(now);
         assertResource(changes, "gender", gender, "1", INSERT, "t0");
         assertResourceSize(1, changes);
         // ================
@@ -256,7 +266,7 @@ class DiffClientTest extends AbstractTestResources {
         builder.addCodes("X", "XTest");
         crud.updateResource(builder.build());
         // Verify again
-        changes = client.getChangesetCS(now);
+        changes = client.getHistory(now);
         assertResource(changes, "gender", gender, "4", UPDATE, "t1");
         assertResourceSize(1, changes);
         // ================
@@ -268,7 +278,7 @@ class DiffClientTest extends AbstractTestResources {
         // Delete CS
         crud.deleteResource(gender, CodeSystem.class);
         // Verify again
-        changes = client.getChangesetCS(now);
+        changes = client.getHistory(now);
         assertResource(changes, "gender", gender, NO_VERSION, DELETE, "t2");
         assertResourceSize(1, changes);
         // ================
@@ -278,7 +288,7 @@ class DiffClientTest extends AbstractTestResources {
         // Retrieve current time
         now = getCurrentTime();
         // Verify again
-        changes = client.getChangesetCS(now);
+        changes = client.getHistory(now);
         // Verify emptiness
         assertEmptyServer(changes, "t3");
     }
@@ -300,7 +310,7 @@ class DiffClientTest extends AbstractTestResources {
         // Retrieve current time
         Date now = getCurrentTime();
         // Verify emptiness
-        Map<String, DiffResource> changes = client.getChangesetCS(now);
+        Map<String, HistoryResourceDTO> changes = client.getHistory(now);
         assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
         // ================
         // ===== <T1> =====
@@ -310,7 +320,7 @@ class DiffClientTest extends AbstractTestResources {
         // Insert CS
         String gender = crud.createResource(cs[0]);
         // Verify again
-        changes = client.getChangesetCS(now);
+        changes = client.getHistory(now);
         assertResource(changes, "gender", gender, "1", INSERT, "t0");
         assertResourceSize(1, changes);
         // Update CS
@@ -324,7 +334,7 @@ class DiffClientTest extends AbstractTestResources {
         builder.addCodes("X", "XTest");
         crud.updateResource(builder.build());
         // Verify again
-        changes = client.getChangesetCS(now);
+        changes = client.getHistory(now);
         assertResource(changes, "gender", gender, "4", INSERT, "t1");
         assertResourceSize(1, changes);
         // ================
@@ -334,7 +344,7 @@ class DiffClientTest extends AbstractTestResources {
         // Retrieve current time
         now = getCurrentTime();
         // Verify again
-        changes = client.getChangesetCS(now);
+        changes = client.getHistory(now);
         // Verify emptiness
         assertEmptyServer(changes, "t2");
     }
@@ -350,7 +360,7 @@ class DiffClientTest extends AbstractTestResources {
         // To insert
         CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
         // Verify emptiness
-        assertEmptyServer(client.getChangesetCS(null));
+        assertEmptyServer(client.getHistory(null));
         // Get time
         Date now = getCurrentTime();
         // Insert CS
@@ -358,7 +368,7 @@ class DiffClientTest extends AbstractTestResources {
         // Now remove it
         crud.deleteResource(gender, CodeSystem.class);
         // Verify again
-        assertEmptyServer(client.getChangesetCS(now), "t0");
+        assertEmptyServer(client.getHistory(now), "t0");
     }
 
     /**
@@ -373,7 +383,7 @@ class DiffClientTest extends AbstractTestResources {
         // To insert
         CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
         // Verify emptiness
-        assertEmptyServer(client.getChangesetCS(null));
+        assertEmptyServer(client.getHistory(null));
         // Get time
         Date now = getCurrentTime();
         // Insert CS
@@ -383,7 +393,7 @@ class DiffClientTest extends AbstractTestResources {
         builder.addCodes("U", "Unknown");
         crud.updateResource(builder.build());
         // Verify again
-        Map<String, DiffResource> changes = client.getChangesetCS(now);
+        Map<String, HistoryResourceDTO> changes = client.getHistory(now);
         assertResource(changes, "gender", gender, "2", INSERT, "t0");
     }
 
