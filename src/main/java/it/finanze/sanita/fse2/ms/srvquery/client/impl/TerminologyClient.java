@@ -414,6 +414,10 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	//											CUSTOM: UPDATE
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
+	public void updateCS(CodeSystem cs) {
+	    tc.update().resource(cs).execute();
+	}
+	
 	public void updateCS(CodeSystem cs, List<CodeDTO> append) {
 	    for (CodeDTO code : append) {
 	        if (!isConceptAlreadyExists(cs, code.getCode())) {
@@ -423,7 +427,7 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	            cs.getConcept().add(cdc);
 	        }
 	    }
-	    tc.update().resource(cs).execute();
+		updateCS(cs);
 	}
 
 	private boolean isConceptAlreadyExists(CodeSystem cs, String code) {
