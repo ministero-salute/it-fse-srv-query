@@ -38,7 +38,7 @@ public interface IMetadataResourceCTL {
 	@ResponseStatus(HttpStatus.OK)
 	MetadataResourceResponseDTO manageMetadataResource(@RequestBody List<SystemUrlDTO> requestBody);
 
-	@PostMapping(value = "",  produces = {MediaType.APPLICATION_JSON_VALUE })
+	@PostMapping(value = "/translate",  produces = {MediaType.APPLICATION_JSON_VALUE })
     @Operation(summary = "Traduci metadata resource", description = "Traduci metadata resource")
     @ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = String.class)))
     @ApiResponses(value = {
