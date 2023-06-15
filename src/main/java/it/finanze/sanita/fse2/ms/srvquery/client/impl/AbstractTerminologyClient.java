@@ -137,7 +137,7 @@ public abstract class AbstractTerminologyClient {
 		String version = mr.getVersion();
 		if(mr instanceof CodeSystem) {
 			CodeSystem cs = (CodeSystem)mr;
-			identifier = cs.getIdentifier().get(0).getId();
+			identifier = cs.getIdentifier().get(0).getValue();
 		} else if(mr instanceof ValueSet) {
 			ValueSet vs = (ValueSet)mr;
 			identifier = vs.getIdentifier().get(0).getId();
