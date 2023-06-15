@@ -1,6 +1,7 @@
 package it.finanze.sanita.fse2.ms.srvquery.service;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
@@ -12,6 +13,7 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.RequestDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.SystemUrlDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.CreateCodeSystemReqDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.CreateCodeSystemResDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.GetResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.UploadResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
@@ -32,4 +34,8 @@ public interface ITerminologySRV {
 	GetResponseDTO isPresent(String oid, String version);
 	
 	void deleteById(String id);
+	
+	List<String> getIdOfActiveResource(Date lastUpdateDate);
+	
+	GetResDTO export(String id, FormatEnum format);
 }

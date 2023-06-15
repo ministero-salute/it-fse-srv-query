@@ -11,4 +11,6 @@ import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
 public interface IConverterClient {
 
 	ConversionResponseDTO callConvertToFhirJson(FormatEnum format, RequestDTO creationInfo, MultipartFile file) throws IOException;
+	
+	ConversionResponseDTO callConvertFromFhirJson(FormatEnum format,String oid, byte[] file) throws IOException;
 }

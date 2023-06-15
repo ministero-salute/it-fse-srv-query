@@ -55,4 +55,29 @@ public class ConverterClient implements IConverterClient {
 	    
 	    return out;
 	}
+	
+	@Override
+	public ConversionResponseDTO callConvertFromFhirJson(FormatEnum format,String oid, byte[] file) throws IOException {
+
+	    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+	    body.add("file", new ByteArrayResource(file) {
+	        @Override
+	        public String getFilename() {
+	            return "TestOid.json";
+	        }
+	    });
+
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+	    HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
+	    String url = msUrlCFG.getMsConverterHost() + "/v1/metadata-resource/from-fhir-json/to/"+format.toString();
+	    ConversionResponseDTO out = null;
+	    try {
+	    	out = restTemplate.postForObject(url, entity, ConversionResponseDTO.class);
+	    } catch (ResourceAccessException ex) {
+			//TODO - Gestisci il timeout
+		}
+	    
+	    return out;
+	}
 }

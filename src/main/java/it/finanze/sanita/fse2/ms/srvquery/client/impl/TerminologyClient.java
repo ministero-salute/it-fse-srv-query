@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-import ca.uhn.fhir.rest.api.SummaryEnum;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -33,6 +32,7 @@ import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.IQuery;
@@ -73,7 +73,7 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	}
 
 	public List<ValueSet> searchModifiedValueSet(Date start) {
-		return searchModified(tc, start, ValueSet.class);
+		return searchModified(tc, start, ValueSet.class,SummaryEnum.TRUE);
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -89,7 +89,12 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	}
 
 	public List<CodeSystem> searchModifiedCodeSystem(Date start) {
-		return searchModified(tc, start, CodeSystem.class);
+		return searchModifiedCodeSystem(start, false);
+	}
+	
+	public List<CodeSystem> searchModifiedCodeSystem(Date start, boolean summaryMode) {
+		SummaryEnum summaryEnum = summaryMode ? SummaryEnum.TRUE : SummaryEnum.FALSE;  
+		return searchModified(tc, start, CodeSystem.class,summaryEnum);
 	}
 	
 	public CodeSystem getCodeSystemVersionByIdAndDate(String id, Date date) {
@@ -556,5 +561,16 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	}
 
 
+	public CodeSystem getByIdVi(String id) {
+		try {
+			 return tc.read()
+		                .resource(CodeSystem.class)
+		                .withId(id)
+		                .execute();
+		} catch(Exception ex) {
+			log.error("Errore while perform searchActive client method:", ex);
+			throw new BusinessException("Errore while perform searchActive client method:", ex);
+		}
+	}
 
 }

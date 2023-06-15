@@ -3,12 +3,16 @@ package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,11 +27,13 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.SystemUrlDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.CreateCodeSystemReqDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.ConversionResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.CreateCodeSystemResDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.GetResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.UploadResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.ResultPushEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.SubscriptionEnum;
+import it.finanze.sanita.fse2.ms.srvquery.enums.TypeEnum;
 import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
@@ -169,4 +175,36 @@ public class TerminologySRV implements ITerminologySRV {
 		TerminologyClient terminologyClient = getTerminologyClient();
 		terminologyClient.deleteCS(id);
 	}
+
+	@Override
+	public List<String> getIdOfActiveResource(Date lastUpdateDate) {
+		TerminologyClient terminologyClient = getTerminologyClient();
+		List<CodeSystem> codeSystems = terminologyClient.searchModifiedCodeSystem(lastUpdateDate);
+		return codeSystems.stream().map(e-> e.getIdElement().getIdPartAsLong().toString()).collect(Collectors.toList());
+	}
+	
+	@Override
+	public GetResDTO export(String id, FormatEnum format) {
+		GetResDTO out = new GetResDTO();
+		TerminologyClient terminologyClient = getTerminologyClient();
+		CodeSystem codeSystem = terminologyClient.getByIdVi(id);
+		String resource = FHIRR4Helper.serializeResource(codeSystem, true, true, true);
+
+		try {
+			String oid = "vi";
+			if(FormatEnum.FHIR_R4_JSON.equals(format)) {
+				out.setContent(resource.getBytes());
+				out.setOid(oid);
+			} else {
+				ConversionResponseDTO conversionResponseDTO = converter.callConvertFromFhirJson(format, oid,resource.getBytes());
+				out.setContent(conversionResponseDTO.getResult().getBytes());
+				out.setOid(oid);	
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return out;
+	}
+	
 }

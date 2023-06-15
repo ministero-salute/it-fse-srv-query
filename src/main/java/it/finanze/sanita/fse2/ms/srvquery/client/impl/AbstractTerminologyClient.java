@@ -25,6 +25,7 @@ import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent;
 
 import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
@@ -59,20 +60,25 @@ public abstract class AbstractTerminologyClient {
 		}
 	}
 
-	protected <T> List<T> searchModified(IGenericClient tc, Date start, Class<? extends MetadataResource> mr) {
-		List<T> out = new ArrayList<>();
-		try {
-			Bundle bundle = tc.search().forResource(mr).cacheControl(CacheControlDirective.noCache())
-					.where(CodeSystem.DATE.afterOrEquals().millis(start)).returnBundle(Bundle.class).execute();
-			for (BundleEntryComponent bec:bundle.getEntry()) {
-				T cs= (T) bec.getResource();
-				out.add(cs);
-			}
-			return out;
-		} catch(Exception ex) {
-			log.error("Errore while perform searchModified client method:", ex);
-			throw new BusinessException("Errore while perform searchModified client method:", ex);
-		}
+	protected <T> List<T> searchModified(IGenericClient tc, Date start, Class<? extends MetadataResource> mr, SummaryEnum summaryEnum) {
+	    List<T> out = new ArrayList<>();
+	    try {
+	        Bundle bundle = tc.search()
+	                .forResource(mr).summaryMode(null)
+	                .cacheControl(CacheControlDirective.noCache())
+	                .where(CodeSystem.DATE.afterOrEquals().millis(start)).summaryMode(summaryEnum)
+	                .returnBundle(Bundle.class)
+	                .execute();
+
+	        for (BundleEntryComponent bec : bundle.getEntry()) {
+	            T cs = (T) bec.getResource();
+	            out.add(cs);
+	        }
+	        return out;
+	    } catch (Exception ex) {
+	        log.error("Errore while perform searchModified client method:", ex);
+	        throw new BusinessException("Errore while perform searchModified client method:", ex);
+	    }
 	}
 	
 	protected void createSubscription(IGenericClient tc, final Subscription subscription) {

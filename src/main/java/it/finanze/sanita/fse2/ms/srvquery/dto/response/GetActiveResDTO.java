@@ -3,6 +3,8 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.dto.response;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,16 +15,13 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ResourceExistResDTO extends ResponseDTO {
+public class GetActiveResDTO extends ResponseDTO {
 
-	/** 
-	 * True if document already exists 
-	 */
-	private boolean exist;
+	private List<String> ids;
 	
-	public ResourceExistResDTO(final LogTraceInfoDTO traceInfo, final boolean inExist) {
+	public GetActiveResDTO(final LogTraceInfoDTO traceInfo, final List<String> inIds) {
 		super(traceInfo);
-		exist = inExist;
+		ids = inIds;
 	}
 	
     
