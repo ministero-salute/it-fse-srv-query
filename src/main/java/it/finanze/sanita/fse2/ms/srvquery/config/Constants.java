@@ -90,6 +90,9 @@ public class Constants {
 		public static final String EXIST = "exist";
 		public static final String UPDATE = "update";
 
+		public static final String ERR_VAL_FUTURE_DATE = "La data del ultimo aggiornamento non può essere nel futuro";
+
+
 		/**
 		 * This method is intentionally left blank
 		 */	

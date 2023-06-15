@@ -30,7 +30,11 @@ public class HistoryClient {
         );
     }
 
-    public Map<String, HistoryResourceDTO> getHistory(Date lastUpdate) {
+    public HistoryDTO getHistory(Date lastUpdate) {
+        return findByLastUpdate(lastUpdate);
+    }
+
+    public Map<String, HistoryResourceDTO> getHistoryMap(Date lastUpdate) {
         return findByLastUpdate(lastUpdate).getHistory();
     }
 
