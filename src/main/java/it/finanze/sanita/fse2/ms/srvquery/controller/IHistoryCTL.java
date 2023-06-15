@@ -25,8 +25,8 @@ public interface IHistoryCTL {
 
     @GetMapping(value = API_GET_HISTORY)
     @Operation(
-        summary = "Retrieve changeset by last-update",
-        description = "Returns an on-the-fly snapshot status for the given timeframe"
+        summary = "Retrieve history by last-update",
+        description = "Returns an on-the-fly history status for the given timeframe"
     )
     @ApiResponses(
         value = {
