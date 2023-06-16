@@ -118,8 +118,33 @@ public abstract class HistoryAbstractClient {
 
     private Optional<IBaseResource> getResource(String resourceId, String versionId) {
         IBaseResource out = getResourceByType(CodeSystem.class, resourceId, versionId);
-        if(out == null) out = getResourceByType(ValueSet.class, resourceId, versionId);
+        if(out == null) {
+            out = getResourceByType(ValueSet.class, resourceId, versionId);
+            if(out != null) {
+                isExpansionNeeded((ValueSet) out, resourceId, versionId);
+            }
+        }
         return Optional.ofNullable(out);
+    }
+
+    private void isExpansionNeeded(ValueSet vs, String resourceId, String versionId) {
+        // Expand only if empty
+        if(vs.getExpansion().isEmpty()) {
+            applyResourceExpansion(vs, resourceId, versionId);
+        }
+    }
+
+    private void applyResourceExpansion(ValueSet vs, String resourceId, String versionId) {
+        ValueSet expanded = client
+            .operation()
+            .onInstance(new IdType(ValueSet.name(), resourceId, versionId))
+            .named("expand")
+            .withNoParameters(Parameters.class)
+            .cacheControl(noCache())
+            .returnResourceType(ValueSet.class)
+            .execute();
+        // Assign
+        vs.setExpansion(expanded.getExpansion());
     }
 
     private IBaseResource getResourceByType(Class<? extends IBaseResource> type, String resourceId, String versionId) {
