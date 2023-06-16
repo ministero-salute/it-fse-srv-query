@@ -91,7 +91,10 @@ public class Constants {
 		public static final String UPDATE = "update";
 
 		public static final String ERR_VAL_FUTURE_DATE = "La data del ultimo aggiornamento non può essere nel futuro";
+		public static final String ERR_VAL_RESOURCE_ID_BLANK = "La resourceId risulta essere nulla o vuota";
+		public static final String ERR_VAL_VERSION_ID_BLANK = "La versionId risulta essere nulla o vuota";
 
+		public static final String ERR_RES_NOT_FOUND = "La risorsa richiesta non esiste";
 
 		/**
 		 * This method is intentionally left blank

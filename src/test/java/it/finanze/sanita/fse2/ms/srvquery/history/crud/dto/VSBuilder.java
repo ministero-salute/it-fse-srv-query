@@ -1,38 +1,43 @@
 package it.finanze.sanita.fse2.ms.srvquery.history.crud.dto;
 
-import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.ValueSet;
 
-import static org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
+import static org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 
-public class CSBuilder {
+public class VSBuilder {
 
     private static final String OID_REF = "urn:ietf:rfc:3986";
     private static final String OID_PREFIX = "urn:oid:";
 
-    private final CodeSystem cs;
+    private final ValueSet vs;
 
-    public CSBuilder(String oid) {
-        this.cs = new CodeSystem();
+    public VSBuilder(String oid, String url) {
+        this.vs = new ValueSet();
+        addUrl(url);
         addIdentifier(oid);
         addVersion("1.0.0");
     }
 
-    private CSBuilder(CodeSystem cs) {
-        this.cs = cs;
+    private void addUrl(String url) {
+        vs.setUrl(url);
     }
 
-    public static CSBuilder from(CodeSystem cs) {
-        return new CSBuilder(cs);
+    private VSBuilder(ValueSet vs) {
+        this.vs = vs;
+    }
+
+    public static VSBuilder from(ValueSet vs) {
+        return new VSBuilder(vs);
     }
 
     public void addCodes(String code, String display) {
         // Prepare
-        ConceptDefinitionComponent component = new ConceptDefinitionComponent();
+        ValueSetExpansionContainsComponent component = new ValueSetExpansionContainsComponent();
         component.setCode(code);
         component.setDisplay(display);
         // Attach
-        cs.getConcept().add(component);
+        vs.getExpansion().getContains().add(component);
     }
 
     private void addIdentifier(String oid) {
@@ -42,15 +47,15 @@ public class CSBuilder {
             id.setSystem(OID_REF);
             id.setValue(OID_PREFIX + oid);
             // Attach
-            cs.getIdentifier().add(id);
+            vs.getIdentifier().add(id);
         }
     }
 
     public void addVersion(String version) {
-        if(version != null) cs.setVersion(version);
+        if(version != null) vs.setVersion(version);
     }
 
-    public CodeSystem build() {
-        return cs;
+    public ValueSet build() {
+        return vs;
     }
 }

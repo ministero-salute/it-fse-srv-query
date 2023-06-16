@@ -18,7 +18,7 @@ import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Profile.TEST;
 import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO.*;
 import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO.HistoryDetailsDTO.NO_VERSION;
 import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.*;
-import static it.finanze.sanita.fse2.ms.srvquery.client.impl.history.HistoryUtils.getCurrentTime;
+import static it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.HistoryUtils.getCurrentTime;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.*;

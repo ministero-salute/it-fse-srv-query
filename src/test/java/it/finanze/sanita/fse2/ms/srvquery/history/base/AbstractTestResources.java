@@ -2,7 +2,9 @@ package it.finanze.sanita.fse2.ms.srvquery.history.base;
 
 import it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.CSBuilder;
+import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.VSBuilder;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.Map;
 
@@ -24,6 +26,17 @@ public abstract class AbstractTestResources {
         builder.addCodes("P", "Platinum");
         builder.addCodes("D", "Diamond");
         builder.addCodes("G", "Gold");
+        return builder.build();
+    }
+
+    protected ValueSet createColorTestVS() {
+        VSBuilder builder = new VSBuilder(
+            "2.144.33.22.04.39",
+            "http://url/testColors"
+        );
+        builder.addCodes("W", "White");
+        builder.addCodes("Y", "Yellow");
+        builder.addCodes("O", "Orange");
         return builder.build();
     }
 

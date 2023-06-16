@@ -1,4 +1,4 @@
-package it.finanze.sanita.fse2.ms.srvquery.client.impl.history;
+package it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum;

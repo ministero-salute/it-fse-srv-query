@@ -1,32 +1,25 @@
-package it.finanze.sanita.fse2.ms.srvquery.client.impl.history;
+package it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.context.FhirVersionEnum.R4;
 import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_NEXT;
 
 public class HistoryUtils {
 
-    public static final int STANDARD_OFFSET = 2;
+    private static final String OID_REF = "urn:ietf:rfc:3986";
+    private static final String OID_PREFIX = "urn:oid:";
 
-    public static void printJSON(Bundle bundle) {
-        FhirContext context = FhirContext.forCached(R4);
-        IParser parser = context.newJsonParser();
-        parser.setPrettyPrint(true);
-        System.out.println(parser.encodeResourceToString(bundle));
-    }
+    public static final int STANDARD_OFFSET = 2;
 
     public static String asId(String uri) {
         int idx = uri.lastIndexOf("/") + 1;
@@ -39,6 +32,28 @@ public class HistoryUtils {
 
     public static String asVersionId(IBaseResource res) {
         return res.getMeta().getVersionId();
+    }
+
+    public static Optional<String> asOID(CodeSystem res) {
+        String oid = null;
+        Optional<Identifier> id = res.getIdentifier().stream().filter(HistoryUtils::matchOid).findFirst();
+        if(id.isPresent()) {
+            Identifier identifier = id.get();
+            String value = identifier.getValue();
+            oid = value.replace(OID_PREFIX, "");
+        }
+        return Optional.ofNullable(oid);
+    }
+
+    public static Optional<String> asOID(ValueSet res) {
+        String oid = null;
+        Optional<Identifier> id = res.getIdentifier().stream().filter(HistoryUtils::matchOid).findFirst();
+        if(id.isPresent()) {
+            Identifier identifier = id.get();
+            String value = identifier.getValue();
+            oid = value.replace(OID_PREFIX, "");
+        }
+        return Optional.ofNullable(oid);
     }
 
     public static List<String> asId(List<Resource> res) {
@@ -64,4 +79,6 @@ public class HistoryUtils {
         }
         return bundle;
     }
+
+    private static boolean matchOid(Identifier id) {return id.getSystem().equalsIgnoreCase(OID_REF);}
 }

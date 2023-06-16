@@ -4,7 +4,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import static it.finanze.sanita.fse2.ms.srvquery.client.impl.history.HistoryUtils.asId;
+import static it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.HistoryUtils.asId;
 import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper.createClient;
 
 public class FhirCrudClient {
