@@ -1,13 +1,13 @@
 package it.finanze.sanita.fse2.ms.srvquery.service;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.GetActiveResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.MetadataResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.RequestDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.SystemUrlDTO;
@@ -35,7 +35,7 @@ public interface ITerminologySRV {
 	
 	void deleteById(String id);
 	
-	List<String> getIdOfActiveResource(Date lastUpdateDate,boolean withoutCopyright);
+	List<GetActiveResourceDTO> getSummaryNameActiveResource();
 	
 	GetResDTO export(String id, FormatEnum format);
 }

@@ -97,6 +97,23 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		return searchModified(tc, start, CodeSystem.class,summaryEnum);
 	}
 	
+	public List<CodeSystem> searchSummaryNames(){
+		List<CodeSystem> out = new ArrayList<>();
+
+		Bundle results = tc.search().forResource(CodeSystem.class)
+				.where(CodeSystem.STATUS.exactly().identifier("active"))
+				.elementsSubset("identifier")
+				.returnBundle(Bundle.class)
+				.execute();
+
+		for (Bundle.BundleEntryComponent entry : results.getEntry()) {
+			CodeSystem codeSystem = (CodeSystem) entry.getResource();
+			out.add(codeSystem);
+		}
+		return out;
+
+	}
+	
 	public CodeSystem getCodeSystemVersionByIdAndDate(String id, Date date) {
         CodeSystem out = null;
         Bundle resultBundle = tc
@@ -565,7 +582,7 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	}
 
 
-	public CodeSystem getByIdVi(String id) {
+	public CodeSystem getContentById(String id) {
 		try {
 			 return tc.read()
 		                .resource(CodeSystem.class)

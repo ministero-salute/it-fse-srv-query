@@ -3,9 +3,7 @@ package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
@@ -19,6 +17,7 @@ import it.finanze.sanita.fse2.ms.srvquery.client.IWebScrapingClient;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.TerminologyClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.TerminologyCFG;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.GetActiveResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.MetadataResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.RequestDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.SystemUrlDTO;
@@ -174,32 +173,39 @@ public class TerminologySRV implements ITerminologySRV {
 	}
 
 	@Override
-	public List<String> getIdOfActiveResource(Date lastUpdateDate,boolean withoutCopyright) {
+	public List<GetActiveResourceDTO> getSummaryNameActiveResource() {
+		List<GetActiveResourceDTO> out = new ArrayList<>();
 		TerminologyClient terminologyClient = getTerminologyClient();
-		List<CodeSystem> codeSystems = terminologyClient.searchModifiedCodeSystem(lastUpdateDate,false);
-
-		return codeSystems.stream()
-				.filter(e -> Boolean.TRUE.equals(withoutCopyright) ? e.getCopyright() == null : true)
-				.map(e -> e.getIdElement().getIdPartAsLong().toString())
-				.collect(Collectors.toList());
+		List<CodeSystem> codeSystems = terminologyClient.searchSummaryNames();
+		for(CodeSystem codeSystem : codeSystems) {
+			String id = codeSystem.getIdElement().getIdPartAsLong().toString();
+			String oid = StringUtility.removeUrnOidFromSystem(codeSystem.getIdentifier().get(0).getValue());
+			out.add(new GetActiveResourceDTO(id,oid));
+		}
+		return out;
 	}
 	
 	@Override
 	public GetResDTO export(String id, FormatEnum format) {
 		GetResDTO out = new GetResDTO();
 		TerminologyClient terminologyClient = getTerminologyClient();
-		CodeSystem codeSystem = terminologyClient.getByIdVi(id);
-		String resource = FHIRR4Helper.serializeResource(codeSystem, true, true, true);
-
+		CodeSystem codeSystem = terminologyClient.getContentById(id);
+		String resource = FHIRR4Helper.serializeResource(codeSystem, true, true, false);
 		try {
-			String oid = codeSystem.getIdentifier().get(0).getValue();
-			if(FormatEnum.FHIR_R4_JSON.equals(format)) {
-				out.setContent(resource.getBytes());
-				out.setOid(oid);
+			
+			if(!codeSystem.hasCopyright()) {
+				out.setHaveCopyright(false);
+				String oid = StringUtility.removeUrnOidFromSystem(codeSystem.getIdentifier().get(0).getValue());
+				if(FormatEnum.FHIR_R4_JSON.equals(format)) {
+					out.setContent(resource.getBytes());
+					out.setOid(oid);
+				} else {
+					ConversionResponseDTO conversionResponseDTO = converter.callConvertFromFhirJson(format, oid,resource.getBytes());
+					out.setContent(conversionResponseDTO.getResult().getBytes());
+					out.setOid(oid);	
+				}
 			} else {
-				ConversionResponseDTO conversionResponseDTO = converter.callConvertFromFhirJson(format, oid,resource.getBytes());
-				out.setContent(conversionResponseDTO.getResult().getBytes());
-				out.setOid(oid);	
+				out.setHaveCopyright(true);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

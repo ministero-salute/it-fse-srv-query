@@ -1,6 +1,5 @@
 package it.finanze.sanita.fse2.ms.srvquery.controller.impl;
 
-import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,9 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import it.finanze.sanita.fse2.ms.srvquery.controller.AbstractCTL;
 import it.finanze.sanita.fse2.ms.srvquery.controller.ICodeSystemCTL;
+import it.finanze.sanita.fse2.ms.srvquery.dto.GetActiveResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.CreateCodeSystemReqDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.CreateCodeSystemResDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetActiveResDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetActiveCSResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
@@ -36,9 +36,9 @@ public class CodeSystemCTL extends AbstractCTL implements ICodeSystemCTL {
 	}
 
 	@Override
-	public GetActiveResDTO getActiveResource(Date lastUpdateDate,Boolean withoutCopyright,HttpServletRequest request) {
-		List<String> ids = terminologySRV.getIdOfActiveResource(lastUpdateDate,withoutCopyright);
-		return new GetActiveResDTO(getLogTraceInfo(), ids);
+	public GetActiveCSResponseDTO getActiveResource(HttpServletRequest request) {
+		List<GetActiveResourceDTO> list = terminologySRV.getSummaryNameActiveResource();
+		return new GetActiveCSResponseDTO(getLogTraceInfo(), list);
 	}
 	 
 	@Override
