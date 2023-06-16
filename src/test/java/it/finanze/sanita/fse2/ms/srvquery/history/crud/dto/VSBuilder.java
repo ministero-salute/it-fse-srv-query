@@ -3,6 +3,8 @@ package it.finanze.sanita.fse2.ms.srvquery.history.crud.dto;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ValueSet;
 
+import java.util.Date;
+
 import static org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 
 public class VSBuilder {
@@ -17,6 +19,11 @@ public class VSBuilder {
         addUrl(url);
         addIdentifier(oid);
         addVersion("1.0.0");
+        addDate(new Date());
+    }
+
+    private void addDate(Date date) {
+        if(date != null) vs.setDate(date);
     }
 
     private void addUrl(String url) {
@@ -53,6 +60,10 @@ public class VSBuilder {
 
     public void addVersion(String version) {
         if(version != null) vs.setVersion(version);
+    }
+
+    public void addInclusionCS(String uri) {
+        vs.getCompose().getInclude().add(new ValueSet.ConceptSetComponent().setSystem(uri));
     }
 
     public ValueSet build() {

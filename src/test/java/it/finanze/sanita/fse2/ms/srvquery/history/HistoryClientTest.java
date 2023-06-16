@@ -6,6 +6,7 @@ import it.finanze.sanita.fse2.ms.srvquery.history.base.AbstractTestResources;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.FhirCrudClient;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.CSBuilder;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -395,6 +396,14 @@ class HistoryClientTest extends AbstractTestResources {
         // Verify again
         Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
         assertResource(changes, "gender", gender, "2", INSERT, "t0");
+    }
+
+    @Test
+    public void createValueset() {
+        String primary = crud.createResource(createPrimaryColorsTestCS());
+        String secondary = crud.createResource(createSecondaryColorsTestCS());
+        String colors = crud.createResource(createColorsTestVS());
+        System.out.println(primary);
     }
 
     @AfterAll

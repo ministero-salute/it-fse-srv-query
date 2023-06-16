@@ -3,6 +3,8 @@ package it.finanze.sanita.fse2.ms.srvquery.history.crud.dto;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Identifier;
 
+import java.util.Date;
+
 import static org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 
 public class CSBuilder {
@@ -16,6 +18,11 @@ public class CSBuilder {
         this.cs = new CodeSystem();
         addIdentifier(oid);
         addVersion("1.0.0");
+        addDate(new Date());
+    }
+
+    private void addDate(Date date) {
+        if(date != null) cs.setDate(date);
     }
 
     private CSBuilder(CodeSystem cs) {
@@ -44,6 +51,10 @@ public class CSBuilder {
             // Attach
             cs.getIdentifier().add(id);
         }
+    }
+
+    public void addUrl(String url) {
+        if(url != null) cs.setUrl(url);
     }
 
     public void addVersion(String version) {

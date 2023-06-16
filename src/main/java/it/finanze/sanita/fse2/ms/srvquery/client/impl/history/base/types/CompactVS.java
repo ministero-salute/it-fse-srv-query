@@ -32,7 +32,12 @@ public class CompactVS {
         HistoryResourceDTO res = new HistoryResourceDTO(
             oid.get(),
             vs.getVersion(),
-            new ResourceMetaDTO(resourceId, versionId, vs.fhirType()),
+            new ResourceMetaDTO(
+                resourceId,
+                versionId,
+                vs.fhirType(),
+                vs.getDate()
+            ),
             new ArrayList<>()
         );
 

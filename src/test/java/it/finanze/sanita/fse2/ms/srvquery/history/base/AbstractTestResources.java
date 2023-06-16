@@ -29,14 +29,53 @@ public abstract class AbstractTestResources {
         return builder.build();
     }
 
-    protected ValueSet createColorTestVS() {
+    protected ValueSet createColorsTestVS() {
+        VSBuilder builder = new VSBuilder(
+            "2.144.33.22.04.38",
+            "http://url/colors"
+        );
+        builder.addInclusionCS("http://url/primary-colors");
+        builder.addInclusionCS("http://url/secondary-colors");
+        return builder.build();
+    }
+
+    protected CodeSystem createPrimaryColorsTestCS() {
+        CSBuilder builder = new CSBuilder("2.144.33.22.04.39");
+        builder.addUrl("http://url/primary-colors");
+        builder.addCodes("R", "Red");
+        builder.addCodes("Y", "Yellow");
+        builder.addCodes("B", "Blue");
+        return builder.build();
+    }
+
+    protected ValueSet createPrimaryColorsTestVS() {
         VSBuilder builder = new VSBuilder(
             "2.144.33.22.04.39",
-            "http://url/testColors"
+            "http://url/primary-colors"
         );
-        builder.addCodes("W", "White");
+        builder.addCodes("R", "Red");
         builder.addCodes("Y", "Yellow");
+        builder.addCodes("B", "Blue");
+        return builder.build();
+    }
+
+    protected CodeSystem createSecondaryColorsTestCS() {
+        CSBuilder builder = new CSBuilder("2.144.33.22.04.40");
+        builder.addUrl("http://url/secondary-colors");
         builder.addCodes("O", "Orange");
+        builder.addCodes("G", "Green");
+        builder.addCodes("V", "Violet");
+        return builder.build();
+    }
+
+    protected ValueSet createSecondaryColorsTestVS() {
+        VSBuilder builder = new VSBuilder(
+            "2.144.33.22.04.40",
+            "http://url/secondary-colors"
+        );
+        builder.addCodes("O", "Orange");
+        builder.addCodes("G", "Green");
+        builder.addCodes("V", "Violet");
         return builder.build();
     }
 
