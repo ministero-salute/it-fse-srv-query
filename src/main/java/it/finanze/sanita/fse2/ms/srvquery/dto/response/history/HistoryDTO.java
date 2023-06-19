@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum;
 import lombok.Value;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.*;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 @Value
 @JsonInclude(NON_NULL)
@@ -21,12 +23,27 @@ public class HistoryDTO {
     @JsonFormat(pattern = PTT_ISO_8601)
     Date lastUpdate;
 
-    Map<String, HistoryDetailsDTO> history;
+    List<HistoryInsertDTO> insertions;
+    List<HistoryDeleteDTO> deletions;
+
+    public HistoryDTO(Date currentTime, Date lastUpdate) {
+        this.currentTime = currentTime;
+        this.lastUpdate = lastUpdate;
+        this.insertions = new ArrayList<>();
+        this.deletions = new ArrayList<>();
+    }
 
     @Value
-    public static class HistoryDetailsDTO {
-        public final static String NO_VERSION = "-";
+    public static class HistoryInsertDTO {
+        String id;
         String version;
-        HistoryOperationEnum op;
     }
+
+    @Value
+    @JsonInclude(NON_NULL)
+    public static class HistoryDeleteDTO {
+        String id;
+        String omit;
+    }
+
 }

@@ -4,7 +4,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.types.CompactCS;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.types.CompactVS;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.MalformedResourceException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -32,8 +32,8 @@ public abstract class HistoryAbstractClient {
         this.client = client;
     }
 
-    protected HistoryDTO createHistoryByLastUpdate(Date lastUpdate) {
-        HistoryDTO out;
+    protected RawHistoryDTO createHistoryByLastUpdate(Date lastUpdate) {
+        RawHistoryDTO out;
         if(lastUpdate == null) {
             out = createHistoryFromBegins();
         } else {
@@ -42,7 +42,7 @@ public abstract class HistoryAbstractClient {
         return out;
     }
 
-    private HistoryDTO createHistoryFromBegins() {
+    private RawHistoryDTO createHistoryFromBegins() {
         // Execute query by resource op and last-update date
         Bundle bundle = client
             .search()
@@ -57,14 +57,14 @@ public abstract class HistoryAbstractClient {
         // Get current time
         Date currentTime = bundle.getMeta().getLastUpdated();
         // Retrieve resources
-        return new HistoryDTO(
+        return new RawHistoryDTO(
             currentTime,
             null,
             composer.compose(POST, null)
         );
     }
 
-    private HistoryDTO createHistoryFromDate(Date lastUpdate) {
+    private RawHistoryDTO createHistoryFromDate(Date lastUpdate) {
         // Execute query by resource op and last-update date
         Bundle bundle = client
             .history()
@@ -80,7 +80,7 @@ public abstract class HistoryAbstractClient {
         // Get current time
         Date currentTime = bundle.getMeta().getLastUpdated();
         // Retrieve resources
-        return new HistoryDTO(
+        return new RawHistoryDTO(
             currentTime,
             lastUpdate,
             composer.compose(null, lastUpdate)

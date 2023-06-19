@@ -6,7 +6,6 @@ import it.finanze.sanita.fse2.ms.srvquery.history.base.AbstractTestResources;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.FhirCrudClient;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.CSBuilder;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,8 +15,8 @@ import java.util.Date;
 import java.util.Map;
 
 import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Profile.TEST;
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO.*;
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO.HistoryDetailsDTO.NO_VERSION;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.*;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO.ANY_VERSION;
 import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.*;
 import static it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.HistoryUtils.getCurrentTime;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -212,7 +211,7 @@ class HistoryClientTest extends AbstractTestResources {
         crud.deleteResource(gender, CodeSystem.class);
         // Verify again
         changes = client.getHistoryMap(now);
-        assertResource(changes, "gender", gender, NO_VERSION, DELETE, "t2");
+        assertResource(changes, "gender", gender, ANY_VERSION, DELETE, "t2");
         assertResourceSize(1, changes);
         // ================
         // ===== <T3> =====
@@ -280,7 +279,7 @@ class HistoryClientTest extends AbstractTestResources {
         crud.deleteResource(gender, CodeSystem.class);
         // Verify again
         changes = client.getHistoryMap(now);
-        assertResource(changes, "gender", gender, NO_VERSION, DELETE, "t2");
+        assertResource(changes, "gender", gender, ANY_VERSION, DELETE, "t2");
         assertResourceSize(1, changes);
         // ================
         // ===== <T3> =====

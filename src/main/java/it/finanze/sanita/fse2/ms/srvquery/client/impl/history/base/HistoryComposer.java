@@ -12,8 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO.*;
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO.HistoryDetailsDTO.*;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.*;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO.*;
 import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.*;
 import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.INSERT;
 import static org.hl7.fhir.r4.model.Bundle.*;
@@ -96,7 +96,7 @@ public class HistoryComposer {
     }
 
     private void registerDeletedResIfAbsent(BundleEntryComponent entry, HistoryOperationEnum type) {
-        map.putIfAbsent(HistoryUtils.asId(entry.getFullUrl()), new HistoryDetailsDTO(NO_VERSION, type));
+        map.putIfAbsent(HistoryUtils.asId(entry.getFullUrl()), new HistoryDetailsDTO(ANY_VERSION, type));
     }
 
     private String registerResIfAbsent(Resource res, HistoryOperationEnum type) {

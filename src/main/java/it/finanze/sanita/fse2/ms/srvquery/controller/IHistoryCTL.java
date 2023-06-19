@@ -24,7 +24,7 @@ import java.util.Date;
 
 import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Logs.*;
 import static it.finanze.sanita.fse2.ms.srvquery.utility.RoutesUtility.*;
-import static org.springframework.format.annotation.DateTimeFormat.ISO.*;
+import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME;
 
 @Tag(name = API_HISTORY_TAG)
 @Validated

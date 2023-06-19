@@ -2,7 +2,7 @@ package it.finanze.sanita.fse2.ms.srvquery.client.impl.history;
 
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.HistoryAbstractClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.TerminologyCFG;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.MalformedResourceException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO.HistoryDetailsDTO;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO;
 import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper.createClient;
 
 @Component
@@ -28,7 +28,7 @@ public class HistoryClient extends HistoryAbstractClient {
         );
     }
 
-    public HistoryDTO getHistory(Date lastUpdate) {
+    public RawHistoryDTO getHistory(Date lastUpdate) {
         return createHistoryByLastUpdate(lastUpdate);
     }
 
