@@ -8,7 +8,6 @@ import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.types.Compact
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.MalformedResourceException;
-import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 
@@ -161,7 +160,7 @@ public abstract class HistoryAbstractClient {
     }
 
     private ICriterion<?> isActiveCS() {
-        return CodeSystem.STATUS.exactly().identifier(ACTIVE.getDisplay());
+        return CodeSystem.STATUS.exactly().identifier(ACTIVE.toCode());
     }
 
     protected void reset() {
