@@ -8,15 +8,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Bundle.BundleType;
-import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
@@ -31,11 +29,9 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
-import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.UriClientParam;
 import ca.uhn.fhir.util.ParametersUtil;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
@@ -467,19 +463,9 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	
 	public CodeSystem getCodeSystemByIdAndVersion(final String id, final String version) {
 	    CodeSystem out = null;
-	    IQuery<IBaseBundle> entry = tc
-	            .search()
-	            .forResource(CodeSystem.class)
-	            .cacheControl(CacheControlDirective.noCache())
-	            .where(CodeSystem.IDENTIFIER.exactly().identifier("urn:oid:"+id))
-				.summaryMode(SummaryEnum.TRUE);
-
-	    if (version != null) {
-	        entry = entry.and(CodeSystem.VERSION.exactly().identifier(version));
-	    }
-
-	    Bundle results = entry.returnBundle(Bundle.class).execute();
-
+	    
+	    Bundle results = searchForResource(tc, CodeSystem.class, id, version);
+ 
 	    // Process the search results
 	    if (results != null && results.hasEntry()) {
 	        // Access the code system resources
@@ -557,28 +543,8 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	
 	
 	public String transaction(CodeSystem codeSystem) {
-		String location = "";
-		try {
-			Bundle transactionBundle = new Bundle();
-			transactionBundle.setType(BundleType.TRANSACTION);
-
-			// Aggiungi l'operazione per creare il CodeSystem al Bundle di transazione
-			Bundle.BundleEntryComponent codeSystemEntry = new Bundle.BundleEntryComponent();
-			codeSystemEntry.setResource(codeSystem);
-			codeSystemEntry.getRequest().setMethod(HTTPVerb.POST);
-			codeSystemEntry.getRequest().setUrl("CodeSystem");
-			transactionBundle.addEntry(codeSystemEntry);
-
-			Bundle response = tc.transaction().withBundle(transactionBundle).execute();
-			// Process the search results
-			if (response != null && response.hasEntry()) {
-				location = response.getEntry().get(0).getResponse().getLocation();
-			}
-		} catch (Exception ex) {
-			log.error("Error while performing transaction: ", ex);
-			throw new BusinessException(ex.getMessage());
-		}
-		return location;
+		IIdType id = tc.create().resource(codeSystem).execute().getId();
+		return id.getValue().toString();
 	}
 
 

@@ -17,6 +17,7 @@ import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MetadataResource;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -133,21 +134,32 @@ public abstract class AbstractTerminologyClient {
 	}
 
 	protected boolean existMetadataResource(IGenericClient tc, MetadataResource mr) {
-		String identifier = "";
-		String version = mr.getVersion();
-		if(mr instanceof CodeSystem) {
-			CodeSystem cs = (CodeSystem)mr;
-			identifier = cs.getIdentifier().get(0).getValue();
-		} else if(mr instanceof ValueSet) {
-			ValueSet vs = (ValueSet)mr;
-			identifier = vs.getIdentifier().get(0).getId();
-		}
-		
-		Bundle response = tc.search().forResource(mr.getClass())
-				.where(new StringClientParam("identifier").matches().value(identifier))
-				.and(new StringClientParam("version").matches().value(version)).returnBundle(Bundle.class)
-				.execute();            
-		return response.getEntry()!=null && !response.getEntry().isEmpty();
+	    String identifier = "";
+	    String version = mr.getVersion();
+	    
+	    if (mr instanceof CodeSystem) {
+	        CodeSystem cs = (CodeSystem) mr;
+	        identifier = cs.getIdentifier().get(0).getValue();
+	    } else if (mr instanceof ValueSet) {
+	        ValueSet vs = (ValueSet) mr;
+	        identifier = vs.getIdentifier().get(0).getId();
+	    }
+	    
+	    Bundle response = searchForResource(tc, mr.getClass(), identifier, version);
+	    return isResponseNotEmpty(response);
+	}
+
+	protected Bundle searchForResource(IGenericClient tc, Class<? extends Resource> resourceClass, String identifier, String version) {
+	    return tc.search().forResource(resourceClass)
+	            .where(new StringClientParam("identifier").matches().value(identifier))
+	            .and(new StringClientParam("version").matches().value(version))
+	            .cacheControl(CacheControlDirective.noCache())
+	            .returnBundle(Bundle.class)
+	            .execute();
+	}
+
+	private boolean isResponseNotEmpty(Bundle response) {
+	    return response.getEntry() != null && !response.getEntry().isEmpty();
 	}
 
 	protected String insertCS(IGenericClient tc, final String id, final PublicationStatus ps, final CodeSystemContentMode cscm, String oid, String name, String version, List<CodeDTO> codes) {
