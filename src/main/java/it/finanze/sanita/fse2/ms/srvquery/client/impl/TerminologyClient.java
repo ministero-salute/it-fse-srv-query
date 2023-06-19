@@ -370,7 +370,7 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	public String insertCS(String oid, String name, String version, List<CodeDTO> codes) {
-		return insertCS(tc, null, PublicationStatus.DRAFT, CodeSystemContentMode.FRAGMENT, oid, name, version, codes);
+		return insertCS(tc, null, PublicationStatus.DRAFT, CodeSystemContentMode.COMPLETE, oid, name, version, codes);
 	}
 
 	public String insertVS(String name, final String url, Map<MetadataResource, List<CodeDTO>> codes) {
