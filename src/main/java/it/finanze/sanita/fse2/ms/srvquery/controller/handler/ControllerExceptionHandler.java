@@ -4,26 +4,30 @@
 package it.finanze.sanita.fse2.ms.srvquery.controller.handler;
 
 
-import brave.Tracer;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseDTO;
-import lombok.extern.slf4j.Slf4j;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.error.ErrorBuilderDTO.createGenericError;
+import static it.finanze.sanita.fse2.ms.srvquery.enums.ErrorClassEnum.TIMEOUT;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.error.ErrorBuilderDTO.createGenericError;
+import brave.Tracer;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseDTO;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.ClientException;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  *	Exceptions handler
  */
 @ControllerAdvice
 @Slf4j
-public class ExceptionCTL extends ResponseEntityExceptionHandler {
+public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     /**
      * Tracker log.
@@ -52,6 +56,34 @@ public class ExceptionCTL extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(out, headers, out.getStatus());
     } 
 
+    
+    /**
+	 * Handles generic or unknown exceptions, unexpected thrown during the execution of any operation.
+	 *
+	 * @param ex exception
+	 */
+	@ExceptionHandler(value = {ResourceAccessException.class})
+	protected ResponseEntity<ErrorResponseDTO> handleResourceAccessException(ResourceAccessException ex) {
+		log.error("HANDLER handleResourceAccessException()", ex);
+		ErrorResponseDTO out = new ErrorResponseDTO(getLogTraceInfo(), TIMEOUT.getType(), TIMEOUT.getTitle(), TIMEOUT.getDetail(), 504, TIMEOUT.getInstance());
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
+		return new ResponseEntity<>(out, headers, out.getStatus());
+	}
+	
+	/**
+	 * Handles generic or unknown exceptions, unexpected thrown during the execution of any operation.
+	 *
+	 * @param ex exception
+	 */
+	@ExceptionHandler(value = {ClientException.class})
+	protected ResponseEntity<ErrorResponseDTO> handleResourceAccessException(ClientException ex) {
+		log.error("HANDLER handleResourceAccessException()", ex);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
+		return new ResponseEntity<>(ex.getError(), headers, ex.getStatusCode());
+	}
+	
     
     
     /**

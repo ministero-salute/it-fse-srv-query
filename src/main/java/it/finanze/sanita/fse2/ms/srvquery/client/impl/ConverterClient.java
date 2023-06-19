@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,14 +45,7 @@ public class ConverterClient implements IConverterClient {
 	    HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
 
 	    String url = msUrlCFG.getMsConverterHost() + "/v1/metadata-resource/from/"+format.toString()+"/to-fhir-json";
-	    ConversionResponseDTO out = null;
-	    try {
-	    	out = restTemplate.postForObject(url, entity, ConversionResponseDTO.class);
-	    } catch (ResourceAccessException ex) {
-			//TODO - Gestisci il timeout
-		}
-	    
-	    return out;
+	    return restTemplate.postForObject(url, entity, ConversionResponseDTO.class);
 	}
 	
 	@Override
@@ -71,13 +63,6 @@ public class ConverterClient implements IConverterClient {
 	    headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 	    HttpEntity<MultiValueMap<String, Object>> entity = new HttpEntity<>(body, headers);
 	    String url = msUrlCFG.getMsConverterHost() + "/v1/metadata-resource/from-fhir-json/to/"+format.toString();
-	    ConversionResponseDTO out = null;
-	    try {
-	    	out = restTemplate.postForObject(url, entity, ConversionResponseDTO.class);
-	    } catch (ResourceAccessException ex) {
-			//TODO - Gestisci il timeout
-		}
-	    
-	    return out;
+	    return restTemplate.postForObject(url, entity, ConversionResponseDTO.class);
 	}
 }

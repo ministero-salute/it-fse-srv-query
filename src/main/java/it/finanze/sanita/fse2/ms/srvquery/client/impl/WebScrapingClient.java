@@ -16,12 +16,7 @@ public class WebScrapingClient implements IWebScrapingClient {
 
 	@Override
 	public String webScraper(final String url) {
-		String json = "";
-		try {
-			json = restTemplate.getForObject(url, String.class);
-		} catch (Exception ex) {
-			log.error("Errow while perform web scraper method:",ex);
-		}
-		return json;
+		log.info(String.format("Web scraper client with url: %s",url));
+		return restTemplate.getForObject(url, String.class);
 	}
 }

@@ -14,10 +14,8 @@ import org.springframework.web.client.ResponseErrorHandler;
 
 import com.google.gson.Gson;
 
-import it.finanze.sanita.fse2.ms.srvquery.dto.ErrorDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseDTO;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.base.NotFoundException;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.ClientException;
 
 @Component
 public class RestTemplateResponseErrorHandler implements ResponseErrorHandler {
@@ -32,13 +30,8 @@ public class RestTemplateResponseErrorHandler implements ResponseErrorHandler {
 	public void handleError(ClientHttpResponse httpResponse) throws IOException {
 		String result = IOUtils.toString(httpResponse.getBody(), StandardCharsets.UTF_8);
 		ErrorResponseDTO error = new Gson().fromJson(result, ErrorResponseDTO.class);
-		Integer status = httpResponse.getStatusCode().value();
-		if (httpResponse.getStatusCode() == HttpStatus.NOT_FOUND) {
-			ErrorDTO e = new ErrorDTO("type", "title", "detail", "instance");
-			throw new NotFoundException(e);
-		} else {
-			throw new BusinessException("");
-		}
+		Integer statusCode = httpResponse.getStatusCode().value();
+		throw new ClientException(error,statusCode);
 	}
 
 }
