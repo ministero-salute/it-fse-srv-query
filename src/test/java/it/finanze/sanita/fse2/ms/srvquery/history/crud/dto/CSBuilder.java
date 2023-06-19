@@ -1,11 +1,14 @@
 package it.finanze.sanita.fse2.ms.srvquery.history.crud.dto;
 
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Identifier;
 
 import java.util.Date;
 
 import static org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.*;
 
 public class CSBuilder {
 
@@ -19,6 +22,7 @@ public class CSBuilder {
         addIdentifier(oid);
         addVersion("1.0.0");
         addDate(new Date());
+        addStatus(ACTIVE);
     }
 
     private void addDate(Date date) {
@@ -59,6 +63,10 @@ public class CSBuilder {
 
     public void addVersion(String version) {
         if(version != null) cs.setVersion(version);
+    }
+
+    public void addStatus(PublicationStatus status) {
+        if(status != null) cs.setStatus(status);
     }
 
     public CodeSystem build() {

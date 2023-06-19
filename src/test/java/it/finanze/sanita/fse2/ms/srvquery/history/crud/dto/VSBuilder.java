@@ -1,10 +1,12 @@
 package it.finanze.sanita.fse2.ms.srvquery.history.crud.dto;
 
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.Date;
 
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
 import static org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 
 public class VSBuilder {
@@ -20,6 +22,7 @@ public class VSBuilder {
         addIdentifier(oid);
         addVersion("1.0.0");
         addDate(new Date());
+        addStatus(ACTIVE);
     }
 
     private void addDate(Date date) {
@@ -64,6 +67,10 @@ public class VSBuilder {
 
     public void addInclusionCS(String uri) {
         vs.getCompose().getInclude().add(new ValueSet.ConceptSetComponent().setSystem(uri));
+    }
+
+    public void addStatus(Enumerations.PublicationStatus status) {
+        if(status != null) vs.setStatus(status);
     }
 
     public ValueSet build() {
