@@ -13,10 +13,14 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.*;
 @Value
 @JsonInclude(NON_NULL)
 public class HistoryDTO {
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+
+    private static final String PTT_ISO_8601 = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+
+    @JsonFormat(pattern = PTT_ISO_8601)
     Date currentTime;
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    @JsonFormat(pattern = PTT_ISO_8601)
     Date lastUpdate;
+
     Map<String, HistoryDetailsDTO> history;
 
     @Value
