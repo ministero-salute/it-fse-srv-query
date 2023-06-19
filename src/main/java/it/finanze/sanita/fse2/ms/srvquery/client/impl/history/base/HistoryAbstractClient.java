@@ -1,17 +1,15 @@
 package it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.types.CompactCS;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.types.CompactVS;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.MalformedResourceException;
+import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.Parameters;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.*;
 
 import java.util.Date;
@@ -19,7 +17,7 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.rest.api.CacheControlDirective.noCache;
 import static ca.uhn.fhir.rest.api.SummaryEnum.TRUE;
-import static org.hl7.fhir.r4.model.ResourceType.*;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
 import static org.springframework.http.HttpMethod.POST;
 
 public abstract class HistoryAbstractClient {
@@ -47,6 +45,7 @@ public abstract class HistoryAbstractClient {
         Bundle bundle = client
             .search()
             .forResource(CodeSystem.class)
+            .where(isActiveCS())
             .cacheControl(noCache())
             .returnBundle(Bundle.class)
             .count(CHUNK_SIZE)
@@ -104,11 +103,11 @@ public abstract class HistoryAbstractClient {
         // Working var
         HistoryResourceDTO res;
         // Check type
-        ResourceType type = fromCode(resource.fhirType());
+        ResourceType type = ResourceType.fromCode(resource.fhirType());
         // Start mapping
-        if(type == CodeSystem) {
+        if(type == ResourceType.CodeSystem) {
             res = new CompactCS(resourceId, versionId, (CodeSystem) resource).convert();
-        } else if(type == ValueSet) {
+        } else if(type == ResourceType.ValueSet) {
             res = new CompactVS(resourceId, versionId, (ValueSet) resource).convert();
         }else {
             throw new IllegalArgumentException("Unknown type to map: " + type);
@@ -137,7 +136,7 @@ public abstract class HistoryAbstractClient {
     private void applyResourceExpansion(ValueSet vs, String resourceId, String versionId) {
         ValueSet expanded = client
             .operation()
-            .onInstance(new IdType(ValueSet.name(), resourceId, versionId))
+            .onInstance(new IdType(ResourceType.ValueSet.name(), resourceId, versionId))
             .named("expand")
             .withNoParameters(Parameters.class)
             .cacheControl(noCache())
@@ -159,6 +158,10 @@ public abstract class HistoryAbstractClient {
             resource = null;
         }
         return resource;
+    }
+
+    private ICriterion<?> isActiveCS() {
+        return CodeSystem.STATUS.exactly().identifier(ACTIVE.getDisplay());
     }
 
     protected void reset() {
