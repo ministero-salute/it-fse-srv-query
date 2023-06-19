@@ -20,6 +20,7 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.response.MetadataResourceResponseD
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.TranslateResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.LanguageEnum;
 import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
+import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 
 @RestController
 public class MetadataResourceCTL extends AbstractCTL implements IMetadataResourceCTL {
@@ -56,6 +57,8 @@ public class MetadataResourceCTL extends AbstractCTL implements IMetadataResourc
         	cs = tc.readCS(id);
         	List<ConceptDefinitionComponent> concepts = translateConcepts(txc, cs.getConcept(), from, to);
         	cs.setConcept(concepts);
+        	String str = FHIRR4Helper.serializeResource(cs, true, false, false);
+        	System.out.println(str);
         	tc.updateCS(cs);
     	} catch (Exception e) {
     		status = false;
@@ -79,8 +82,13 @@ public class MetadataResourceCTL extends AbstractCTL implements IMetadataResourc
     		}
     		if (!bFound) {
     			ConceptDefinitionDesignationComponent cddc = new ConceptDefinitionDesignationComponent();
-    			cddc.setLanguage(cddc.getLanguage());
-    			cddc.setValue(txc.translate(cmc.getDisplay(), from.getCode(), to.getCode()).getTranslatedText());
+    			cddc.setLanguage(to.getDescription());
+    			String fromLan = "auto";
+    			if (from!=null) {
+    				fromLan = from.getCode();
+    			}
+    			cddc.setValue(txc.translate(cmc.getDisplay(), fromLan, to.getCode()).getTranslatedText());
+    			cmc.getDesignation().add(cddc);
     		}
     	}
     	return concepts;
