@@ -6,10 +6,13 @@ import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.VSBuilder;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
 
+import java.time.OffsetDateTime;
+import java.util.Date;
 import java.util.Map;
 
 import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO;
 import static java.lang.String.format;
+import static java.time.ZoneOffset.UTC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -112,6 +115,11 @@ public abstract class AbstractTestResources {
 
     protected void assertResourceSize(int size, Map<String, HistoryDetailsDTO> changes) {
         assertEquals(size, changes.size(), "Expected size doesn't match current one");
+    }
+
+    @SuppressWarnings("unused")
+    protected String printDateAsUTC(Date date) {
+        return OffsetDateTime.ofInstant(date.toInstant(), UTC).toString();
     }
 
 }
