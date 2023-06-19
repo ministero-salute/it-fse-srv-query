@@ -4,6 +4,7 @@ import it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.CSBuilder;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.VSBuilder;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.time.OffsetDateTime;
@@ -13,6 +14,7 @@ import java.util.Map;
 import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO;
 import static java.lang.String.format;
 import static java.time.ZoneOffset.UTC;
+import static org.hl7.fhir.r4.model.Enumerations.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -22,6 +24,12 @@ public abstract class AbstractTestResources {
         builder.addCodes("M", "Male");
         builder.addCodes("F", "Female");
         return builder.build();
+    }
+
+    protected CodeSystem createGenderTestCS(PublicationStatus id) {
+        CodeSystem cs = createGenderTestCS();
+        cs.setStatus(id);
+        return cs;
     }
 
     protected CodeSystem createOreTestCS() {
@@ -51,31 +59,9 @@ public abstract class AbstractTestResources {
         return builder.build();
     }
 
-    protected ValueSet createPrimaryColorsTestVS() {
-        VSBuilder builder = new VSBuilder(
-            "2.144.33.22.04.39",
-            "http://url/primary-colors"
-        );
-        builder.addCodes("R", "Red");
-        builder.addCodes("Y", "Yellow");
-        builder.addCodes("B", "Blue");
-        return builder.build();
-    }
-
     protected CodeSystem createSecondaryColorsTestCS() {
         CSBuilder builder = new CSBuilder("2.144.33.22.04.40");
         builder.addUrl("http://url/secondary-colors");
-        builder.addCodes("O", "Orange");
-        builder.addCodes("G", "Green");
-        builder.addCodes("V", "Violet");
-        return builder.build();
-    }
-
-    protected ValueSet createSecondaryColorsTestVS() {
-        VSBuilder builder = new VSBuilder(
-            "2.144.33.22.04.40",
-            "http://url/secondary-colors"
-        );
         builder.addCodes("O", "Orange");
         builder.addCodes("G", "Green");
         builder.addCodes("V", "Violet");

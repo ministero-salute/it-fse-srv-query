@@ -1,8 +1,10 @@
 package it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base;
 
+import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.http.HttpMethod;
 
@@ -11,12 +13,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.*;
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO.*;
+import static ca.uhn.fhir.rest.api.CacheControlDirective.noCache;
+import static it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.HistoryUtils.*;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO.ANY_VERSION;
 import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.*;
-import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.INSERT;
-import static org.hl7.fhir.r4.model.Bundle.*;
+import static org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import static org.hl7.fhir.r4.model.Bundle.HTTPVerb;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
 
 public class HistoryComposer {
 
@@ -36,8 +42,11 @@ public class HistoryComposer {
             // Add resources
             extract(method, lastUpdate);
             // Verify if next page is available
-            bundle = HistoryUtils.hasNextPage(client, bundle);
+            bundle = hasNextPage(client, bundle);
         }
+        // Omit draft resources
+        omitDraftResourcesFromHistory();
+        // Now returns
         return map;
     }
 
@@ -52,15 +61,21 @@ public class HistoryComposer {
             HistoryOperationEnum type = getHistoryOperation(op, entry);
             // Check if resource deleted
             if(res != null) {
+                // Get status
+                PublicationStatus status = getPublicationStatus(res);
                 // Register then return id
-                String id = registerResIfAbsent(res, type);
+                String id = registerResIfAbsent(res, type, status);
                 // If we reached the POST operation of a DELETED resource
                 if(isLastOperation(id, DELETE) && type == INSERT) {
                     omitResourceExistedInBetween(res, id, lastUpdate);
                 }
                 // If we reached the POST operation of an UPDATED resource
                 else if(isLastOperation(id, UPDATE) && type == INSERT) {
-                    reviseResourceUpsertInBetween(res, id, lastUpdate);
+                    reviseResourceUpsertInBetween(res, id, lastUpdate, status);
+                }
+                // If we reached the PUT/PATCH operation of an UPDATED resource
+                else if(isLastOperation(id, UPDATE) && type == UPDATE) {
+                    reviseResourceFromDraftToActive(res, id);
                 }
             } else {
                 // For deleted resource getResource() returns null,
@@ -70,14 +85,55 @@ public class HistoryComposer {
         }
     }
 
-    private void reviseResourceUpsertInBetween(Resource res, String id, Date lastUpdate) {
+    private void omitDraftResourcesFromHistory() {
+        List<String> keys = map
+            .keySet()
+            .stream()
+            .filter(id -> map.get(id).getStatus() != ACTIVE)
+            .collect(Collectors.toList());
+        keys.forEach(map::remove);
+    }
+
+    private void reviseResourceFromDraftToActive(Resource res, String id) {
+        // Skip if resource is not active
+        if(map.get(id).getStatus() == ACTIVE) {
+            // Verify if previous one was different from active
+            PublicationStatus previous = getPreviousPublicationStatus(res, id);
+            // Check
+            if(previous != ACTIVE) {
+                // Register as an insertion
+                String root = map.get(id).getVersion();
+                // Replace it
+                map.replace(id, new HistoryDetailsDTO(root, INSERT, ACTIVE));
+            }
+        }
+    }
+
+    private PublicationStatus getPreviousPublicationStatus(Resource res, String id) {
+        // Map as integer, then subtract to get previous version
+        int version = Integer.parseInt(asVersionId(res)) - 1;
+        // Retrieve latest version
+        Resource raw = (Resource) client
+            .read()
+            .resource(res.fhirType())
+            .withIdAndVersion(id, String.valueOf(version))
+            .summaryMode(SummaryEnum.TRUE)
+            .cacheControl(noCache())
+            .preferResponseType(Resource.class)
+            .execute();
+        // Get status
+        return getPublicationStatus(raw);
+    }
+
+    private void reviseResourceUpsertInBetween(Resource res, String id, Date lastUpdate, PublicationStatus status) {
         // Retrieve creation date
         Date insertionDate = res.getMeta().getLastUpdated();
         // If defined and updated in between the lastUpdate, define as INSERT instead of UPDATE
         if(insertionDate.after(lastUpdate)) {
+            // Get root
+            String version = map.get(id).getVersion();
             // Replace it
-            String root = map.get(id).getVersion();
-            map.replace(id, new HistoryDetailsDTO(root, INSERT));
+            map.replace(id, new HistoryDetailsDTO(version, INSERT, status));
         }
     }
 
@@ -96,14 +152,20 @@ public class HistoryComposer {
     }
 
     private void registerDeletedResIfAbsent(BundleEntryComponent entry, HistoryOperationEnum type) {
-        map.putIfAbsent(HistoryUtils.asId(entry.getFullUrl()), new HistoryDetailsDTO(ANY_VERSION, type));
+        // TODO Decide how to define deleted resources as status, or if one should use the previous value
+        // TODO Remember any status != ACTIVE will be erased from the history
+        map.putIfAbsent(asId(entry.getFullUrl()), new HistoryDetailsDTO(ANY_VERSION, type, ACTIVE));
     }
 
-    private String registerResIfAbsent(Resource res, HistoryOperationEnum type) {
+    private String registerResIfAbsent(
+        Resource res,
+        HistoryOperationEnum type,
+        PublicationStatus status
+    ) {
         // Get id
-        String id = HistoryUtils.asId(res);
+        String id = asId(res);
         // Register operation op
-        map.putIfAbsent(id, new HistoryDetailsDTO(HistoryUtils.asVersionId(res), type));
+        map.putIfAbsent(id, new HistoryDetailsDTO(asVersionId(res), type, status));
         // Return id
         return id;
     }

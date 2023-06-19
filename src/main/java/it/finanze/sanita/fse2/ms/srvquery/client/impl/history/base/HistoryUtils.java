@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_NEXT;
+import static org.hl7.fhir.r4.model.Enumerations.*;
 
 public class HistoryUtils {
 
@@ -66,6 +67,16 @@ public class HistoryUtils {
 
     public static Date getTime(LocalDateTime time, int offset) {
         return Date.from(time.toInstant(ZoneOffset.ofHours(offset)));
+    }
+
+    public static PublicationStatus getPublicationStatus(Resource res) {
+        return PublicationStatus.fromCode(
+            res
+            .getNamedProperty(CodeSystem.SP_STATUS)
+            .getValues()
+            .get(0)
+            .primitiveValue()
+        );
     }
 
     @Nullable

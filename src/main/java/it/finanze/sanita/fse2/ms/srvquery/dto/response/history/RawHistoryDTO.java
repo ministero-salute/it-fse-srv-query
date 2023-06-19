@@ -6,6 +6,8 @@ import lombok.Value;
 import java.util.Date;
 import java.util.Map;
 
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+
 @Value
 public class RawHistoryDTO {
 
@@ -19,5 +21,6 @@ public class RawHistoryDTO {
         public final static String ANY_VERSION = "*";
         String version;
         HistoryOperationEnum op;
+        PublicationStatus status;
     }
 }

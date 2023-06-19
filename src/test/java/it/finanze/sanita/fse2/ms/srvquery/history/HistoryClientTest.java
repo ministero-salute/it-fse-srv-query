@@ -14,14 +14,16 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.Date;
 import java.util.Map;
 
+import static it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.HistoryUtils.getCurrentTime;
 import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Profile.TEST;
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.*;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO;
 import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO.ANY_VERSION;
 import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.*;
-import static it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.HistoryUtils.getCurrentTime;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.DRAFT;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.*;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles(TEST)
@@ -397,12 +399,73 @@ class HistoryClientTest extends AbstractTestResources {
         assertResource(changes, "gender", gender, "2", INSERT, "t0");
     }
 
+    /**
+     * Verify the flow t0->INSERT->t1->UPDATE, it should return an insert operation
+     * because if an element has been inserted as whatever status, then it becomes active
+     * it should be treated as an insertion
+     */
     @Test
-    public void createValueset() {
-        String primary = crud.createResource(createPrimaryColorsTestCS());
-        String secondary = crud.createResource(createSecondaryColorsTestCS());
-        String colors = crud.createResource(createColorsTestVS());
-        System.out.println(primary);
+    @DisplayName("Last update is not null then add/update element status from draft to active")
+    public void resourceFromDraftToActive() {
+        // To insert
+        CodeSystem cs = createGenderTestCS(DRAFT);
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = getCurrentTime();
+        // Insert CS
+        String gender = crud.createResource(cs);
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(now));
+        // ================
+        // ===== <T1> =====
+        // ================
+        // Get time
+        now = getCurrentTime();
+        // Change status from DRAFT to ACTIVE
+        CSBuilder builder = CSBuilder.from(crud.readResource(gender, CodeSystem.class));
+        builder.addStatus(ACTIVE);
+        cs = builder.build();
+        // Update CS
+        crud.updateResource(cs);
+        // Verify again
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        assertResource(changes, "gender", gender, "2", INSERT, "t1");
+    }
+
+    /**
+     * Verify the flow t0->INSERT+UPDATE, it should return an insert operation
+     * because if an element has been inserted as whatever status, then it becomes active
+     * it should be treated as an insertion
+     */
+    @Test
+    @DisplayName("Last update is not null then add/update element status from draft to active")
+    public void resourceFromDraftToActiveSingle() {
+        // To insert
+        CodeSystem cs = createGenderTestCS(DRAFT);
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = getCurrentTime();
+        // Insert CS
+        String gender = crud.createResource(cs);
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(now));
+        // Change status from DRAFT to ACTIVE
+        CSBuilder builder = CSBuilder.from(crud.readResource(gender, CodeSystem.class));
+        builder.addStatus(ACTIVE);
+        cs = builder.build();
+        // Update CS
+        crud.updateResource(cs);
+        // Verify again
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        assertResource(changes, "gender", gender, "2", INSERT, "t0");
     }
 
     @AfterAll
