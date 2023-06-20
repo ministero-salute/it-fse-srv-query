@@ -39,6 +39,7 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.ValidateCodeResultDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.ResultPushEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.SubscriptionEnum;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.DocumentAlreadyPresentException;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
 import lombok.extern.slf4j.Slf4j;
@@ -542,7 +543,12 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	}
 	
 	
-	public String transaction(CodeSystem codeSystem) {
+	public String transaction(final CodeSystem codeSystem) {
+		if(existMetadataResource(tc, codeSystem)) {
+			String oid = codeSystem.getIdentifier().get(0).getValue();
+			String version = codeSystem.getVersion();
+			throw new DocumentAlreadyPresentException(String.format("CodeSystem già esistente con oid %s e version %s", oid,version));
+		}
 		IIdType id = tc.create().resource(codeSystem).execute().getId();
 		return id.getValue().toString();
 	}

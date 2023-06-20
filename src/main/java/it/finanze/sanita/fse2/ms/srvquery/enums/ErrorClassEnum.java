@@ -14,6 +14,7 @@ public enum ErrorClassEnum {
 	 */
 	GENERIC("/errors", "Generic", "Errore generico", "/generic"),
 	VALIDATION_MANDATORY("/errors/fields", "Missing", "Campo obbligatorio non presente", "/mandatory"),
+	CONFLICT("/errors/conflict", "Conflict", "Documento già esistente", "/conflict"),
     TIMEOUT("/errors", "Timeout", "Errore di timeout", "/timeout");
 
 

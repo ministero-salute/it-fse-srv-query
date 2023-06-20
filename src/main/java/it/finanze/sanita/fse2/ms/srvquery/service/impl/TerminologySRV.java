@@ -30,6 +30,7 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.UploadRespons
 import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.ResultPushEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.SubscriptionEnum;
+import it.finanze.sanita.fse2.ms.srvquery.enums.TypeEnum;
 import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
@@ -138,16 +139,20 @@ public class TerminologySRV implements ITerminologySRV {
 	public UploadResponseDTO uploadTerminology(FormatEnum formatEnum,RequestDTO creationInfo, MultipartFile file) throws IOException {
 		log.info("Upload terminology with format:" + formatEnum);
 		TerminologyClient terminologyClient = getTerminologyClient();
-		
+
 		String fhirBundle = new String(file.getBytes() ,StandardCharsets.UTF_8);
 		if(!FormatEnum.FHIR_R4_JSON.equals(formatEnum)) {
+			if(creationInfo == null) {
+				creationInfo = new RequestDTO();
+				creationInfo.setType(TypeEnum.CODE_SYSTEM);
+			}
 			ConversionResponseDTO res = converter.callConvertToFhirJson(formatEnum,creationInfo,file);
 			fhirBundle = res.getResult();
 		}
-		
+
 		CodeSystem codeSystem = FHIRR4Helper.deserializeResource(CodeSystem.class, fhirBundle, true);
 		String location = terminologyClient.transaction(codeSystem);
-		
+
 		UploadResponseDTO out = new UploadResponseDTO();
 		out.setLocation(location);
 		out.setInsertedItems(codeSystem.getConcept().size());

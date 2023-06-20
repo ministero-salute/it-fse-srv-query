@@ -9,6 +9,7 @@ import static it.finanze.sanita.fse2.ms.srvquery.enums.ErrorClassEnum.TIMEOUT;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -20,6 +21,8 @@ import brave.Tracer;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ClientException;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.DocumentAlreadyPresentException;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.base.ConflictException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -56,6 +59,21 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(out, headers, out.getStatus());
     } 
 
+    /**
+   	 * Handles generic or unknown exceptions, unexpected thrown during the execution of any operation.
+   	 *
+   	 * @param ex exception
+   	 */
+   	@ExceptionHandler(value = {DocumentAlreadyPresentException.class})
+   	protected ResponseEntity<ErrorResponseDTO> handleConflictException(ConflictException ex) {
+   		log.error("HANDLER handleConflictException()", ex);
+   		HttpHeaders headers = new HttpHeaders();
+   		headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
+   		LogTraceInfoDTO traceInfo = getLogTraceInfo();
+		ErrorResponseDTO response = new ErrorResponseDTO(traceInfo, ex.getError());
+
+		return new ResponseEntity<>(response, headers, HttpStatus.CONFLICT);
+   	}
     
     /**
 	 * Handles generic or unknown exceptions, unexpected thrown during the execution of any operation.

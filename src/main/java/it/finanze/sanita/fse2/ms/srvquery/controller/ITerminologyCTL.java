@@ -41,7 +41,7 @@ public interface ITerminologyCTL {
 			@ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
     UploadResponseDTO uploadTerminology(
     		@PathVariable FormatEnum format,
-			@RequestPart RequestDTO creationInfo,
+			@RequestPart(required = false) RequestDTO creationInfo,
 			@RequestPart(name = "file") MultipartFile file,HttpServletRequest request) throws IOException;
     
     @GetMapping(path = "/{oid}/{version}", produces = { MediaType.APPLICATION_JSON_VALUE })
