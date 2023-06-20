@@ -27,30 +27,33 @@ import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
 public class HistoryComposer {
 
     private final IGenericClient client;
-    private Bundle bundle;
+    private final Bundle[] bundles;
     private final Map<String, HistoryDetailsDTO> map;
 
-    public HistoryComposer(IGenericClient client, Bundle bundle) {
+    public HistoryComposer(IGenericClient client, Bundle ...bundle) {
         this.client = client;
-        this.bundle = bundle;
+        this.bundles = bundle;
         this.map = new HashMap<>();
     }
 
     public Map<String, HistoryDetailsDTO> compose(@Nullable HttpMethod method, Date lastUpdate) {
-        // Iterate for each page of the bundle
-        while (bundle != null) {
-            // Add resources
-            extract(method, lastUpdate);
-            // Verify if next page is available
-            bundle = hasNextPage(client, bundle);
+        // For each bundle
+        for (Bundle bundle : bundles) {
+            // Iterate for each page of the bundle
+            while (bundle != null) {
+                // Add resources
+                extract(method, lastUpdate, bundle);
+                // Verify if next page is available
+                bundle = hasNextPage(client, bundle);
+            }
+            // Omit draft resources
+            omitDraftResourcesFromHistory();
         }
-        // Omit draft resources
-        omitDraftResourcesFromHistory();
         // Now returns
         return map;
     }
 
-    private void extract(@Nullable HttpMethod op, Date lastUpdate) {
+    private void extract(@Nullable HttpMethod op, Date lastUpdate, Bundle bundle) {
         // Retrieve entries
         List<BundleEntryComponent> resources = bundle.getEntry();
         // Iterate
@@ -112,6 +115,10 @@ public class HistoryComposer {
     private PublicationStatus getPreviousPublicationStatus(Resource res, String id) {
         // Map as integer, then subtract to get previous version
         int version = Integer.parseInt(asVersionId(res)) - 1;
+        // Integrity check
+        if(version == 0) {
+            throw new IllegalArgumentException("Cannot search for version zero, this is a bug");
+        }
         // Retrieve latest version
         Resource raw = (Resource) client
             .read()

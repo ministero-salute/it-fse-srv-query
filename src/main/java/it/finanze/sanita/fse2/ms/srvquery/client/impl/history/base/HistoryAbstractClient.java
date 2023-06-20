@@ -2,6 +2,8 @@ package it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.ICriterion;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.types.CompactCS;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.types.CompactVS;
@@ -20,6 +22,7 @@ import static ca.uhn.fhir.rest.api.SummaryEnum.TRUE;
 import static java.time.ZoneOffset.UTC;
 import static java.util.TimeZone.getTimeZone;
 import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
+import static org.hl7.fhir.r4.model.SearchParameter.*;
 import static org.springframework.http.HttpMethod.POST;
 
 public abstract class HistoryAbstractClient {
@@ -43,49 +46,62 @@ public abstract class HistoryAbstractClient {
     }
 
     private RawHistoryDTO createHistoryFromBegins() {
-        // Execute query by resource op and last-update date
-        Bundle bundle = client
-            .search()
-            .forResource(CodeSystem.class)
-            .where(isActiveCS())
-            .cacheControl(noCache())
-            .returnBundle(Bundle.class)
-            .count(CHUNK_SIZE)
-            .summaryMode(TRUE)
-            .execute();
+        // Create timestamp to sync both queries
+        Date timestamp = new Date();
         // Create composer
-        HistoryComposer composer = new HistoryComposer(client, bundle);
-        // Get current time
-        Date currentTime = bundle.getMeta().getLastUpdated();
+        HistoryComposer composer = new HistoryComposer(
+            client,
+            getHistoryFromBeginsButUntil(CodeSystem.class, timestamp),
+            getHistoryFromBeginsButUntil(ValueSet.class, timestamp)
+        );
         // Retrieve resources
         return new RawHistoryDTO(
-            currentTime,
+            timestamp,
             null,
             composer.compose(POST, null)
         );
     }
 
     private RawHistoryDTO createHistoryFromDate(Date lastUpdate) {
-        // Execute query by resource op and last-update date
-        Bundle bundle = client
-            .history()
-            .onType(CodeSystem.class)
-            .returnBundle(Bundle.class)
-            .cacheControl(noCache())
-            .since(getTimeUTC(lastUpdate))
-            .summaryMode(TRUE)
-            .count(CHUNK_SIZE)
-            .execute();
+        // Create timestamp to sync both queries
+        Date timestamp = new Date();
         // Create composer
-        HistoryComposer composer = new HistoryComposer(client, bundle);
-        // Get current time
-        Date currentTime = bundle.getMeta().getLastUpdated();
+        HistoryComposer composer = new HistoryComposer(
+            client,
+            getHistoryFromDateButUntil(CodeSystem.class, lastUpdate, timestamp),
+            getHistoryFromDateButUntil(ValueSet.class, lastUpdate, timestamp)
+        );
         // Retrieve resources
         return new RawHistoryDTO(
-            currentTime,
+            timestamp,
             lastUpdate,
             composer.compose(null, lastUpdate)
         );
+    }
+
+    private Bundle getHistoryFromBeginsButUntil(Class<? extends BaseResource> type, Date until) {
+        return client
+            .search()
+            .forResource(type)
+            .where(isActiveResource())
+            .cacheControl(noCache())
+            .returnBundle(Bundle.class)
+            .count(CHUNK_SIZE)
+            .summaryMode(TRUE)
+            .lastUpdated(new DateRangeParam(null, getTimeUTC(until)))
+            .execute();
+    }
+
+    private Bundle getHistoryFromDateButUntil(Class<? extends BaseResource> type, Date lastUpdate, Date until) {
+        return client
+            .history()
+            .onType(type)
+            .returnBundle(Bundle.class)
+            .cacheControl(noCache())
+            .at(new DateRangeParam(getTimeUTC(lastUpdate), getTimeUTC(until)))
+            .summaryMode(TRUE)
+            .count(CHUNK_SIZE)
+            .execute();
     }
 
     protected Optional<HistoryResourceDTO> getMappedResource(String resourceId, String versionId) throws MalformedResourceException {
@@ -162,8 +178,8 @@ public abstract class HistoryAbstractClient {
         return resource;
     }
 
-    private ICriterion<?> isActiveCS() {
-        return CodeSystem.STATUS.exactly().identifier(ACTIVE.toCode());
+    private ICriterion<?> isActiveResource() {
+        return new TokenClientParam(SP_STATUS).exactly().identifier(ACTIVE.toCode());
     }
 
     private DateTimeType getTimeUTC(Date lastUpdate) {

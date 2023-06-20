@@ -5,6 +5,7 @@ import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
 import it.finanze.sanita.fse2.ms.srvquery.history.base.AbstractTestResources;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.FhirCrudClient;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.CSBuilder;
+import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +69,10 @@ class HistoryClientTest extends AbstractTestResources {
     @DisplayName("Last update is null then add items")
     public void emptyServerThenAddMore() {
         // To insert
-        CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
+        BaseResource[] cs = new BaseResource[]{
+            createGenderTestCS(),
+            createOreTestCS()
+        };
         // Verify emptiness
         assertEmptyServer(client.getHistoryMap(null));
         // Insert CS
@@ -96,7 +100,7 @@ class HistoryClientTest extends AbstractTestResources {
     @DisplayName("Last update is null then add/remove items")
     public void emptyServerThenAddRemove() {
         // To insert
-        CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
+        BaseResource[] cs = new BaseResource[]{createGenderTestCS(), createOreTestCS()};
         // Verify emptiness
         assertEmptyServer(client.getHistoryMap(null));
         // Insert CS
@@ -124,7 +128,7 @@ class HistoryClientTest extends AbstractTestResources {
         // ================
         // => Check emptiness, then add one resource and verify
         // To insert
-        CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
+        BaseResource[] cs = new BaseResource[]{createGenderTestCS(), createOreTestCS()};
         // Retrieve current time
         Date init = new Date();
         Date now = init;
@@ -180,7 +184,7 @@ class HistoryClientTest extends AbstractTestResources {
         // ================
         // => Check emptiness, then add one resource and verify
         // To insert
-        CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
+        BaseResource[] cs = new BaseResource[]{createGenderTestCS(), createOreTestCS()};
         // Retrieve current time
         Date now = new Date();
         // Verify emptiness
@@ -242,7 +246,7 @@ class HistoryClientTest extends AbstractTestResources {
         // ================
         // => Check emptiness, then add one resource and verify
         // To insert
-        CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
+        BaseResource[] cs = new BaseResource[]{createGenderTestCS(), createOreTestCS()};
         // Retrieve current time
         Date now = new Date();
         // Verify emptiness
@@ -311,7 +315,7 @@ class HistoryClientTest extends AbstractTestResources {
         // ================
         // => Check emptiness, then add one resource and verify
         // To insert
-        CodeSystem[] cs = new CodeSystem[]{createGenderTestCS()};
+        BaseResource[] cs = new BaseResource[]{createGenderTestCS()};
         // Retrieve current time
         Date now = new Date();
         // Verify emptiness
@@ -363,7 +367,7 @@ class HistoryClientTest extends AbstractTestResources {
     @DisplayName("Last update is not null then add/remove item in-between the time-range")
     public void omitCreatedAndRemovedResources() {
         // To insert
-        CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
+        BaseResource[] cs = new BaseResource[]{createGenderTestCS(), createOreTestCS()};
         // Verify emptiness
         assertEmptyServer(client.getHistoryMap(null));
         // Get time
@@ -386,7 +390,7 @@ class HistoryClientTest extends AbstractTestResources {
     @DisplayName("Last update is not null then add/update item in-between the time-range")
     public void resourceIsCreatedAndUpdated() {
         // To insert
-        CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
+        BaseResource[] cs = new BaseResource[]{createGenderTestCS(), createOreTestCS()};
         // Verify emptiness
         assertEmptyServer(client.getHistoryMap(null));
         // Get time
