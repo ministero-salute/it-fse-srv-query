@@ -123,7 +123,8 @@ public abstract class AbstractTestResources {
     protected Stream<Arguments> getTestResources() {
         return Stream.of(
             Arguments.of((Object) getTestResourcesCS()),
-            Arguments.of((Object) getTestResourcesVS())
+            Arguments.of((Object) getTestResourcesVS()),
+            Arguments.of((Object) getTestResourcesMixed())
         );
     }
 
@@ -132,6 +133,13 @@ public abstract class AbstractTestResources {
             Arguments.of(new TestResource("gender", createGenderTestCS(DRAFT))),
             Arguments.of(new TestResource("colors", createColorsTestVS(DRAFT)))
         );
+    }
+
+    private TestResource[] getTestResourcesMixed() {
+        return new TestResource[] {
+            new TestResource("gender", createGenderTestCS()),
+            new TestResource("colors", createColorsTestVS())
+        };
     }
 
     private TestResource[] getTestResourcesCS() {
