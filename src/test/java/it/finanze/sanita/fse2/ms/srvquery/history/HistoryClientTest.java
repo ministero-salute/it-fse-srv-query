@@ -14,7 +14,6 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.Date;
 import java.util.Map;
 
-import static it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.HistoryUtils.getCurrentTime;
 import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Profile.TEST;
 import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO;
 import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO.ANY_VERSION;
@@ -25,6 +24,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
+/**
+ * TerminologyServer MUST BE set as UTC time,
+ * otherwise the test suite won't work
+ */
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles(TEST)
 @TestInstance(PER_CLASS)
@@ -123,7 +126,7 @@ class HistoryClientTest extends AbstractTestResources {
         // To insert
         CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
         // Retrieve current time
-        Date init = getCurrentTime();
+        Date init = new Date();
         Date now = init;
         // Verify emptiness
         assertEmptyServer(client.getHistoryMap(now));
@@ -138,7 +141,7 @@ class HistoryClientTest extends AbstractTestResources {
         // ================
         // => Add one resource and verify
         // Retrieve current time
-        now = getCurrentTime();
+        now = new Date();
         // Insert CS
         String ore = crud.createResource(cs[1]);
         // Verify again
@@ -149,7 +152,7 @@ class HistoryClientTest extends AbstractTestResources {
         // ================
         // => Given an updated server, verify no ids returns
         // Retrieve current time
-        now = getCurrentTime();
+        now = new Date();
         // Verify again
         changes = client.getHistoryMap(now);
         assertEmptyServer(changes, "t2");
@@ -179,7 +182,7 @@ class HistoryClientTest extends AbstractTestResources {
         // To insert
         CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
         // Retrieve current time
-        Date now = getCurrentTime();
+        Date now = new Date();
         // Verify emptiness
         Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
         assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
@@ -194,7 +197,7 @@ class HistoryClientTest extends AbstractTestResources {
         // ================
         // => Update one resource and verify
         // Retrieve current time
-        now = getCurrentTime();
+        now = new Date();
         // Update CS
         CSBuilder builder = CSBuilder.from(crud.readResource(gender, CodeSystem.class));
         builder.addCodes("U", "Unknown");
@@ -208,7 +211,7 @@ class HistoryClientTest extends AbstractTestResources {
         // ================
         // => Delete one resource and verify
         // Retrieve current time
-        now = getCurrentTime();
+        now = new Date();
         // Delete CS
         crud.deleteResource(gender, CodeSystem.class);
         // Verify again
@@ -220,7 +223,7 @@ class HistoryClientTest extends AbstractTestResources {
         // ================
         // => Given an updated server, verify no ids returns
         // Retrieve current time
-        now = getCurrentTime();
+        now = new Date();
         // Verify again
         changes = client.getHistoryMap(now);
         // Verify emptiness
@@ -241,7 +244,7 @@ class HistoryClientTest extends AbstractTestResources {
         // To insert
         CodeSystem[] cs = new CodeSystem[]{createGenderTestCS(), createOreTestCS()};
         // Retrieve current time
-        Date now = getCurrentTime();
+        Date now = new Date();
         // Verify emptiness
         Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
         assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
@@ -256,7 +259,7 @@ class HistoryClientTest extends AbstractTestResources {
         // ================
         // => Update one resource and verify
         // Retrieve current time
-        now = getCurrentTime();
+        now = new Date();
         // Update CS
         CSBuilder builder = CSBuilder.from(crud.readResource(gender, CodeSystem.class));
         builder.addCodes("U", "Unknown");
@@ -276,7 +279,7 @@ class HistoryClientTest extends AbstractTestResources {
         // ================
         // => Delete one resource and verify
         // Retrieve current time
-        now = getCurrentTime();
+        now = new Date();
         // Delete CS
         crud.deleteResource(gender, CodeSystem.class);
         // Verify again
@@ -288,7 +291,7 @@ class HistoryClientTest extends AbstractTestResources {
         // ================
         // => Given an updated server, verify no ids returns
         // Retrieve current time
-        now = getCurrentTime();
+        now = new Date();
         // Verify again
         changes = client.getHistoryMap(now);
         // Verify emptiness
@@ -310,7 +313,7 @@ class HistoryClientTest extends AbstractTestResources {
         // To insert
         CodeSystem[] cs = new CodeSystem[]{createGenderTestCS()};
         // Retrieve current time
-        Date now = getCurrentTime();
+        Date now = new Date();
         // Verify emptiness
         Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
         assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
@@ -318,7 +321,7 @@ class HistoryClientTest extends AbstractTestResources {
         // ===== <T1> =====
         // ================
         // Retrieve current time
-        now = getCurrentTime();
+        now = new Date();
         // Insert CS
         String gender = crud.createResource(cs[0]);
         // Verify again
@@ -344,7 +347,7 @@ class HistoryClientTest extends AbstractTestResources {
         // ================
         // => Given an updated server, verify no ids returns
         // Retrieve current time
-        now = getCurrentTime();
+        now = new Date();
         // Verify again
         changes = client.getHistoryMap(now);
         // Verify emptiness
@@ -364,7 +367,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Verify emptiness
         assertEmptyServer(client.getHistoryMap(null));
         // Get time
-        Date now = getCurrentTime();
+        Date now = new Date();
         // Insert CS
         String gender = crud.createResource(cs[0]);
         // Now remove it
@@ -387,7 +390,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Verify emptiness
         assertEmptyServer(client.getHistoryMap(null));
         // Get time
-        Date now = getCurrentTime();
+        Date now = new Date();
         // Insert CS
         String gender = crud.createResource(cs[0]);
         // Now update it
@@ -415,7 +418,7 @@ class HistoryClientTest extends AbstractTestResources {
         // ===== <T0> =====
         // ================
         // Get time
-        Date now = getCurrentTime();
+        Date now = new Date();
         // Insert CS
         String gender = crud.createResource(cs);
         // Verify emptiness
@@ -424,7 +427,7 @@ class HistoryClientTest extends AbstractTestResources {
         // ===== <T1> =====
         // ================
         // Get time
-        now = getCurrentTime();
+        now = new Date();
         // Change status from DRAFT to ACTIVE
         CSBuilder builder = CSBuilder.from(crud.readResource(gender, CodeSystem.class));
         builder.addStatus(ACTIVE);
@@ -452,7 +455,7 @@ class HistoryClientTest extends AbstractTestResources {
         // ===== <T0> =====
         // ================
         // Get time
-        Date now = getCurrentTime();
+        Date now = new Date();
         // Insert CS
         String gender = crud.createResource(cs);
         // Verify emptiness

@@ -14,8 +14,11 @@ import org.hl7.fhir.r4.model.*;
 import java.util.Date;
 import java.util.Optional;
 
+import static ca.uhn.fhir.model.api.TemporalPrecisionEnum.MILLI;
 import static ca.uhn.fhir.rest.api.CacheControlDirective.noCache;
 import static ca.uhn.fhir.rest.api.SummaryEnum.TRUE;
+import static java.time.ZoneOffset.UTC;
+import static java.util.TimeZone.getTimeZone;
 import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
 import static org.springframework.http.HttpMethod.POST;
 
@@ -69,7 +72,7 @@ public abstract class HistoryAbstractClient {
             .onType(CodeSystem.class)
             .returnBundle(Bundle.class)
             .cacheControl(noCache())
-            .since(lastUpdate)
+            .since(getTimeUTC(lastUpdate))
             .summaryMode(TRUE)
             .count(CHUNK_SIZE)
             .execute();
@@ -161,6 +164,10 @@ public abstract class HistoryAbstractClient {
 
     private ICriterion<?> isActiveCS() {
         return CodeSystem.STATUS.exactly().identifier(ACTIVE.toCode());
+    }
+
+    private DateTimeType getTimeUTC(Date lastUpdate) {
+        return new DateTimeType(lastUpdate, MILLI, getTimeZone(UTC));
     }
 
     protected void reset() {

@@ -5,22 +5,17 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.hl7.fhir.instance.model.api.IBaseBundle.LINK_NEXT;
-import static org.hl7.fhir.r4.model.Enumerations.*;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 
 public class HistoryUtils {
 
     private static final String OID_REF = "urn:ietf:rfc:3986";
     private static final String OID_PREFIX = "urn:oid:";
-
-    public static final int STANDARD_OFFSET = 2;
 
     public static String asId(String uri) {
         int idx = uri.lastIndexOf("/") + 1;
@@ -59,14 +54,6 @@ public class HistoryUtils {
 
     public static List<String> asId(List<Resource> res) {
         return res.stream().map(r -> r.getIdElement().getIdPart()).collect(Collectors.toList());
-    }
-
-    public static Date getCurrentTime() {
-        return getTime(LocalDateTime.now(), STANDARD_OFFSET);
-    }
-
-    public static Date getTime(LocalDateTime time, int offset) {
-        return Date.from(time.toInstant(ZoneOffset.ofHours(offset)));
     }
 
     public static PublicationStatus getPublicationStatus(Resource res) {
