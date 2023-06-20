@@ -29,6 +29,7 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.r4.model.ValueSet;
 
+import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
@@ -101,6 +102,7 @@ public class TerminologyClient extends AbstractTerminologyClient {
 				.where(CodeSystem.STATUS.exactly().identifier("active"))
 				.elementsSubset("identifier")
 				.returnBundle(Bundle.class)
+				.cacheControl(CacheControlDirective.noCache())
 				.execute();
 
 		for (Bundle.BundleEntryComponent entry : results.getEntry()) {
@@ -119,6 +121,7 @@ public class TerminologyClient extends AbstractTerminologyClient {
             .where(CodeSystem.RES_ID.exactly().code(id))
             .and(new DateClientParam("_lastUpdated").beforeOrEquals().millis(date))
             .sort().descending("_lastUpdated")
+            .cacheControl(CacheControlDirective.noCache())
             .returnBundle(Bundle.class)
             .execute();
 
@@ -289,6 +292,7 @@ public class TerminologyClient extends AbstractTerminologyClient {
 			Bundle bundle = tc.search()
 					.forResource(ConceptMap.class)
 					.where(new UriClientParam("source-system").matches().value(sourceSystem))
+					.cacheControl(CacheControlDirective.noCache())
 					.returnBundle(Bundle.class)
 					.execute();
 
