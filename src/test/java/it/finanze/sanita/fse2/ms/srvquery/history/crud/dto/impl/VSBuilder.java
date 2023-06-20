@@ -1,5 +1,6 @@
-package it.finanze.sanita.fse2.ms.srvquery.history.crud.dto;
+package it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.impl;
 
+import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.IResBuilder;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -9,10 +10,7 @@ import java.util.Date;
 import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
 import static org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 
-public class VSBuilder {
-
-    private static final String OID_REF = "urn:ietf:rfc:3986";
-    private static final String OID_PREFIX = "urn:oid:";
+public class VSBuilder implements IResBuilder<ValueSet> {
 
     private final ValueSet vs;
 
@@ -25,11 +23,13 @@ public class VSBuilder {
         addStatus(ACTIVE);
     }
 
-    private void addDate(Date date) {
+    @Override
+    public void addDate(Date date) {
         if(date != null) vs.setDate(date);
     }
 
-    private void addUrl(String url) {
+    @Override
+    public void addUrl(String url) {
         vs.setUrl(url);
     }
 
@@ -41,6 +41,7 @@ public class VSBuilder {
         return new VSBuilder(vs);
     }
 
+    @Override
     public void addCodes(String code, String display) {
         // Prepare
         ValueSetExpansionContainsComponent component = new ValueSetExpansionContainsComponent();
@@ -50,7 +51,8 @@ public class VSBuilder {
         vs.getExpansion().getContains().add(component);
     }
 
-    private void addIdentifier(String oid) {
+    @Override
+    public void addIdentifier(String oid) {
         if(oid != null) {
             // Prepare
             Identifier id = new Identifier();
@@ -61,6 +63,7 @@ public class VSBuilder {
         }
     }
 
+    @Override
     public void addVersion(String version) {
         if(version != null) vs.setVersion(version);
     }
@@ -69,10 +72,12 @@ public class VSBuilder {
         vs.getCompose().getInclude().add(new ValueSet.ConceptSetComponent().setSystem(uri));
     }
 
+    @Override
     public void addStatus(Enumerations.PublicationStatus status) {
         if(status != null) vs.setStatus(status);
     }
 
+    @Override
     public ValueSet build() {
         return vs;
     }

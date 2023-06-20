@@ -1,38 +1,38 @@
 package it.finanze.sanita.fse2.ms.srvquery.history.base;
 
 import it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum;
-import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.CSBuilder;
-import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.VSBuilder;
+import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.impl.CSBuilder;
+import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.impl.VSBuilder;
+import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.params.provider.Arguments;
 
-import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO;
 import static java.lang.String.format;
-import static java.time.ZoneOffset.UTC;
-import static org.hl7.fhir.r4.model.Enumerations.*;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public abstract class AbstractTestResources {
-    protected CodeSystem createGenderTestCS() {
+    protected BaseResource createGenderTestCS() {
         CSBuilder builder = new CSBuilder("2.16.840.1.113883.5.1");
         builder.addCodes("M", "Male");
         builder.addCodes("F", "Female");
         return builder.build();
     }
 
-    protected CodeSystem createGenderTestCS(PublicationStatus id) {
-        CodeSystem cs = createGenderTestCS();
+    protected BaseResource createGenderTestCS(PublicationStatus id) {
+        CodeSystem cs = (CodeSystem) createGenderTestCS();
         cs.setStatus(id);
         return cs;
     }
 
-    protected CodeSystem createOreTestCS() {
+    protected BaseResource createOreTestCS() {
         CSBuilder builder = new CSBuilder("2.16.840.1.113883.2.9.6.1.54.6");
         builder.addCodes("P", "Platinum");
         builder.addCodes("D", "Diamond");
@@ -40,7 +40,7 @@ public abstract class AbstractTestResources {
         return builder.build();
     }
 
-    protected ValueSet createColorsTestVS() {
+    protected BaseResource createColorsTestVS() {
         VSBuilder builder = new VSBuilder(
             "2.144.33.22.04.38",
             "http://url/colors"
@@ -50,7 +50,24 @@ public abstract class AbstractTestResources {
         return builder.build();
     }
 
-    protected CodeSystem createPrimaryColorsTestCS() {
+    protected BaseResource createColorsTestVS(PublicationStatus id) {
+        ValueSet cs = (ValueSet) createColorsTestVS();
+        cs.setStatus(id);
+        return cs;
+    }
+
+    protected BaseResource createDaysTestVS() {
+        VSBuilder builder = new VSBuilder(
+            "2.144.33.12.02.38",
+            "http://url/days"
+        );
+        builder.addCodes("M", "Monday");
+        builder.addCodes("T", "Tuesday");
+        builder.addCodes("W", "Wednesday");
+        return builder.build();
+    }
+
+    protected BaseResource createPrimaryColorsTestCS() {
         CSBuilder builder = new CSBuilder("2.144.33.22.04.39");
         builder.addUrl("http://url/primary-colors");
         builder.addCodes("R", "Red");
@@ -59,7 +76,7 @@ public abstract class AbstractTestResources {
         return builder.build();
     }
 
-    protected CodeSystem createSecondaryColorsTestCS() {
+    protected BaseResource createSecondaryColorsTestCS() {
         CSBuilder builder = new CSBuilder("2.144.33.22.04.40");
         builder.addUrl("http://url/secondary-colors");
         builder.addCodes("O", "Orange");
@@ -103,9 +120,32 @@ public abstract class AbstractTestResources {
         assertEquals(size, changes.size(), "Expected size doesn't match current one");
     }
 
-    @SuppressWarnings("unused")
-    protected String printDateAsUTC(Date date) {
-        return OffsetDateTime.ofInstant(date.toInstant(), UTC).toString();
+    protected Stream<Arguments> getTestResources() {
+        return Stream.of(
+            Arguments.of((Object) getTestResourcesCS()),
+            Arguments.of((Object) getTestResourcesVS())
+        );
+    }
+
+    protected Stream<Arguments> getTestResourcesDraft() {
+        return Stream.of(
+            Arguments.of(new TestResource("gender", createGenderTestCS(DRAFT))),
+            Arguments.of(new TestResource("colors", createColorsTestVS(DRAFT)))
+        );
+    }
+
+    private TestResource[] getTestResourcesCS() {
+        return new TestResource[] {
+            new TestResource("gender", createGenderTestCS()),
+            new TestResource("ore", createOreTestCS())
+        };
+    }
+
+    private TestResource[] getTestResourcesVS() {
+        return new TestResource[] {
+            new TestResource("colors", createColorsTestVS()),
+            new TestResource("days", createDaysTestVS())
+        };
     }
 
 }

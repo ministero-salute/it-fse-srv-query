@@ -1,7 +1,7 @@
-package it.finanze.sanita.fse2.ms.srvquery.history.crud.dto;
+package it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.impl;
 
+import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.IResBuilder;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Identifier;
 
@@ -10,10 +10,7 @@ import java.util.Date;
 import static org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.*;
 
-public class CSBuilder {
-
-    private static final String OID_REF = "urn:ietf:rfc:3986";
-    private static final String OID_PREFIX = "urn:oid:";
+public class CSBuilder implements IResBuilder<CodeSystem> {
 
     private final CodeSystem cs;
 
@@ -25,7 +22,8 @@ public class CSBuilder {
         addStatus(ACTIVE);
     }
 
-    private void addDate(Date date) {
+    @Override
+    public void addDate(Date date) {
         if(date != null) cs.setDate(date);
     }
 
@@ -37,6 +35,7 @@ public class CSBuilder {
         return new CSBuilder(cs);
     }
 
+    @Override
     public void addCodes(String code, String display) {
         // Prepare
         ConceptDefinitionComponent component = new ConceptDefinitionComponent();
@@ -46,7 +45,8 @@ public class CSBuilder {
         cs.getConcept().add(component);
     }
 
-    private void addIdentifier(String oid) {
+    @Override
+    public void addIdentifier(String oid) {
         if(oid != null) {
             // Prepare
             Identifier id = new Identifier();
@@ -57,18 +57,22 @@ public class CSBuilder {
         }
     }
 
+    @Override
     public void addUrl(String url) {
         if(url != null) cs.setUrl(url);
     }
 
+    @Override
     public void addVersion(String version) {
         if(version != null) cs.setVersion(version);
     }
 
+    @Override
     public void addStatus(PublicationStatus status) {
         if(status != null) cs.setStatus(status);
     }
 
+    @Override
     public CodeSystem build() {
         return cs;
     }
