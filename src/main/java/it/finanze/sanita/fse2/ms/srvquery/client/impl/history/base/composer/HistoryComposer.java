@@ -111,7 +111,9 @@ public class HistoryComposer {
         // Re-write as insertion resources that were created and updated in between
         reviseResourceUpsertInBetween();
         // Re-write as insertion resources that went from draft to active
-        reviseResourceFromDraftToActive();
+        reviseResourceFromDeactivateToActive();
+        // Re-write as deletions resources that went from active to draft
+        reviseResourceFromActiveToDeactivate();
     }
 
     private void omitDraftResourcesFromHistory() {
@@ -119,6 +121,7 @@ public class HistoryComposer {
             .keySet()
             .stream()
             .filter(this::isNotAnActiveResource)
+            .filter(this::wasDeactivateResourceBeforeChanges)
             .collect(Collectors.toList());
         keys.forEach(composition::remove);
     }
@@ -134,7 +137,11 @@ public class HistoryComposer {
             HistoryDetailsDTO latest = details.getFirst();
             HistoryDetailsDTO first = details.getLast();
             // Check
-            if(latest.getOp() == DELETE && first.getOp() == INSERT) {
+            if(
+                latest.getOp() == DELETE &&
+                latest.getStatus() == ACTIVE &&
+                first.getOp() == INSERT
+            ) {
                 // Clear history
                 composition.get(id).clear();
                 // Remove
@@ -154,7 +161,11 @@ public class HistoryComposer {
             HistoryDetailsDTO latest = details.getFirst();
             HistoryDetailsDTO first = details.getLast();
             // Check
-            if(latest.getOp() == UPDATE && first.getOp() == INSERT) {
+            if(
+                latest.getOp() == UPDATE &&
+                latest.getStatus() == ACTIVE &&
+                first.getOp() == INSERT
+            ) {
                 // Clear history
                 composition.get(id).clear();
                 // Map as insertion
@@ -163,7 +174,7 @@ public class HistoryComposer {
         }
     }
 
-    private void reviseResourceFromDraftToActive() {
+    private void reviseResourceFromDeactivateToActive() {
         // Get ids
         List<String> ids = new ArrayList<>(composition.keySet());
         // For each one, retrieve resource
@@ -173,11 +184,38 @@ public class HistoryComposer {
             // Get operations
             HistoryDetailsDTO latest = details.getFirst();
             // Check
-            if(latest.getOp() == UPDATE && wasDraftResource(id)) {
+            if(
+                latest.getOp() == UPDATE &&
+                latest.getStatus() == ACTIVE &&
+                wasDraftResource(id)
+            ) {
                 // Clear history
                 composition.get(id).clear();
                 // Map as insertion
                 composition.get(id).add(HistoryDetailsDTO.from(latest, INSERT));
+            }
+        }
+    }
+
+    private void reviseResourceFromActiveToDeactivate() {
+        // Get ids
+        List<String> ids = new ArrayList<>(composition.keySet());
+        // For each one, retrieve resource
+        for (String id : ids) {
+            // Verify condition
+            ArrayDeque<HistoryDetailsDTO> details = composition.get(id);
+            // Get operations
+            HistoryDetailsDTO latest = details.getFirst();
+            // Check
+            if(
+                latest.getOp() == UPDATE &&
+                latest.getStatus() == DRAFT &&
+                !wasDraftResource(id)
+            ) {
+                // Clear history
+                composition.get(id).clear();
+                // Map as insertion
+                composition.get(id).add(HistoryDetailsDTO.from(latest, DELETE));
             }
         }
     }
@@ -204,40 +242,44 @@ public class HistoryComposer {
     }
 
     private boolean isNotAnActiveResource(String id) {
-        return composition.get(id).getFirst().getStatus() != ACTIVE;
+        ArrayDeque<HistoryDetailsDTO> history = composition.get(id);
+        HistoryDetailsDTO latest = history.getFirst();
+        HistoryDetailsDTO earliest = history.getLast();
+        return latest.getStatus() != ACTIVE && earliest.getStatus() != ACTIVE;
     }
 
     private boolean wasDraftResource(String id) {
-        return wasDraftResourceInHistory(id) || wasDraftResourceBeforeChanges(id);
+        return wasDeactivateResourceInHistory(id) || wasDeactivateResourceBeforeChanges(id);
     }
 
-    private boolean wasDraftResourceInHistory(String id) {
+    private boolean wasDeactivateResourceInHistory(String id) {
         return composition
             .get(id)
             .stream()
-            .anyMatch(v -> v.getStatus() == DRAFT);
+            .anyMatch(v -> v.getStatus() != ACTIVE);
     }
 
-    private boolean wasDraftResourceBeforeChanges(String id) {
+    private boolean wasDeactivateResourceBeforeChanges(String id) {
+        // Working var
+        Resource raw = null;
         // Get the earliest tracked version
         HistoryDetailsDTO dto = composition.get(id).getLast();
         // Map as integer, then subtract to get previous version
         int previous = Integer.parseInt(dto.getVersion()) - 1;
-        // Integrity check
-        if(previous == 0) {
-            throw new IllegalArgumentException("Cannot search for version zero, this is a bug");
+        // Skip if previous is zero
+        if(previous != 0) {
+            // Retrieve latest version
+            raw = (Resource) client
+                .read()
+                .resource(dto.getType().getPath())
+                .withIdAndVersion(id, String.valueOf(previous))
+                .summaryMode(SummaryEnum.TRUE)
+                .cacheControl(noCache())
+                .preferResponseType(Resource.class)
+                .execute();
         }
-        // Retrieve latest version
-        Resource raw = (Resource) client
-            .read()
-            .resource(dto.getType().getPath())
-            .withIdAndVersion(id, String.valueOf(previous))
-            .summaryMode(SummaryEnum.TRUE)
-            .cacheControl(noCache())
-            .preferResponseType(Resource.class)
-            .execute();
         // Get status
-        return asStatus(raw) != ACTIVE;
+        return raw != null ? asStatus(raw) != ACTIVE : dto.getStatus() != ACTIVE;
     }
 
 
