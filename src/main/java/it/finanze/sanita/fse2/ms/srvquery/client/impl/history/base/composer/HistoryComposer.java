@@ -17,7 +17,6 @@ import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistory
 import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.*;
 import static org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
-import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.DRAFT;
 
 public class HistoryComposer {
 
@@ -106,6 +105,8 @@ public class HistoryComposer {
     private void refineComposition() {
         // Remove resources in-draft
         omitDraftResourcesFromHistory();
+        // Remove resources born as active but then deactivated
+        omitActiveResourcesInBetween();
         // Remove resources created and deleted in between
         omitResourceExistedInBetween();
         // Re-write as insertion resources that were created and updated in between
@@ -117,13 +118,39 @@ public class HistoryComposer {
     }
 
     private void omitDraftResourcesFromHistory() {
-        List<String> keys = composition
+        // Remove pure draft resources
+        Set<String> keys = composition
             .keySet()
             .stream()
             .filter(this::isNotAnActiveResource)
             .filter(this::wasDeactivateResourceBeforeChanges)
-            .collect(Collectors.toList());
+            .collect(Collectors.toSet());
+        // Remove
         keys.forEach(composition::remove);
+    }
+
+    private void omitActiveResourcesInBetween() {
+        // Get ids
+        List<String> ids = new ArrayList<>(composition.keySet());
+        // For each one, retrieve resource
+        for (String id : ids) {
+            // Verify condition
+            ArrayDeque<HistoryDetailsDTO> details = composition.get(id);
+            // Get operations
+            HistoryDetailsDTO latest = details.getFirst();
+            HistoryDetailsDTO first = details.getLast();
+            // Check
+            if(
+                latest.getStatus() != ACTIVE &&
+                first.getStatus() == ACTIVE &&
+                first.getOp() == INSERT
+            ) {
+                // Clear history
+                composition.get(id).clear();
+                // Remove
+                composition.remove(id);
+            }
+        }
     }
 
     private void omitResourceExistedInBetween() {
@@ -209,8 +236,8 @@ public class HistoryComposer {
             // Check
             if(
                 latest.getOp() == UPDATE &&
-                latest.getStatus() == DRAFT &&
-                !wasDraftResource(id)
+                latest.getStatus() != ACTIVE &&
+                wasActiveResource(id)
             ) {
                 // Clear history
                 composition.get(id).clear();
@@ -252,6 +279,17 @@ public class HistoryComposer {
         return wasDeactivateResourceInHistory(id) || wasDeactivateResourceBeforeChanges(id);
     }
 
+    private boolean wasActiveResource(String id) {
+        return wasActivateResourceInHistory(id) || wasActivateResourceBeforeChanges(id);
+    }
+
+    private boolean wasActivateResourceInHistory(String id) {
+        return composition
+            .get(id)
+            .stream()
+            .anyMatch(v -> v.getStatus() == ACTIVE);
+    }
+
     private boolean wasDeactivateResourceInHistory(String id) {
         return composition
             .get(id)
@@ -280,6 +318,28 @@ public class HistoryComposer {
         }
         // Get status
         return raw != null ? asStatus(raw) != ACTIVE : dto.getStatus() != ACTIVE;
+    }
+    private boolean wasActivateResourceBeforeChanges(String id) {
+        // Working var
+        Resource raw = null;
+        // Get the earliest tracked version
+        HistoryDetailsDTO dto = composition.get(id).getLast();
+        // Map as integer, then subtract to get previous version
+        int previous = Integer.parseInt(dto.getVersion()) - 1;
+        // Skip if previous is zero
+        if(previous != 0) {
+            // Retrieve latest version
+            raw = (Resource) client
+                .read()
+                .resource(dto.getType().getPath())
+                .withIdAndVersion(id, String.valueOf(previous))
+                .summaryMode(SummaryEnum.TRUE)
+                .cacheControl(noCache())
+                .preferResponseType(Resource.class)
+                .execute();
+        }
+        // Get status
+        return raw != null ? asStatus(raw) == ACTIVE : dto.getStatus() == ACTIVE;
     }
 
 

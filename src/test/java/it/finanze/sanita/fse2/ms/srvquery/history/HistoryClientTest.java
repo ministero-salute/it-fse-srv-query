@@ -22,6 +22,7 @@ import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Profile.TEST;
 import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO;
 import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.*;
 import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.RETIRED;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -404,7 +405,7 @@ class HistoryClientTest extends AbstractTestResources {
     @ParameterizedTest
     @MethodSource("getTestResourcesDraft")
     @DisplayName("Last update is not null then add/update element status from draft to active")
-    public void resourceFromDraftToActive(TestResource res) {
+    public void resourceFromAnyToActive(TestResource res) {
         // Verify emptiness
         assertEmptyServer(client.getHistoryMap(null));
         // ================
@@ -440,7 +441,7 @@ class HistoryClientTest extends AbstractTestResources {
     @ParameterizedTest
     @MethodSource("getTestResourcesDraft")
     @DisplayName("Last update is not null then add/update element status from draft to active")
-    public void resourceFromDraftToActiveSingle(TestResource res) {
+    public void resourceFromAnyToActiveSingle(TestResource res) {
         // Verify emptiness
         assertEmptyServer(client.getHistoryMap(null));
         // ================
@@ -461,6 +462,78 @@ class HistoryClientTest extends AbstractTestResources {
         // Verify again
         Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
         assertResource(changes, res.name(), id, "2", INSERT, "t0");
+    }
+
+    /**
+     * Verify the flow t0->INSERT->t1->UPDATE, it should return an insert operation
+     * because if an element has been inserted as active status, then it becomes deactivated
+     * it should be treated as a deletion
+     */
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("Last update is not null then add/update element status from active to draft")
+    public void resourceFromActiveToAny(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Get history
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        // Verify emptiness
+        assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T1> =====
+        // ================
+        // Get time
+        now = new Date();
+        // Change status from ACTIVE to DEACTIVATED
+        IResBuilder<?> builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addStatus(RETIRED);
+        BaseResource out = builder.build();
+        // Update CS
+        crud.updateResource(out);
+        // Verify again
+        changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "2", DELETE, "t1");
+    }
+
+    /**
+     * Verify the flow t0->INSERT+UPDATE, it should return nothing
+     * because if an element has been inserted as active status, then it becomes deactivated
+     * before alignment, it should be omitted
+     */
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("Last update is not null then add/update element status from draft to active")
+    public void resourceFromActiveToAnySingle(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Get history
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        // Verify emptiness
+        assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
+        assertResourceSize(1, changes);
+        // Change status from ACTIVE to DEACTIVATED
+        IResBuilder<?> builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addStatus(RETIRED);
+        BaseResource out = builder.build();
+        // Update CS
+        crud.updateResource(out);
+        // Verify again
+        assertEmptyServer(client.getHistoryMap(now));
     }
 
     @AfterAll
