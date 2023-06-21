@@ -20,7 +20,6 @@ import java.util.Map;
 
 import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Profile.TEST;
 import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO;
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO.ANY_VERSION;
 import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.*;
 import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -215,7 +214,7 @@ class HistoryClientTest extends AbstractTestResources {
         crud.deleteResource(id, res[0].type());
         // Verify again
         changes = client.getHistoryMap(now);
-        assertResource(changes, res[0].name(), id, ANY_VERSION, DELETE, "t2");
+        assertResource(changes, res[0].name(), id, "3", DELETE, "t2");
         assertResourceSize(1, changes);
         // ================
         // ===== <T3> =====
@@ -282,7 +281,7 @@ class HistoryClientTest extends AbstractTestResources {
         crud.deleteResource(id, res[0].type());
         // Verify again
         changes = client.getHistoryMap(now);
-        assertResource(changes, res[0].name(), id, ANY_VERSION, DELETE, "t2");
+        assertResource(changes, res[0].name(), id, "5", DELETE, "t2");
         assertResourceSize(1, changes);
         // ================
         // ===== <T3> =====

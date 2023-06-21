@@ -5,6 +5,8 @@ import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.composer.HistoryComposer;
+import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.composer.SimpleComposer;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.types.CompactCS;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.types.CompactVS;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
@@ -22,8 +24,7 @@ import static ca.uhn.fhir.rest.api.SummaryEnum.TRUE;
 import static java.time.ZoneOffset.UTC;
 import static java.util.TimeZone.getTimeZone;
 import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
-import static org.hl7.fhir.r4.model.SearchParameter.*;
-import static org.springframework.http.HttpMethod.POST;
+import static org.hl7.fhir.r4.model.SearchParameter.SP_STATUS;
 
 public abstract class HistoryAbstractClient {
 
@@ -49,7 +50,7 @@ public abstract class HistoryAbstractClient {
         // Create timestamp to sync both queries
         Date timestamp = new Date();
         // Create composer
-        HistoryComposer composer = new HistoryComposer(
+        SimpleComposer composer = new SimpleComposer(
             client,
             getHistoryFromBeginsButUntil(CodeSystem.class, timestamp),
             getHistoryFromBeginsButUntil(ValueSet.class, timestamp)
@@ -58,7 +59,7 @@ public abstract class HistoryAbstractClient {
         return new RawHistoryDTO(
             timestamp,
             null,
-            composer.compose(POST, null)
+            composer.compose()
         );
     }
 
@@ -75,7 +76,7 @@ public abstract class HistoryAbstractClient {
         return new RawHistoryDTO(
             timestamp,
             lastUpdate,
-            composer.compose(null, lastUpdate)
+            composer.compose()
         );
     }
 
