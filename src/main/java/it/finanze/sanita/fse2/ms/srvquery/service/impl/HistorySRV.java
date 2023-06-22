@@ -50,17 +50,17 @@ public class HistorySRV implements IHistorySRV {
             // Map by operation type
             switch (details.getOp()) {
                 case INSERT:
-                    out.getInsertions().add(new HistoryInsertDTO(id, details.getVersion()));
+                    out.getInsertions().add(HistoryInsertDTO.from(id, details));
                     break;
                 case UPDATE:
                     // Define as insertion the newest available version
-                    out.getInsertions().add(new HistoryInsertDTO(id, details.getVersion()));
+                    out.getInsertions().add(HistoryInsertDTO.from(id, details));
                     // Instruct to delete anything else but omit the latest inserted
-                    out.getDeletions().add(new HistoryDeleteDTO(id, details.getVersion()));
+                    out.getDeletions().add(HistoryDeleteDTO.from(id, details));
                     break;
                 case DELETE:
                     // Instruct to delete the whole resource, nothing to omit here
-                    out.getDeletions().add(new HistoryDeleteDTO(id, null));
+                    out.getDeletions().add(HistoryDeleteDTO.fromThenOmit(id, details));
                     break;
             }
         });

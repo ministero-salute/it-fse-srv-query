@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.*;
 
 @Getter
 @JsonInclude(NON_NULL)
@@ -46,13 +47,29 @@ public class HistoryResDTO {
     public static class HistoryInsertDTO {
         String id;
         String version;
+        String type;
+
+        public static HistoryInsertDTO from(String id, HistoryDetailsDTO dto) {
+            return new HistoryInsertDTO(id, dto.getVersion(), dto.getType().getPath());
+        }
+
     }
 
     @Value
     @JsonInclude(NON_NULL)
     public static class HistoryDeleteDTO {
         String id;
+        String type;
         String omit;
+
+        public static HistoryDeleteDTO from(String id, HistoryDetailsDTO dto) {
+            return new HistoryDeleteDTO(id, dto.getType().getPath(), dto.getVersion());
+        }
+
+        public static HistoryDeleteDTO fromThenOmit(String id, HistoryDetailsDTO dto) {
+            return new HistoryDeleteDTO(id, dto.getType().getPath(), null);
+        }
+
     }
 
 }
