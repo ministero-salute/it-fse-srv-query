@@ -39,9 +39,4 @@ public class HistoryClient extends HistoryAbstractClient {
     public Optional<HistoryResourceResDTO> getResource(String resourceId, String versionId) throws MalformedResourceException {
         return getMappedResource(resourceId, versionId);
     }
-
-    public void resetFhir() {
-        reset();
-    }
-
 }

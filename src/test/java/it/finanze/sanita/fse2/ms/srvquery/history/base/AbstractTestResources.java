@@ -135,7 +135,7 @@ public abstract class AbstractTestResources {
         );
     }
 
-    private TestResource[] getTestResourcesMixed() {
+    protected TestResource[] getTestResourcesMixed() {
         return new TestResource[] {
             new TestResource("gender", createGenderTestCS()),
             new TestResource("colors", createColorsTestVS())

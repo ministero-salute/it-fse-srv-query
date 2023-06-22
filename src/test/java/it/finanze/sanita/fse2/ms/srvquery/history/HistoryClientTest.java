@@ -50,7 +50,7 @@ class HistoryClientTest extends AbstractTestResources {
 
     @BeforeEach
     public void init() {
-        client.resetFhir();
+        crud.reset();
     }
 
     /**
@@ -538,7 +538,7 @@ class HistoryClientTest extends AbstractTestResources {
 
     @AfterAll
     public void teardown() {
-        client.resetFhir();
+        crud.reset();
     }
 
 }

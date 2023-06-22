@@ -187,16 +187,4 @@ public abstract class HistoryAbstractClient {
         return new DateTimeType(lastUpdate, MILLI, getTimeZone(UTC));
     }
 
-    protected void reset() {
-        // Inside terminology-server (AppProperties.java):
-        // allow_multiple_delete = true
-        client
-            .operation()
-            .onServer()
-            .named("$expunge")
-            .withParameter(
-                Parameters.class, "expungeEverything", new BooleanType(true)
-            ).execute();
-    }
-
 }

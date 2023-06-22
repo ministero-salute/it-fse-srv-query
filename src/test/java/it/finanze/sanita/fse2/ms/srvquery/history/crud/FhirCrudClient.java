@@ -3,6 +3,8 @@ package it.finanze.sanita.fse2.ms.srvquery.history.crud;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Parameters;
 
 import static it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.HistoryUtils.asId;
 import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper.createClient;
@@ -34,6 +36,18 @@ public class FhirCrudClient {
 
     public <T extends IBaseResource> void deleteResource(T resource) {
         client.delete().resource(resource).execute();
+    }
+
+    public void reset() {
+        // Inside terminology-server (AppProperties.java):
+        // allow_multiple_delete = true
+        client
+            .operation()
+            .onServer()
+            .named("$expunge")
+            .withParameter(
+                Parameters.class, "expungeEverything", new BooleanType(true)
+            ).execute();
     }
 
 }
