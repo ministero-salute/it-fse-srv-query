@@ -1,6 +1,6 @@
 package it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.types;
 
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.MalformedResourceException;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import static it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.HistoryUtils.asOID;
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO.ResourceItemDTO;
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO.ResourceMetaDTO;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceResDTO.ResourceItemDTO;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceResDTO.ResourceMetaDTO;
 import static org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import static org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 
@@ -21,7 +21,7 @@ public class CompactVS {
     private final String versionId;
     private final ValueSet vs;
 
-    public HistoryResourceDTO convert() throws MalformedResourceException {
+    public HistoryResourceResDTO convert() throws MalformedResourceException {
 
         Optional<String> oid = asOID(vs);
 
@@ -29,7 +29,7 @@ public class CompactVS {
             throw new MalformedResourceException(resourceId, versionId, "Missing OID identifier");
         }
 
-        HistoryResourceDTO res = new HistoryResourceDTO(
+        HistoryResourceResDTO res = new HistoryResourceResDTO(
             oid.get(),
             vs.getVersion(),
             new ResourceMetaDTO(

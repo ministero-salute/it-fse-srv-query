@@ -3,7 +3,7 @@ package it.finanze.sanita.fse2.ms.srvquery.client.impl.history;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.HistoryAbstractClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.TerminologyCFG;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.MalformedResourceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,7 @@ public class HistoryClient extends HistoryAbstractClient {
         return createHistoryByLastUpdate(lastUpdate).getHistory();
     }
 
-    public Optional<HistoryResourceDTO> getResource(String resourceId, String versionId) throws MalformedResourceException {
+    public Optional<HistoryResourceResDTO> getResource(String resourceId, String versionId) throws MalformedResourceException {
         return getMappedResource(resourceId, versionId);
     }
 

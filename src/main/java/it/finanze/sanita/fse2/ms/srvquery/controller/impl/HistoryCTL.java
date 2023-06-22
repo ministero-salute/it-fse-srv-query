@@ -2,8 +2,8 @@ package it.finanze.sanita.fse2.ms.srvquery.controller.impl;
 
 import it.finanze.sanita.fse2.ms.srvquery.controller.AbstractCTL;
 import it.finanze.sanita.fse2.ms.srvquery.controller.IHistoryCTL;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.MalformedResourceException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceNotFoundException;
 import it.finanze.sanita.fse2.ms.srvquery.service.IHistorySRV;
@@ -21,12 +21,12 @@ public class HistoryCTL extends AbstractCTL implements IHistoryCTL {
     private IHistorySRV service;
 
     @Override
-    public HistoryDTO history(Date lastUpdate) {
-        return service.history(lastUpdate);
+    public HistoryResDTO history(Date lastUpdate) {
+        return service.history(lastUpdate).trackWith(getLogTraceInfo());
     }
 
     @Override
-    public HistoryResourceDTO resource(String resourceId, String versionId) throws ResourceNotFoundException, MalformedResourceException {
-        return service.resource(resourceId, versionId);
+    public HistoryResourceResDTO resource(String resourceId, String versionId) throws ResourceNotFoundException, MalformedResourceException {
+        return service.resource(resourceId, versionId).trackWith(getLogTraceInfo());
     }
 }

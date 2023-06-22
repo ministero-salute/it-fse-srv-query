@@ -7,8 +7,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.MalformedResourceException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceNotFoundException;
 import it.finanze.sanita.fse2.ms.srvquery.validators.NoFutureDate;
@@ -42,7 +42,7 @@ public interface IHistoryCTL {
                 description = "Storico recuperato",
                 content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = HistoryDTO.class))
+                    schema = @Schema(implementation = HistoryResDTO.class))
             ),
             @ApiResponse(
                 responseCode = "400",
@@ -60,7 +60,7 @@ public interface IHistoryCTL {
             )
         }
     )
-    HistoryDTO history(
+    HistoryResDTO history(
         @RequestParam(value=API_QP_LAST_UPDATE, required = false)
         @DateTimeFormat(iso = DATE_TIME)
         @NoFutureDate(message = ERR_VAL_FUTURE_DATE)
@@ -79,7 +79,7 @@ public interface IHistoryCTL {
                 description = "Risorsa recuperata",
                 content = @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = HistoryResourceDTO.class))
+                    schema = @Schema(implementation = HistoryResourceResDTO.class))
             ),
             @ApiResponse(
                 responseCode = "400",
@@ -97,7 +97,7 @@ public interface IHistoryCTL {
             )
         }
     )
-    HistoryResourceDTO resource(
+    HistoryResourceResDTO resource(
         @PathVariable(API_PATH_RES_ID_VAR)
         @NotBlank(message = ERR_VAL_RESOURCE_ID_BLANK)
         String resourceId,

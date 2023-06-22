@@ -1,9 +1,9 @@
 package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.HistoryClient;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.MalformedResourceException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceNotFoundException;
@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryDTO.*;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResDTO.*;
 
 @Service
 public class HistorySRV implements IHistorySRV {
@@ -24,22 +24,22 @@ public class HistorySRV implements IHistorySRV {
     private HistoryClient client;
 
     @Override
-    public HistoryDTO history(Date lastUpdate) {
+    public HistoryResDTO history(Date lastUpdate) {
         return convert(client.getHistory(lastUpdate));
     }
 
     @Override
-    public HistoryResourceDTO resource(String resourceId, String versionId) throws ResourceNotFoundException, MalformedResourceException {
-        Optional<HistoryResourceDTO> resource = client.getResource(resourceId, versionId);
+    public HistoryResourceResDTO resource(String resourceId, String versionId) throws ResourceNotFoundException, MalformedResourceException {
+        Optional<HistoryResourceResDTO> resource = client.getResource(resourceId, versionId);
         if(!resource.isPresent()) {
             throw new ResourceNotFoundException(resourceId, versionId);
         }
         return resource.get();
     }
 
-    private HistoryDTO convert(RawHistoryDTO history) {
+    private HistoryResDTO convert(RawHistoryDTO history) {
         // Working var
-        HistoryDTO out = new HistoryDTO(
+        HistoryResDTO out = new HistoryResDTO(
             history.getCurrentTime(),
             history.getLastUpdate()
         );

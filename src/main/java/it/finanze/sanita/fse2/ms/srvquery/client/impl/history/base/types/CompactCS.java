@@ -1,6 +1,6 @@
 package it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.types;
 
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.MalformedResourceException;
 import lombok.RequiredArgsConstructor;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import static it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.HistoryUtils.*;
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO.*;
+import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceResDTO.*;
 
 @RequiredArgsConstructor
 public class CompactCS {
@@ -18,7 +18,7 @@ public class CompactCS {
     private final String versionId;
     private final CodeSystem cs;
 
-    public HistoryResourceDTO convert() throws MalformedResourceException {
+    public HistoryResourceResDTO convert() throws MalformedResourceException {
 
         Optional<String> oid = asOID(cs);
 
@@ -26,7 +26,7 @@ public class CompactCS {
             throw new MalformedResourceException(resourceId, versionId, "Missing OID identifier");
         }
 
-        HistoryResourceDTO res = new HistoryResourceDTO(
+        HistoryResourceResDTO res = new HistoryResourceResDTO(
             oid.get(),
             cs.getVersion(),
             new ResourceMetaDTO(

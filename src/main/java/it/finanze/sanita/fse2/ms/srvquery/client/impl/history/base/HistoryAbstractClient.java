@@ -9,7 +9,7 @@ import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.composer.Hist
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.composer.SimpleComposer;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.types.CompactCS;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.types.CompactVS;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.MalformedResourceException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -105,9 +105,9 @@ public abstract class HistoryAbstractClient {
             .execute();
     }
 
-    protected Optional<HistoryResourceDTO> getMappedResource(String resourceId, String versionId) throws MalformedResourceException {
+    protected Optional<HistoryResourceResDTO> getMappedResource(String resourceId, String versionId) throws MalformedResourceException {
         // Working var
-        HistoryResourceDTO out = null;
+        HistoryResourceResDTO out = null;
         // Get resource
         Optional<IBaseResource> wrapper = getResource(resourceId, versionId);
         // Check if found
@@ -118,9 +118,9 @@ public abstract class HistoryAbstractClient {
         return Optional.ofNullable(out);
     }
 
-    private HistoryResourceDTO mapResource(IBaseResource resource, String resourceId, String versionId) throws MalformedResourceException {
+    private HistoryResourceResDTO mapResource(IBaseResource resource, String resourceId, String versionId) throws MalformedResourceException {
         // Working var
-        HistoryResourceDTO res;
+        HistoryResourceResDTO res;
         // Check type
         ResourceType type = ResourceType.fromCode(resource.fhirType());
         // Start mapping
