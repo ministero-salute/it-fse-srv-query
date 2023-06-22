@@ -15,6 +15,8 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.*;
 @JsonInclude(NON_NULL)
 public class HistoryResourceResDTO {
 
+    private static final String PTT_ISO_8601 = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+
     private String traceID;
     private String spanID;
 
@@ -44,7 +46,7 @@ public class HistoryResourceResDTO {
         String resourceId;
         String versionId;
         String resourceType;
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        @JsonFormat(pattern = PTT_ISO_8601)
         Date releaseDate;
     }
 
