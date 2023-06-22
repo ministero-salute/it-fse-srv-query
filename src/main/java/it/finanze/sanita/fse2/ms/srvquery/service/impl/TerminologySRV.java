@@ -1,5 +1,6 @@
 package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -31,11 +32,13 @@ import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.ResultPushEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.SubscriptionEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.TypeEnum;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
-
+import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Resource.SECURITY_SYSTEM;
+import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Resource.SECURITY_CODE;
 /** 
  * FHIR Service Implementation 
  */
@@ -47,28 +50,28 @@ public class TerminologySRV implements ITerminologySRV {
 	private TerminologyCFG terminologyCFG;
 
 	private TerminologyClient terminologyClient;
-	
+
 	@Autowired
-    private IConverterClient converter;
-	
+	private IConverterClient converter;
+
 	@Autowired
 	private IWebScrapingClient client;
-	
-    private TerminologyClient getTerminologyClient() {
-        if (terminologyClient == null) {
-            synchronized (this) {
-                if (terminologyClient == null) {
-                    terminologyClient = new TerminologyClient(terminologyCFG.getFhirServerUrl(), terminologyCFG.getFhirServerUser(), terminologyCFG.getFhirServerPwd());
-                }
-            }
-        }
-        return terminologyClient;
-    }
+
+	private TerminologyClient getTerminologyClient() {
+		if (terminologyClient == null) {
+			synchronized (this) {
+				if (terminologyClient == null) {
+					terminologyClient = new TerminologyClient(terminologyCFG.getFhirServerUrl(), terminologyCFG.getFhirServerUser(), terminologyCFG.getFhirServerPwd());
+				}
+			}
+		}
+		return terminologyClient;
+	}
 
 	@Override
 	public void manageSubscription(SubscriptionEnum subscriptionEnum, SubscriptionStatus actionEnum) {
-        TerminologyClient terminologyClient = getTerminologyClient();
-		
+		TerminologyClient terminologyClient = getTerminologyClient();
+
 		if(SubscriptionEnum.ALL.equals(subscriptionEnum)) {
 			for(SubscriptionEnum s : SubscriptionEnum.values()) {
 				if(SubscriptionEnum.ALL.equals(s)) {
@@ -83,38 +86,38 @@ public class TerminologySRV implements ITerminologySRV {
 
 	@Override
 	public String insertCodeSystem(String name, String oid, String version, List<CodeDTO> codes) {
-        TerminologyClient terminologyClient = getTerminologyClient();
-        return terminologyClient.insertCS(oid, name, version, codes);
+		TerminologyClient terminologyClient = getTerminologyClient();
+		return terminologyClient.insertCS(oid, name, version, codes);
 	}
-	
-	
+
+
 	@Override
 	public CreateCodeSystemResDTO manageCodeSystem(final CreateCodeSystemReqDTO dto) {
 		CreateCodeSystemResDTO out = new CreateCodeSystemResDTO();
-		
+
 		CodeSystem codeSystem = getCodeSystemById("urn:oid:"+dto.getOid());
-		
+
 		if(codeSystem==null) {
 			String id = insertCodeSystem(dto.getName(), dto.getOid(), dto.getVersion(), dto.getCodes()); 
 			out.setId(id);
 		} else if(PublicationStatus.DRAFT.equals(codeSystem.getStatusElement().getValue())) {
-			 updateCodeSystem(codeSystem, dto.getCodes());
-			 out.setId(codeSystem.getId());
+			updateCodeSystem(codeSystem, dto.getCodes());
+			out.setId(codeSystem.getId());
 		}
-		
+
 		return out;
 	}
-	
+
 	private CodeSystem getCodeSystemById(final String oid) {
 		TerminologyClient terminologyClient = getTerminologyClient();
 		return terminologyClient.getCodeSystemById(oid);
 	}
-	
+
 	private void updateCodeSystem(final CodeSystem codeSystem, List<CodeDTO> codes) {
 		TerminologyClient terminologyClient = getTerminologyClient();
 		terminologyClient.updateCS(codeSystem, codes);
 	}
-	
+
 	@Override
 	public List<MetadataResourceDTO> manageMetadataResource(final List<SystemUrlDTO> list) {
 		TerminologyClient terminologyClient = getTerminologyClient();
@@ -122,19 +125,19 @@ public class TerminologySRV implements ITerminologySRV {
 
 		for(SystemUrlDTO entry : list) {
 			ResultPushEnum esito = null;
-			
+
 			String res = client.webScraper(entry.getUrl());
 			if(StringUtility.isNullOrEmpty(res)) {
 				esito = ResultPushEnum.RESOURCE_NOT_FOUND;
 				out.add(new MetadataResourceDTO(entry.getSystem(),entry.getUrl(),  esito));
 				continue;
 			}
-			 esito = terminologyClient.handlePullMetadataResource(res, entry.getForceDraft());
+			esito = terminologyClient.handlePullMetadataResource(res, entry.getForceDraft());
 			out.add(new MetadataResourceDTO(entry.getSystem(), entry.getUrl(),esito));
 		}
 		return out;
 	}
-	
+
 	@Override
 	public UploadResponseDTO uploadTerminology(FormatEnum formatEnum,RequestDTO creationInfo, MultipartFile file) throws IOException {
 		log.info("Upload terminology with format:" + formatEnum);
@@ -159,7 +162,7 @@ public class TerminologySRV implements ITerminologySRV {
 		return out;
 	}
 
-	
+
 	@Override
 	public GetResponseDTO isPresent(String oid, String version) {
 		GetResponseDTO out = new GetResponseDTO(); 
@@ -170,7 +173,7 @@ public class TerminologySRV implements ITerminologySRV {
 		out.setId(codeSystem!=null ? codeSystem.getIdElement().getIdPartAsLong().toString() : null);
 		return out;
 	}
-	
+
 	@Override
 	public void deleteById(String id) {
 		TerminologyClient terminologyClient = getTerminologyClient();
@@ -189,34 +192,41 @@ public class TerminologySRV implements ITerminologySRV {
 		}
 		return out;
 	}
-	
+
 	@Override
 	public GetResDTO export(String id, FormatEnum format) {
 		GetResDTO out = new GetResDTO();
 		TerminologyClient terminologyClient = getTerminologyClient();
 		CodeSystem codeSystem = terminologyClient.getContentById(id);
 		String resource = FHIRR4Helper.serializeResource(codeSystem, true, true, false);
-		try {
-			
-			if(!codeSystem.hasCopyright()) {
-				out.setHaveCopyright(false);
-				String oid = StringUtility.removeUrnOidFromSystem(codeSystem.getIdentifier().get(0).getValue());
+
+		String oid = StringUtility.removeUrnOidFromSystem(codeSystem.getIdentifier().get(0).getValue());
+		out.setOid(oid);
+		out.setExportable(false);
+
+		String cp = !StringUtility.isNullOrEmpty(codeSystem.getCopyright()) ? "###" + codeSystem.getCopyright() +"###\n" : "";   
+		
+		if(codeSystem.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE)==null) {
+			try {
+				out.setExportable(true);
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				outputStream.write(cp.getBytes());
 				if(FormatEnum.FHIR_R4_JSON.equals(format)) {
-					out.setContent(resource.getBytes());
-					out.setOid(oid);
+					outputStream.write(resource.getBytes());
+					byte[] finalBytes = outputStream.toByteArray();
+					out.setContent(finalBytes);
 				} else {
 					ConversionResponseDTO conversionResponseDTO = converter.callConvertFromFhirJson(format, oid,resource.getBytes());
-					out.setContent(conversionResponseDTO.getResult().getBytes());
-					out.setOid(oid);	
+					outputStream.write(conversionResponseDTO.getResult().getBytes());
+					byte[] finalBytes = outputStream.toByteArray();
+					out.setContent(finalBytes);
 				}
-			} else {
-				out.setHaveCopyright(true);
+			}catch(Exception ex) {
+				log.error("Error while export : " , ex);
+				throw new BusinessException(ex);
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		}  
 		return out;
 	}
-	
+
 }

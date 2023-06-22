@@ -16,13 +16,13 @@ public class GetResDTO extends ResponseDTO {
 	
 	private byte[] content;
 	
-	private boolean haveCopyright;
+	private boolean exportable;
 	
-	public GetResDTO(final LogTraceInfoDTO traceInfo, final String inOid, final byte[] inContent, final boolean inHaveCopyright) {
+	public GetResDTO(final LogTraceInfoDTO traceInfo, final String inOid, final byte[] inContent,final boolean inExportable) {
 		super(traceInfo);
 		oid = inOid;
 		content = inContent;
-		haveCopyright = inHaveCopyright;
+		exportable = inExportable;
 	}
 	
     

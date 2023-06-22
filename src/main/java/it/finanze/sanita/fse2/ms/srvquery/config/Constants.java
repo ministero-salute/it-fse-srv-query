@@ -41,6 +41,29 @@ public class Constants {
 
 	}
 	
+	 /**
+     * Resource
+     */
+    public static final class Resource {
+
+        /**
+         * Copyright
+         */
+        public static final String COPYRIGHT = "The code system and its contents cannot be published without proper authorization and may have specific usage restrictions.";
+        
+        /**
+         * Copyright
+         */
+        public static final String SECURITY_SYSTEM= "https://www.hl7.org/fhir/R4/v3/ConfidentialityClassification/vs.html";
+        public static final String SECURITY_CODE= "R";
+        public static final String SECURITY_DISPLAY= "Restricted";
+
+        /**
+         * Private constructor to disallow to access from other classes
+         */
+        private Resource() {}
+    }
+	
 	/**
 	 * Constants used in logging. 
 	 *

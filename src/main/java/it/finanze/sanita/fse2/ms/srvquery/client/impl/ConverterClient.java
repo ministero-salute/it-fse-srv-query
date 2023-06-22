@@ -18,8 +18,11 @@ import it.finanze.sanita.fse2.ms.srvquery.config.MsUrlCFG;
 import it.finanze.sanita.fse2.ms.srvquery.dto.RequestDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.ConversionResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
+@Slf4j
 public class ConverterClient implements IConverterClient {
 
 	@Autowired
@@ -49,15 +52,20 @@ public class ConverterClient implements IConverterClient {
 	}
 	
 	@Override
-	public ConversionResponseDTO callConvertFromFhirJson(FormatEnum format,String oid, byte[] file) throws IOException {
+	public ConversionResponseDTO callConvertFromFhirJson(FormatEnum format,String oid, byte[] file){
 
 	    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-	    body.add("file", new ByteArrayResource(file) {
-	        @Override
-	        public String getFilename() {
-	            return oid+".json";
-	        }
-	    });
+	    try {
+	    	body.add("file", new ByteArrayResource(file) {
+	    		@Override
+	    		public String getFilename() {
+	    			return oid+".json";
+	    		}
+	    	});
+	    } catch(Exception ex) {
+	    	log.error("Error while build multipart file:" , ex);
+	    	throw new BusinessException(ex);
+	    }
 
 	    HttpHeaders headers = new HttpHeaders();
 	    headers.setContentType(MediaType.MULTIPART_FORM_DATA);
