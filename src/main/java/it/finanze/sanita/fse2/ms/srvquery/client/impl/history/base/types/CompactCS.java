@@ -27,12 +27,12 @@ public class CompactCS {
         }
 
         HistoryResourceResDTO res = new HistoryResourceResDTO(
-            oid.get(),
-            cs.getVersion(),
+            resourceId,
+            versionId,
             new ResourceMetaDTO(
-                resourceId,
-                versionId,
-                cs.fhirType(),
+                oid.get(),
+                cs.getVersion(),
+                cs.getResourceType().getPath(),
                 cs.getDate()
             ),
             new ArrayList<>()

@@ -20,14 +20,14 @@ public class HistoryResourceResDTO {
     private String traceID;
     private String spanID;
 
-    private final String id;
-    private final String version;
+    private final String resourceId;
+    private final String versionId;
     private final ResourceMetaDTO meta;
     private final List<ResourceItemDTO> items;
 
-    public HistoryResourceResDTO(String id, String version, ResourceMetaDTO meta, List<ResourceItemDTO> items) {
-        this.id = id;
-        this.version = version;
+    public HistoryResourceResDTO(String resourceId, String versionId, ResourceMetaDTO meta, List<ResourceItemDTO> items) {
+        this.resourceId = resourceId;
+        this.versionId = versionId;
         this.meta = meta;
         this.items = items;
         this.traceID = "";
@@ -43,11 +43,11 @@ public class HistoryResourceResDTO {
     @Value
     @JsonInclude(NON_NULL)
     public static class ResourceMetaDTO {
-        String resourceId;
-        String versionId;
-        String resourceType;
+        String oid;
+        String version;
+        String type;
         @JsonFormat(pattern = PTT_ISO_8601)
-        Date releaseDate;
+        Date released;
     }
 
     @Value
