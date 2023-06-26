@@ -1,25 +1,42 @@
 /*
  * SPDX-License-Identifier: AGPL-3.0-or-later
+ * 
+ * Copyright (C) 2023 Ministero della Salute
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 
-import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
-import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
-import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
-import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
-import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
-import lombok.extern.slf4j.Slf4j;
+import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility.deserializeBundle;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility.deserializeBundle;
+import it.finanze.sanita.fse2.ms.srvquery.client.impl.CustomCapabilityStatement;
+import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
+import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
+import it.finanze.sanita.fse2.ms.srvquery.dto.ResourceSearchParameterDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
+import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
+import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
+import lombok.extern.slf4j.Slf4j;
 
 /** 
  * FHIR Service Implementation 
@@ -52,6 +69,8 @@ public class FHIRSRV implements IFHIRSRV {
 			log.debug("FHIR bundle: {}", json);
 			Bundle bundle = deserializeBundle(json);
 			esito = fhirClient.create(bundle);
+		} catch(BusinessException e) {
+			throw e;
 		} catch(Exception ex) {
 			log.error("Error while perform create operation :", ex);
 			throw new BusinessException("Error while perform create operation :", ex);
@@ -140,15 +159,22 @@ public class FHIRSRV implements IFHIRSRV {
 
 		return isFound;
 	}
-
+ 
+	private List<String> parametersFromPaths(List<StringType> paths) {
+		if (paths == null) paths = new ArrayList<>();
+		return paths
+			.stream()
+			.map(PrimitiveType::asStringValue)
+			.collect(Collectors.toList());
+	}
+	
 	@Override
-	public String translateCode(String code, String system, String targetSystem) {
-		if(fhirClient==null) {
-			initialize();
-		}
-		String out = fhirClient.translateCode(code, system, targetSystem);
-		log.info("Code translated result: {}", out);
-		return out;
+	public List<ResourceSearchParameterDTO> getResourcesSearchParameters() {
+		CustomCapabilityStatement capabilities = fhirClient.getServerCapabilities();
+		return capabilities.getResourceSearchPaths()
+			.stream()
+			.map(rp -> new ResourceSearchParameterDTO(rp.getType(), parametersFromPaths(rp.getSearchPath())) )
+			.collect(Collectors.toList()); 
 	}
 
 }

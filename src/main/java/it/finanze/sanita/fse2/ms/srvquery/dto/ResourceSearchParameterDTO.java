@@ -9,33 +9,16 @@
  * 
  * You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-package it.finanze.sanita.fse2.ms.srvquery;
+package it.finanze.sanita.fse2.ms.srvquery.dto;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-import org.junit.jupiter.api.Test;
+import java.util.List;
 
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
-
-
-class ExceptionTest {
-
-	@Test
-	void businessExceptionTest() {
-		BusinessException exc = new BusinessException("Error"); 
-		
-		assertEquals(BusinessException.class, exc.getClass()); 
-		assertEquals("Error", exc.getMessage()); 
-		
-	} 
-	
-	@Test
-	void businessExceptionTestWithoutMsg() {
-		BusinessException exc = new BusinessException(new RuntimeException()); 
-		
-		assertEquals(BusinessException.class, exc.getClass()); 
-		
-	} 
-
-	
-} 
+@RequiredArgsConstructor
+@Getter
+public class ResourceSearchParameterDTO {
+	private final String name;
+	private final List<String> parameters;
+}

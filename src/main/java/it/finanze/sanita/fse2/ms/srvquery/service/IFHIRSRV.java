@@ -1,8 +1,19 @@
 /*
  * SPDX-License-Identifier: AGPL-3.0-or-later
+ * 
+ * Copyright (C) 2023 Ministero della Salute
+ * 
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 package it.finanze.sanita.fse2.ms.srvquery.service;
 
+import java.util.List;
+
+import it.finanze.sanita.fse2.ms.srvquery.dto.ResourceSearchParameterDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 
 /** 
@@ -38,16 +49,7 @@ public interface IFHIRSRV {
      * @return boolean  The result of the update  
      */
 	boolean updateMetadata(FhirPublicationDTO updateDTO);
-	
-	/**
-     * Translate a code into a different codeSystem 
-     * 
-     * @param code  The code to be translated 
-     * @param system  The starting system 
-     * @param targetSystem  The target system 
-     * @return String  The translated code 
-     */
-    String translateCode(String code, String system, String targetSystem);
+ 
 
     /**
      * Check if a document reference exist on FHIR server
@@ -57,4 +59,12 @@ public interface IFHIRSRV {
      */
     boolean checkExists(String masterIdentifier);
 
+    
+    /**
+     * Retrieve search parameters for all resources managed by the FHIR server
+     * 
+     * @return List<ResourceSearchParameterDTO> the parameters list
+     */
+    List<ResourceSearchParameterDTO> getResourcesSearchParameters();
+    
 }
