@@ -1,5 +1,7 @@
 package it.finanze.sanita.fse2.ms.srvquery;
 
+import java.io.File;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,7 +17,7 @@ public class GeneratorTest {
 
 	@Test
 	void generateRandomBundle() {
-		byte[] bundleLDO = FileUtility.getFileFromInternalResources("BundleLDO");
+		byte[] bundleLDO = FileUtility.getFileFromInternalResources("Files" + File.separator + "BundleLDO.json");
 		System.out.println(new String(bundleLDO));
 		
 	}

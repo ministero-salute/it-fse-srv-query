@@ -4,19 +4,18 @@ import java.io.IOException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import com.google.gson.Gson;
 
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.TranslateResultDTO;
-import lombok.extern.slf4j.Slf4j;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 
-@Slf4j
 public class TranslatorClient extends AbstractTerminologyClient {
 
 	private String srvURL;
@@ -26,10 +25,10 @@ public class TranslatorClient extends AbstractTerminologyClient {
 	}
 
 	public TranslateResultDTO translate(String text, String sourceLang, String targetLang) {
-        HttpClient client = HttpClients.createDefault();
-        HttpPost request = new HttpPost(srvURL);
-        TranslateResultDTO out = null;
-        try {
+		try (CloseableHttpClient client = HttpClients.createDefault()) {
+			HttpPost request = new HttpPost(srvURL);
+        	TranslateResultDTO out = null;
+       
             String requestBody = "q=" + text + "&source=" + sourceLang + "&target=" + targetLang;
             StringEntity entity = new StringEntity(requestBody, ContentType.APPLICATION_FORM_URLENCODED);
             request.setEntity(entity);
@@ -39,10 +38,11 @@ public class TranslatorClient extends AbstractTerminologyClient {
             String responseBody = EntityUtils.toString(responseEntity);
 
             out = new Gson().fromJson(responseBody, TranslateResultDTO.class);
+            
+            return out;
         } catch (IOException e) {
-            e.printStackTrace();
+        	throw new BusinessException("Error during translation", e);
         }
-        return out;
 	}
 
 }
