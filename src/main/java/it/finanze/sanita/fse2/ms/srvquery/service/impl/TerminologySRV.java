@@ -38,7 +38,9 @@ import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Resource.SECURITY_SYSTEM;
-import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Resource.SECURITY_CODE;
+import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Resource.SECURITY_CODE_RESTRICTED;
+import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Resource.SECURITY_CODE_VERY_RESTRICTED;
+
 /** 
  * FHIR Service Implementation 
  */
@@ -204,13 +206,12 @@ public class TerminologySRV implements ITerminologySRV {
 		out.setOid(oid);
 		out.setExportable(false);
 
-		String cp = !StringUtility.isNullOrEmpty(codeSystem.getCopyright()) ? "###" + codeSystem.getCopyright() +"###\n" : "";   
 		
-		if(codeSystem.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE)==null) {
+		if(codeSystem.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_RESTRICTED)==null && 
+				codeSystem.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_VERY_RESTRICTED)==null) {
 			try {
 				out.setExportable(true);
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-				outputStream.write(cp.getBytes());
 				if(FormatEnum.FHIR_R4_JSON.equals(format)) {
 					outputStream.write(resource.getBytes());
 					byte[] finalBytes = outputStream.toByteArray();
