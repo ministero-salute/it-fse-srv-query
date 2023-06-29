@@ -36,7 +36,8 @@ public class CompactVS {
                 oid.get(),
                 vs.getVersion(),
                 vs.getResourceType().getPath(),
-                vs.getDate()
+                vs.getDate(),
+                vs.getExpansion().isEmpty()
             ),
             new ArrayList<>()
         );

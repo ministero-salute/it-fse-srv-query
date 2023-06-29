@@ -33,7 +33,8 @@ public class CompactCS {
                 oid.get(),
                 cs.getVersion(),
                 cs.getResourceType().getPath(),
-                cs.getDate()
+                cs.getDate(),
+                cs.getConcept().isEmpty()
             ),
             new ArrayList<>()
         );
