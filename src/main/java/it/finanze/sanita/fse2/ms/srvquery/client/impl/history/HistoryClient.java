@@ -2,6 +2,7 @@ package it.finanze.sanita.fse2.ms.srvquery.client.impl.history;
 
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.HistoryAbstractClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.TerminologyCFG;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistorySnapshotDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.MalformedResourceException;
@@ -39,4 +40,9 @@ public class HistoryClient extends HistoryAbstractClient {
     public Optional<HistoryResourceResDTO> getResource(String resourceId, String versionId) throws MalformedResourceException {
         return getMappedResource(resourceId, versionId);
     }
+
+    public HistorySnapshotDTO getSnapshot(Date lastUpdate) {
+        return createSnapshotByLastUpdate(lastUpdate);
+    }
+
 }

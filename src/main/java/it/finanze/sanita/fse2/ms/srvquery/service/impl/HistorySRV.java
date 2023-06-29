@@ -2,6 +2,7 @@ package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.HistoryClient;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistorySnapshotDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO;
@@ -22,6 +23,11 @@ public class HistorySRV implements IHistorySRV {
 
     @Autowired
     private HistoryClient client;
+
+    @Override
+    public HistorySnapshotDTO snapshot(Date lastUpdate) {
+        return client.getSnapshot(lastUpdate);
+    }
 
     @Override
     public HistoryResDTO history(Date lastUpdate) {

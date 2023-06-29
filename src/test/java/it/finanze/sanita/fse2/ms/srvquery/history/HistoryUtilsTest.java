@@ -5,7 +5,6 @@ import it.finanze.sanita.fse2.ms.srvquery.history.base.AbstractTestResources;
 import it.finanze.sanita.fse2.ms.srvquery.history.base.TestResource;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.FhirCrudClient;
 import lombok.extern.slf4j.Slf4j;
-import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;

@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceResDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistorySnapshotDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.MalformedResourceException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceNotFoundException;
 import it.finanze.sanita.fse2.ms.srvquery.validators.NoFutureDate;
@@ -29,6 +30,43 @@ import static org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME
 @Tag(name = API_HISTORY_TAG)
 @Validated
 public interface IHistoryCTL {
+
+    @GetMapping(value = API_GET_INTEGRITY)
+    @Operation(
+        summary = "Retrieve actives items by last-update",
+        description = "Returns an on-the-fly active items for the given timeframe"
+    )
+    @ApiResponses(
+        value = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Snapshot recuperato",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = HistorySnapshotDTO.class))
+            ),
+            @ApiResponse(
+                responseCode = "400",
+                description = "I parametri forniti non sono validi",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                    schema = @Schema(implementation = ErrorResponseDTO.class))
+            ),
+            @ApiResponse(
+                responseCode = "500",
+                description = "Internal Server Error",
+                content = @Content(
+                    mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE,
+                    schema = @Schema(implementation = ErrorResponseDTO.class))
+            )
+        }
+    )
+    HistorySnapshotDTO snapshot(
+        @RequestParam(value=API_QP_LAST_UPDATE)
+        @DateTimeFormat(iso = DATE_TIME)
+        @NoFutureDate(message = ERR_VAL_FUTURE_DATE)
+        Date lastUpdate
+    );
 
     @GetMapping(value = API_GET_HISTORY)
     @Operation(

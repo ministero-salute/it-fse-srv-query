@@ -10,6 +10,7 @@ import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.composer.Simp
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.types.CompactCS;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.types.CompactVS;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistoryResourceResDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.HistorySnapshotDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.MalformedResourceException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -34,6 +35,17 @@ public abstract class HistoryAbstractClient {
 
     public HistoryAbstractClient(IGenericClient client) {
         this.client = client;
+    }
+
+    protected HistorySnapshotDTO createSnapshotByLastUpdate(Date lastUpdate) {
+        // Create composer
+        SimpleComposer composer = new SimpleComposer(
+            client,
+            getHistoryFromBeginsButUntil(CodeSystem.class, lastUpdate),
+            getHistoryFromBeginsButUntil(ValueSet.class, lastUpdate)
+        );
+        // Convert
+        return HistorySnapshotDTO.from(lastUpdate, composer.compose());
     }
 
     protected RawHistoryDTO createHistoryByLastUpdate(Date lastUpdate) {
