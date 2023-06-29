@@ -22,8 +22,8 @@ public class HistoryCTL extends AbstractCTL implements IHistoryCTL {
     private IHistorySRV service;
 
     @Override
-    public HistorySnapshotDTO snapshot(Date lastUpdate) {
-        return service.snapshot(lastUpdate).trackWith(getLogTraceInfo());
+    public HistorySnapshotDTO snapshot() {
+        return service.snapshot().trackWith(getLogTraceInfo());
     }
 
     @Override

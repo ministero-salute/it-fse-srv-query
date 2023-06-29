@@ -9,7 +9,7 @@ import it.finanze.sanita.fse2.ms.srvquery.exceptions.ResourceNotFoundException;
 import java.util.Date;
 
 public interface IHistorySRV {
-    HistorySnapshotDTO snapshot(Date lastUpdate);
+    HistorySnapshotDTO snapshot();
     HistoryResDTO history(Date lastUpdate);
     HistoryResourceResDTO resource(String resourceId, String versionId) throws ResourceNotFoundException, MalformedResourceException;
 }

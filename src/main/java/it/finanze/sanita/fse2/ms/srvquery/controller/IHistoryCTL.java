@@ -34,7 +34,7 @@ public interface IHistoryCTL {
     @GetMapping(value = API_GET_INTEGRITY)
     @Operation(
         summary = "Retrieve actives items by last-update",
-        description = "Returns an on-the-fly active items for the given timeframe"
+        description = "Returns an on-the-fly active items at the current instant"
     )
     @ApiResponses(
         value = {
@@ -61,12 +61,7 @@ public interface IHistoryCTL {
             )
         }
     )
-    HistorySnapshotDTO snapshot(
-        @RequestParam(value=API_QP_LAST_UPDATE)
-        @DateTimeFormat(iso = DATE_TIME)
-        @NoFutureDate(message = ERR_VAL_FUTURE_DATE)
-        Date lastUpdate
-    );
+    HistorySnapshotDTO snapshot();
 
     @GetMapping(value = API_GET_HISTORY)
     @Operation(

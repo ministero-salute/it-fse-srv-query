@@ -24,12 +24,12 @@ public class HistorySnapshotDTO {
     private String spanID;
 
     @JsonFormat(pattern = PTT_ISO_8601)
-    private final Date lastUpdate;
+    private final Date timestamp;
 
     private final List<Resources> resources;
 
-    public HistorySnapshotDTO(Date lastUpdate, List<Resources> resources) {
-        this.lastUpdate = lastUpdate;
+    public HistorySnapshotDTO(Date timestamp, List<Resources> resources) {
+        this.timestamp = timestamp;
         this.resources = resources;
     }
 

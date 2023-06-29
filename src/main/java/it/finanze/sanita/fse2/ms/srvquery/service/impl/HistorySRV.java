@@ -25,8 +25,8 @@ public class HistorySRV implements IHistorySRV {
     private HistoryClient client;
 
     @Override
-    public HistorySnapshotDTO snapshot(Date lastUpdate) {
-        return client.getSnapshot(lastUpdate);
+    public HistorySnapshotDTO snapshot() {
+        return client.getSnapshot();
     }
 
     @Override

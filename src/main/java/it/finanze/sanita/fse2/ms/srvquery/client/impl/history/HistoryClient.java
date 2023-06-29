@@ -41,8 +41,8 @@ public class HistoryClient extends HistoryAbstractClient {
         return getMappedResource(resourceId, versionId);
     }
 
-    public HistorySnapshotDTO getSnapshot(Date lastUpdate) {
-        return createSnapshotByLastUpdate(lastUpdate);
+    public HistorySnapshotDTO getSnapshot() {
+        return createSnapshotByLastUpdate();
     }
 
 }

@@ -37,15 +37,17 @@ public abstract class HistoryAbstractClient {
         this.client = client;
     }
 
-    protected HistorySnapshotDTO createSnapshotByLastUpdate(Date lastUpdate) {
+    protected HistorySnapshotDTO createSnapshotByLastUpdate() {
+        // Create timestamp
+        Date timestamp = new Date();
         // Create composer
         SimpleComposer composer = new SimpleComposer(
             client,
-            getHistoryFromBeginsButUntil(CodeSystem.class, lastUpdate),
-            getHistoryFromBeginsButUntil(ValueSet.class, lastUpdate)
+            getCurrentActiveResources(CodeSystem.class),
+            getCurrentActiveResources(ValueSet.class)
         );
         // Convert
-        return HistorySnapshotDTO.from(lastUpdate, composer.compose());
+        return HistorySnapshotDTO.from(timestamp, composer.compose());
     }
 
     protected RawHistoryDTO createHistoryByLastUpdate(Date lastUpdate) {
@@ -59,13 +61,13 @@ public abstract class HistoryAbstractClient {
     }
 
     private RawHistoryDTO createHistoryFromBegins() {
-        // Create timestamp to sync both queries
+        // Create timestamp
         Date timestamp = new Date();
         // Create composer
         SimpleComposer composer = new SimpleComposer(
             client,
-            getHistoryFromBeginsButUntil(CodeSystem.class, timestamp),
-            getHistoryFromBeginsButUntil(ValueSet.class, timestamp)
+            getCurrentActiveResources(CodeSystem.class),
+            getCurrentActiveResources(ValueSet.class)
         );
         // Retrieve resources
         return new RawHistoryDTO(
@@ -92,7 +94,7 @@ public abstract class HistoryAbstractClient {
         );
     }
 
-    private Bundle getHistoryFromBeginsButUntil(Class<? extends BaseResource> type, Date until) {
+    private Bundle getCurrentActiveResources(Class<? extends BaseResource> type) {
         return client
             .search()
             .forResource(type)
@@ -101,7 +103,6 @@ public abstract class HistoryAbstractClient {
             .returnBundle(Bundle.class)
             .count(CHUNK_SIZE)
             .summaryMode(TRUE)
-            .lastUpdated(new DateRangeParam(null, getTimeUTC(until)))
             .execute();
     }
 
