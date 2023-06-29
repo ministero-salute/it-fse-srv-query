@@ -21,7 +21,7 @@ public final class RoutesUtility {
     public static final String API_QP_LAST_UPDATE = "lastUpdate";
 
     public static final String API_GET_HISTORY = "/" + API_VERSION + "/" + API_HISTORY;
-    public static final String API_GET_INTEGRITY = "/" + API_VERSION + "/" + API_INTEGRITY;
+    public static final String API_GET_INTEGRITY = "/" + API_VERSION + "/" + API_HISTORY + "/" + API_INTEGRITY;
 
     public static final String API_GET_RESOURCE_HISTORY = "/" + API_VERSION + "/" + API_HISTORY + "/" + API_RESOURCE + API_RES_ID_EXTS + API_RES_VERSION_EXTS;
 
