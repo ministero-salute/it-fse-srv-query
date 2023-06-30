@@ -1,5 +1,8 @@
 package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 
+import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Resource.SECURITY_CODE_NORMAL;
+import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Resource.SECURITY_SYSTEM;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -7,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +41,6 @@ import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
-import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Resource.SECURITY_SYSTEM;
-import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Resource.SECURITY_CODE_RESTRICTED;
-import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Resource.SECURITY_CODE_VERY_RESTRICTED;
 
 /** 
  * FHIR Service Implementation 
@@ -207,8 +208,11 @@ public class TerminologySRV implements ITerminologySRV {
 		out.setExportable(false);
 
 		
-		if(codeSystem.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_RESTRICTED)==null && 
-				codeSystem.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_VERY_RESTRICTED)==null) {
+		Coding security = codeSystem.getMeta()!=null && codeSystem.getMeta().getSecurity()!=null && !codeSystem.getMeta().getSecurity().isEmpty() ? 
+				codeSystem.getMeta().getSecurity().get(0) : null;
+		
+		
+		if(security==null || security.getSystem().equals(SECURITY_SYSTEM) && security.getCode().equals(SECURITY_CODE_NORMAL)) {
 			try {
 				out.setExportable(true);
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

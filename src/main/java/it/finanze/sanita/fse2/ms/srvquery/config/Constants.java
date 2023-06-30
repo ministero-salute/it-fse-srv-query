@@ -64,6 +64,7 @@ public class Constants {
          */
         public static final String SECURITY_SYSTEM= "https://www.hl7.org/fhir/R4/v3/ConfidentialityClassification/vs.html";
         public static final String SECURITY_CODE_RESTRICTED = "R";
+        public static final String SECURITY_CODE_NORMAL = "N";
         public static final String SECURITY_CODE_VERY_RESTRICTED = "V";
 
         /**
