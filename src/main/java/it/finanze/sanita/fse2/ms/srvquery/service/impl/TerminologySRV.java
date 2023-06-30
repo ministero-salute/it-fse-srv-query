@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -208,11 +207,8 @@ public class TerminologySRV implements ITerminologySRV {
 		out.setExportable(false);
 
 		
-		Coding security = codeSystem.getMeta()!=null && codeSystem.getMeta().getSecurity()!=null && !codeSystem.getMeta().getSecurity().isEmpty() ? 
-				codeSystem.getMeta().getSecurity().get(0) : null;
-		
-		
-		if(security==null || security.getSystem().equals(SECURITY_SYSTEM) && security.getCode().equals(SECURITY_CODE_NORMAL)) {
+		if(codeSystem.getMeta().getSecurity()==null || 
+				codeSystem.getMeta().getSecurity().isEmpty() || codeSystem.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_NORMAL)!=null) {
 			try {
 				out.setExportable(true);
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
