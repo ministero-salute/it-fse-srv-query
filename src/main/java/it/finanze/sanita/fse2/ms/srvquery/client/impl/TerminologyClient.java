@@ -553,8 +553,8 @@ public class TerminologyClient extends AbstractTerminologyClient {
 			String version = codeSystem.getVersion();
 			throw new DocumentAlreadyPresentException(String.format("CodeSystem già esistente con oid %s e version %s", oid,version));
 		}
-		IIdType id = tc.create().resource(codeSystem).execute().getId();
-		return id.getValue().toString();
+		IIdType id = tc.create().resource(codeSystem).summaryMode(SummaryEnum.TRUE).execute().getId();
+		return id.getValue();
 	}
 
 
