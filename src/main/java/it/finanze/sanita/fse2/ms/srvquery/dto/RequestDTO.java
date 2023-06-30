@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class RequestDTO {
-	private String name;
+	private String oidName;
 	private String version;
 	private String url;
 	private String oid;
