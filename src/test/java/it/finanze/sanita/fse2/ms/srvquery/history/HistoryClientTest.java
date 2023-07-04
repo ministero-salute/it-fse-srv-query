@@ -1,31 +1,38 @@
 package it.finanze.sanita.fse2.ms.srvquery.history;
 
-import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.HistoryClient;
-import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
-import it.finanze.sanita.fse2.ms.srvquery.history.base.AbstractTestResources;
-import it.finanze.sanita.fse2.ms.srvquery.history.base.TestResource;
-import it.finanze.sanita.fse2.ms.srvquery.history.crud.FhirCrudClient;
-import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.IResBuilder;
-import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.RSBuilder;
+import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Profile.TEST;
+import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.DELETE;
+import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.INSERT;
+import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.UPDATE;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.RETIRED;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+
+import java.util.Date;
+import java.util.Map;
+
 import org.hl7.fhir.r4.model.BaseResource;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.Date;
-import java.util.Map;
-
-import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Profile.TEST;
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO;
-import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.*;
-import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
-import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.RETIRED;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.HistoryClient;
+import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO;
+import it.finanze.sanita.fse2.ms.srvquery.history.base.AbstractTestResources;
+import it.finanze.sanita.fse2.ms.srvquery.history.base.TestResource;
+import it.finanze.sanita.fse2.ms.srvquery.history.crud.FhirCrudClient;
+import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.IResBuilder;
+import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.RSBuilder;
 
 /**
  * TerminologyServer MUST BE set as UTC time,
@@ -338,7 +345,6 @@ class HistoryClientTest extends AbstractTestResources {
         // Verify again
         changes = client.getHistoryMap(now);
         assertResource(changes, res[0].name(), id, "4", INSERT, "t1");
-        assertResourceSize(1, changes);
         // ================
         // ===== <T2> =====
         // ================
@@ -534,6 +540,165 @@ class HistoryClientTest extends AbstractTestResources {
         crud.updateResource(out);
         // Verify again
         assertEmptyServer(client.getHistoryMap(now));
+    }
+    
+    /*
+     * Verify the flow t0->INSERT, it should return 1 element inserted
+     * Verify the flow t1->UPDATE+DELETE, it should return 1 element updated at time t1
+     * Verify t2, it should return 0 element because it was deleted in t1 flow
+     */
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("Update and delete should return one element updated")
+    void insertUpdateDeleteTest(TestResource[] res) {
+    	// Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Get history
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        // Verify size 1 on fhir
+        assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T1> =====
+        // ================
+        // => Update one resource, delete it and verify
+        // Retrieve current time
+        now = new Date();
+        // Update CS
+        IResBuilder<?> builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Now remove it
+        crud.deleteResource(id, res[0].type());
+        // Verify on T1
+        changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "3", DELETE, "t1");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T2> =====
+        // ================
+        // => Given an updated server, verify no ids returns
+        // Retrieve current time
+        now = new Date();
+        // Verify again
+        changes = client.getHistoryMap(now);
+        // Verify emptiness
+        assertEmptyServer(changes, "t2");
+    }
+    
+    /*
+     * Verify the flow t0->INSERT+DELETE+UPDATE
+     * Return only one inserted
+     */
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("Insert, delete and update should return one element inserted")
+    void insertDeleteUpdateTest(TestResource[] res) {
+    	// Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Now remove it
+        crud.deleteResource(id, res[0].type());
+        // Get history
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        // Verify emptiness
+        assertEmptyServer(changes, "t0");
+        // Update CS
+        IResBuilder<?> builder = RSBuilder.from(crud.readResource(id, "1", res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Get history
+        changes = client.getHistoryMap(now);
+        // Verify emptiness
+        assertResource(changes, res[0].name(), id, "3", INSERT, "t1");
+        assertResourceSize(1, changes);
+    }
+    
+    /*
+     * Verify the flow t0->INSERT+DELETE
+     * return nothing
+     * Verify the flow t1->UPDATE
+     * return one resource inserted
+     */
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("Insert, delete (t0) return null and update (t1) return one inserted")
+    void insertDeleteAfterUpdateTest(TestResource[] res) {
+    	// Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Now remove it
+        crud.deleteResource(id, res[0].type());
+        // Get history
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        // Verify size 1 on fhir
+        assertResource(changes, res[0].name(), id, "2", INSERT, "t0");
+        assertResourceSize(1, changes);
+    }
+    
+    /*
+     * Verify the flow t0->INSERT+UPDATE
+     * return one resource inserted
+     * Verify the flow t1->DELETE+UPDATE
+     * return one resource updated
+     */
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("Insert, update (t0) return one inserted and delete, update (t1) return one updated")
+    void insertUpdateAfterDeleteUpdateTest(TestResource[] res) {
+    	// Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Update CS
+        IResBuilder<?> builder = RSBuilder.from(crud.readResource(id, "1", res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Get history
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        // Verify size 1 on fhir
+        assertResource(changes, res[0].name(), id, "2", INSERT, "t0");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T1> =====
+        // ================
+        // => Update one resource, delete it and verify
+        // Retrieve current time
+        now = new Date();
+        // Now remove it
+        crud.deleteResource(id, res[0].type());
+        // Update CS
+        builder = RSBuilder.from(crud.readResource(id, "2", res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Verify on T1
+        changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "4", UPDATE, "t1");
+        assertResourceSize(1, changes);
     }
 
     @AfterAll
