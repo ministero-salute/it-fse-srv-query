@@ -2,11 +2,13 @@ package it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.composer;
 
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -256,14 +258,7 @@ public class HistoryComposer {
             throw new IllegalArgumentException("Cannot search for version zero, this is a bug");
         }
         // Retrieve latest version
-        Resource raw = (Resource) client
-            .read()
-            .resource(type.getPath())
-            .withIdAndVersion(id, String.valueOf(previous))
-            .summaryMode(SummaryEnum.TRUE)
-            .cacheControl(noCache())
-            .preferResponseType(Resource.class)
-            .execute();
+        Resource raw = retrieveResourceAt(id, type.getPath(), previous);
         // Get status
         return asStatus(raw);
     }
@@ -299,27 +294,18 @@ public class HistoryComposer {
 
     private boolean wasDeactivateResourceBeforeChanges(String id) {
         // Working var
-        Resource raw = null;
-        // Get the earliest tracked version
-        HistoryDetailsDTO dto = composition.get(id).getLast();
-        // Map as integer, then subtract to get previous version
-        int previous = Integer.parseInt(dto.getVersion()) - 1;
-        // Skip if previous is zero
-        if(previous != 0) {
-            // Retrieve latest version
-            raw = (Resource) client
-                .read()
-                .resource(dto.getType().getPath())
-                .withIdAndVersion(id, String.valueOf(previous))
-                .summaryMode(SummaryEnum.TRUE)
-                .cacheControl(noCache())
-                .preferResponseType(Resource.class)
-                .execute();
-        }
+        Result result = retrievePreviousResource(id);
         // Get status
-        return raw != null ? asStatus(raw) != ACTIVE : dto.getStatus() != ACTIVE;
+        return result.raw != null ? asStatus(result.raw) != ACTIVE : result.dto.getStatus() != ACTIVE;
     }
     private boolean wasActivateResourceBeforeChanges(String id) {
+        Result result = retrievePreviousResource(id);
+        // Get status
+        return result.raw != null ? asStatus(result.raw) == ACTIVE : result.dto.getStatus() == ACTIVE;
+    }
+
+    @NotNull
+    private Result retrievePreviousResource(String id) {
         // Working var
         Resource raw = null;
         // Get the earliest tracked version
@@ -328,18 +314,36 @@ public class HistoryComposer {
         int previous = Integer.parseInt(dto.getVersion()) - 1;
         // Skip if previous is zero
         if(previous != 0) {
-            // Retrieve latest version
-            raw = (Resource) client
-                .read()
-                .resource(dto.getType().getPath())
-                .withIdAndVersion(id, String.valueOf(previous))
-                .summaryMode(SummaryEnum.TRUE)
-                .cacheControl(noCache())
-                .preferResponseType(Resource.class)
-                .execute();
+            try {
+                // Retrieve latest version
+                raw = retrieveResourceAt(id, dto.getType().getPath(), previous);
+            } catch (ResourceGoneException ex) {
+                // If was deleted, we need to retrieve the latest one - 1
+                raw = retrieveResourceAt(id, dto.getType().getPath(), previous - 1);
+            }
         }
-        // Get status
-        return raw != null ? asStatus(raw) == ACTIVE : dto.getStatus() == ACTIVE;
+        return new Result(raw, dto);
+    }
+
+    private Resource retrieveResourceAt(String id, String type, int version) {
+        return (Resource) client
+            .read()
+            .resource(type)
+            .withIdAndVersion(id, String.valueOf(version))
+            .summaryMode(SummaryEnum.TRUE)
+            .cacheControl(noCache())
+            .preferResponseType(Resource.class)
+            .execute();
+    }
+
+    private static class Result {
+        public final Resource raw;
+        public final HistoryDetailsDTO dto;
+
+        public Result(Resource raw, HistoryDetailsDTO dto) {
+            this.raw = raw;
+            this.dto = dto;
+        }
     }
 
 
