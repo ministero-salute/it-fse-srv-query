@@ -26,6 +26,10 @@ public class FhirCrudClient {
         return client.read().resource(clazz).withId(id).execute();
     }
 
+    public <T extends IBaseResource> T readResource(String id, String version, Class<T> clazz) {
+        return client.read().resource(clazz).withIdAndVersion(id, version).execute();
+    }
+
     public <T extends IBaseResource> void updateResource(T resource) {
         client.update().resource(resource).execute();
     }
