@@ -1,13 +1,15 @@
 package it.finanze.sanita.fse2.ms.srvquery.history.crud;
 
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.BooleanType;
-import org.hl7.fhir.r4.model.Parameters;
-
 import static it.finanze.sanita.fse2.ms.srvquery.client.impl.history.base.HistoryUtils.asId;
 import static it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper.createClient;
+
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
+
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 
 public class FhirCrudClient {
 
@@ -31,6 +33,7 @@ public class FhirCrudClient {
     }
 
     public <T extends IBaseResource> void updateResource(T resource) {
+    	resource.setId(new IdType(resource.fhirType(), asId(resource)));
         client.update().resource(resource).execute();
     }
 
