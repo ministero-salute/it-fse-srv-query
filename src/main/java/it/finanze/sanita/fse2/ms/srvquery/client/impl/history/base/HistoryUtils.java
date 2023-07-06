@@ -29,7 +29,15 @@ public class HistoryUtils {
             return extractIdFromFullUrl(url);
         }
         public static ResourceType extractFhirTypeFromRequestUrl(String url) {
-            return ResourceType.fromCode(url.substring(0, url.indexOf("/")));
+            ResourceType res;
+            if(url.contains(ResourceType.CodeSystem.name())) {
+                res = ResourceType.CodeSystem;
+            } else if(url.contains(ResourceType.ValueSet.name())) {
+                res = ResourceType.ValueSet;
+            } else {
+                throw new IllegalArgumentException("Cannot extract resource type from url: " + url);
+            }
+            return res;
         }
     }
 
