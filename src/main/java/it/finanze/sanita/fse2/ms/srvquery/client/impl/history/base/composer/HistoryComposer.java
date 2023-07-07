@@ -165,11 +165,17 @@ public class HistoryComposer {
             // Get operations
             HistoryDetailsDTO latest = details.getFirst();
             HistoryDetailsDTO first = details.getLast();
+            boolean activeResourceDeleted = latest.getOp() == DELETE && latest.getStatus() == ACTIVE;
             // Check
-            if(
-                latest.getOp() == DELETE &&
-                latest.getStatus() == ACTIVE &&
-                first.getOp() == INSERT
+            if(activeResourceDeleted && first.getOp() == INSERT) {
+                // Clear history
+                composition.get(id).clear();
+                // Remove
+                composition.remove(id);
+            } else if (
+                activeResourceDeleted &&
+                first.getOp() == UPDATE &&
+                wasDeactivateResourceBeforeChanges(id)
             ) {
                 // Clear history
                 composition.get(id).clear();
