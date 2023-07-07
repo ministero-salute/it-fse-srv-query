@@ -300,8 +300,8 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     /**
-     * Verify the flow T0->INSERT(1)+UPDATE(2)+UPDATE(3)->T1->EMPTY
-     * At t0 it's expected one insertion, at t1 one insert and multiple updates
+     * Verify the flow T0->EMPTY->T1->INSERT(1)+UPDATE(2)+UPDATE(3)
+     * At t0 it's expected no insertion, at t1 one insert and multiple updates
      * and then at t2 one must be synchronised
      */
     @ParameterizedTest
