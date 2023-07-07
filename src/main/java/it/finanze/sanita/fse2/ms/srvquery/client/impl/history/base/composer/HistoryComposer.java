@@ -113,9 +113,9 @@ public class HistoryComposer {
         omitResourceExistedInBetween();
         // Re-write as insertion resources that were created and updated in between
         reviseResourceUpsertInBetween();
-        // Re-write as insertion resources that went from draft to active
+        // Re-write as insertion resources that went from any to active
         reviseResourceFromDeactivateToActive();
-        // Re-write as deletions resources that went from active to draft
+        // Re-write as deletions resources that went from active to any
         reviseResourceFromActiveToDeactivate();
     }
 

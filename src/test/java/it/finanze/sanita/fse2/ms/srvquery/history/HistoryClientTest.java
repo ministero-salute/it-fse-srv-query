@@ -1282,6 +1282,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     @ParameterizedTest
+    @Order(42)
     @MethodSource("getTestResources")
     @DisplayName("[42] t0->INSERT(active)->t1->UPDATE(draft)")
     void resourceFromActiveToAny(TestResource[] res) {
@@ -1316,6 +1317,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
     
     @ParameterizedTest
+    @Order(43)
     @MethodSource("getTestResourcesDraft")
     @DisplayName("[43] t0->INSERT(draft)->t1->UPDATE(active)")
     void resourceFromAnyToActive(TestResource[] res) {
@@ -1345,7 +1347,64 @@ class HistoryClientTest extends AbstractTestResources {
         Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
         assertResource(changes, res[0].name(), id, "2", INSERT, "t1");
     }
-    
+
+    @ParameterizedTest
+    @Order(44)
+    @MethodSource("getTestResourcesDraft")
+    @DisplayName("[44] t0->INSERT(draft)->t1->DELETE(draft)")
+    void emptyThenInsertDraftThenRemoveDraft(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(now));
+        // ================
+        // ===== <T1> =====
+        // ================
+        // Get time
+        now = new Date();
+        // Update CS
+        crud.deleteResource(id, res[0].type());
+        // Verify again
+        assertEmptyServer(client.getHistoryMap(now));
+    }
+
+    @ParameterizedTest
+    @Order(45)
+    @MethodSource("getTestResourcesDraft")
+    @DisplayName("[45] t0->INSERT(draft)->t1->UPDATE(active)+DELETE")
+    void emptyThenInsertDraftThenUpdateToActiveThenRemove(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(now));
+        // ================
+        // ===== <T1> =====
+        // ================
+        // Get time
+        now = new Date();
+        // Update CS
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addStatus(ACTIVE);
+        crud.updateResource(builder.build());
+        crud.deleteResource(id, res[0].type());
+        // Verify again
+        assertEmptyServer(client.getHistoryMap(now));
+    }
+
     /*
      * Verify the flow t0->INSERT+DELETE+UPDATE
      * Return only one inserted
