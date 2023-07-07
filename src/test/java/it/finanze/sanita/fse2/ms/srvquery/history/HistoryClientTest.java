@@ -275,6 +275,96 @@ class HistoryClientTest extends AbstractTestResources {
         assertResourceSize(1, changes);
     }
 
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[12] null->INSERT->null->UPDATE->null->DELETE")
+    public void emptyThenAddThenUpdateThenDelete(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Check
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(null);
+        assertResource(changes, res[0].name(), id, "1", INSERT);
+        assertResourceSize(1, changes);
+        // Update resource
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Check
+        changes = client.getHistoryMap(null);
+        assertResource(changes, res[0].name(), id, "2", INSERT);
+        assertResourceSize(1, changes);
+        // Delete resource
+        crud.deleteResource(id, res[0].type());
+        // Check
+        changes = client.getHistoryMap(null);
+        assertEmptyServer(changes);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[13] null->INSERT->null->UPDATE->null->UPDATE")
+    public void emptyThenAddThenUpdateThenUpdate(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Check
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(null);
+        assertResource(changes, res[0].name(), id, "1", INSERT);
+        assertResourceSize(1, changes);
+        // Update resource
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Check
+        changes = client.getHistoryMap(null);
+        assertResource(changes, res[0].name(), id, "2", INSERT);
+        assertResourceSize(1, changes);
+        // Update resource
+        builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("O", "Other");
+        crud.updateResource(builder.build());
+        // Check
+        changes = client.getHistoryMap(null);
+        assertResource(changes, res[0].name(), id, "3", INSERT);
+        assertResourceSize(1, changes);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[14] null->INSERT->null->UPDATE+UPDATE->null->UPDATE")
+    public void emptyThenAddThenMultipleUpdateThenUpdate(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Check
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(null);
+        assertResource(changes, res[0].name(), id, "1", INSERT);
+        assertResourceSize(1, changes);
+        // Update resource
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("O", "Other");
+        crud.updateResource(builder.build());
+        // Check
+        changes = client.getHistoryMap(null);
+        assertResource(changes, res[0].name(), id, "3", INSERT);
+        assertResourceSize(1, changes);
+        // Update resource
+        builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("A", "Alpha");
+        crud.updateResource(builder.build());
+        // Check
+        changes = client.getHistoryMap(null);
+        assertResource(changes, res[0].name(), id, "4", INSERT);
+        assertResourceSize(1, changes);
+    }
+
     /**
      * Verify the flow T0->INSERT->T1->INSERT->T2->NO-OP
      * does return an appropriate changeset reflecting
