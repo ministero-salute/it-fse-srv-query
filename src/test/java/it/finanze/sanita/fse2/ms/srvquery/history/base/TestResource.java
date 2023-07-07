@@ -19,4 +19,9 @@ public class TestResource {
     public Class<? extends BaseResource> type() {
         return resource.getClass();
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s/%s", name, resource.fhirType());
+    }
 }

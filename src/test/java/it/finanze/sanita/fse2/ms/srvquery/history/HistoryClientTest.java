@@ -56,24 +56,17 @@ class HistoryClientTest extends AbstractTestResources {
         crud.reset();
     }
 
-    /**
-     * Verify an empty server doesn't return any changeset
-     */
+
     @Test
-    @DisplayName("Last update is null and no items")
+    @DisplayName("[0] empty-server")
     public void emptyServer() {
         assertEmptyServer(client.getHistoryMap(null));
     }
 
-    /**
-     * Verify the flow null->INSERT->null->INSERT
-     * At first changeset is expected one insertion,
-     * at the second one are expected two insertions
-     */
     @ParameterizedTest
     @MethodSource("getTestResources")
-    @DisplayName("Last update is null then add items")
-    public void emptyServerThenAddMore(TestResource[] res) {
+    @DisplayName("[1] null->INSERT")
+    public void emptyThenAdd(TestResource[] res) {
         // Verify emptiness
         assertEmptyServer(client.getHistoryMap(null));
         // Insert resource
@@ -82,36 +75,204 @@ class HistoryClientTest extends AbstractTestResources {
         Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(null);
         // Check
         assertResource(changes, res[0].name(), id, "1", INSERT);
+        assertResourceSize(1, changes);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[2] null->INSERT+INSERT")
+    public void emptyThenMultipleAdd(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        String id2 = crud.createResource(res[1].resource());
+        // Check
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(null);
+        assertResource(changes, res[0].name(), id, "1", INSERT);
+        assertResource(changes, res[0].name(), id2, "1", INSERT);
+        assertResourceSize(2, changes);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[3] null->INSERT+UPDATE")
+    public void emptyThenAddUpdate(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        // Update it
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Check
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(null);
+        assertResource(changes, res[0].name(), id, "2", INSERT);
+        assertResourceSize(1, changes);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[4] null->INSERT+DELETE")
+    public void emptyThenAddRemove(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Remove it
+        crud.deleteResource(id, res[0].type());
+        // Check
+        assertEmptyServer(client.getHistoryMap(null));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[5] null->INSERT+UPDATE+DELETE")
+    public void emptyThenAddUpdateRemove(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Update it
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Remove it
+        crud.deleteResource(id, res[0].type());
+        // Verify again
+        assertEmptyServer(client.getHistoryMap(null));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[6] null->INSERT+UPDATE+UPDATE")
+    public void emptyThenAddUpdateUpdate(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Update
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Update again
+        builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("O", "Other");
+        crud.updateResource(builder.build());
+        // Check
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(null);
+        assertResource(changes, res[0].name(), id, "3", INSERT);
+        assertResourceSize(1, changes);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[7] null->INSERT->null->INSERT")
+    public void emptyThenAddThenAdd(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Check
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(null);
+        assertResource(changes, res[0].name(), id, "1", INSERT);
+        assertResourceSize(1, changes);
         // Insert resource
         String id2 = crud.createResource(res[1].resource());
-        // Verify again
-        changes = client.getHistoryMap(null);
         // Check
+        changes = client.getHistoryMap(null);
         assertResource(changes, res[0].name(), id, "1", INSERT);
         assertResource(changes, res[1].name(), id2, "1", INSERT);
         assertResourceSize(2, changes);
     }
 
-    /**
-     * Verify the flow null->INSERT+DELETE returns an empty changeset
-     * because if an element has been inserted and deleted before an alignment
-     * there is no point into returning it
-     */
     @ParameterizedTest
     @MethodSource("getTestResources")
-    @DisplayName("Last update is null then add/remove items")
-    public void emptyServerThenAddRemove(TestResource[] res) {
+    @DisplayName("[8] null->INSERT->null->UPDATE")
+    public void emptyThenAddThenUpdate(TestResource[] res) {
         // Verify emptiness
         assertEmptyServer(client.getHistoryMap(null));
         // Insert resource
         String id = crud.createResource(res[0].resource());
-        // Verify again
+        // Check
         Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(null);
         assertResource(changes, res[0].name(), id, "1", INSERT);
-        // Now remove it
-        crud.deleteResource(id, res[0].type());
-        // Verify again
+        assertResourceSize(1, changes);
+        // Update resource
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("O", "Other");
+        crud.updateResource(builder.build());
+        // Check
+        changes = client.getHistoryMap(null);
+        assertResource(changes, res[0].name(), id, "2", INSERT);
+        assertResourceSize(1, changes);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[9] null->INSERT->null->DELETE")
+    public void emptyThenAddThenRemove(TestResource[] res) {
+        // Verify emptiness
         assertEmptyServer(client.getHistoryMap(null));
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Check
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(null);
+        assertResource(changes, res[0].name(), id, "1", INSERT);
+        assertResourceSize(1, changes);
+        // Delete resource
+        crud.deleteResource(id, res[0].type());
+        // Check
+        assertEmptyServer(client.getHistoryMap(null));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[10] null->INSERT->null->UPDATE+DELETE")
+    public void emptyThenAddThenUpdateRemove(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Check
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(null);
+        assertResource(changes, res[0].name(), id, "1", INSERT);
+        assertResourceSize(1, changes);
+        // Update resource
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("O", "Other");
+        crud.updateResource(builder.build());
+        // Delete resource
+        crud.deleteResource(id, res[0].type());
+        // Check
+        assertEmptyServer(client.getHistoryMap(null));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[11] null->INSERT->null->UPDATE+UPDATE")
+    public void emptyThenAddThenMultipleUpdate(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Check
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(null);
+        assertResource(changes, res[0].name(), id, "1", INSERT);
+        assertResourceSize(1, changes);
+        // Update resource
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Update resource
+        builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("O", "Other");
+        crud.updateResource(builder.build());
+        // Check
+        changes = client.getHistoryMap(null);
+        assertResource(changes, res[0].name(), id, "3", INSERT);
+        assertResourceSize(1, changes);
     }
 
     /**
@@ -201,7 +362,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Retrieve current time
         now = new Date();
         // Update CS
-        IResBuilder<?> builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
         builder.addCodes("U", "Unknown");
         crud.updateResource(builder.build());
         // Verify again
@@ -262,7 +423,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Retrieve current time
         now = new Date();
         // Update CS
-        IResBuilder<?> builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
         builder.addCodes("U", "Unknown");
         crud.updateResource(builder.build());
         builder = RSBuilder.from(crud.readResource(id, res[0].type()));
@@ -329,7 +490,7 @@ class HistoryClientTest extends AbstractTestResources {
         assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
         assertResourceSize(1, changes);
         // Update CS
-        IResBuilder<?> builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
         builder.addCodes("U", "Unknown");
         crud.updateResource(builder.build());
         builder = RSBuilder.from(crud.readResource(id, res[0].type()));
@@ -391,7 +552,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Insert resource
         String id = crud.createResource(res[0].resource());
         // Now update it
-        IResBuilder<?> builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
         builder.addCodes("U", "Unknown");
         crud.updateResource(builder.build());
         // Verify again
@@ -425,7 +586,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Get time
         now = new Date();
         // Change status from DRAFT to ACTIVE
-        IResBuilder<?> builder = RSBuilder.from(crud.readResource(id, res.type()));
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res.type()));
         builder.addStatus(ACTIVE);
         BaseResource out = builder.build();
         // Update CS
@@ -456,7 +617,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Verify emptiness
         assertEmptyServer(client.getHistoryMap(now));
         // Change status from DRAFT to ACTIVE
-        IResBuilder<?> builder = RSBuilder.from(crud.readResource(id, res.type()));
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res.type()));
         builder.addStatus(ACTIVE);
         BaseResource out = builder.build();
         // Update CS
@@ -495,7 +656,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Get time
         now = new Date();
         // Change status from ACTIVE to DEACTIVATED
-        IResBuilder<?> builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
         builder.addStatus(RETIRED);
         BaseResource out = builder.build();
         // Update CS
@@ -529,7 +690,7 @@ class HistoryClientTest extends AbstractTestResources {
         assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
         assertResourceSize(1, changes);
         // Change status from ACTIVE to DEACTIVATED
-        IResBuilder<?> builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
         builder.addStatus(RETIRED);
         BaseResource out = builder.build();
         // Update CS
@@ -568,7 +729,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Retrieve current time
         now = new Date();
         // Update CS
-        IResBuilder<?> builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
         builder.addCodes("U", "Unknown");
         crud.updateResource(builder.build());
         // Now remove it
@@ -614,7 +775,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Verify emptiness
         assertEmptyServer(changes, "t0");
         // Update CS
-        IResBuilder<?> builder = RSBuilder.from(crud.readResource(id, "1", res[0].type()));
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, "1", res[0].type()));
         builder.addCodes("U", "Unknown");
         crud.updateResource(builder.build());
         // Get history
@@ -645,7 +806,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Insert resource
         String id = crud.createResource(res[0].resource());
         // Update CS
-        IResBuilder<?> builder = RSBuilder.from(crud.readResource(id, "1", res[0].type()));
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, "1", res[0].type()));
         builder.addCodes("U", "Unknown");
         crud.updateResource(builder.build());
         // Get history

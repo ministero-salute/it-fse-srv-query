@@ -10,7 +10,7 @@ import java.util.Date;
 import static org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.*;
 
-public class CSBuilder implements IResBuilder<CodeSystem> {
+public class CSBuilder implements IResBuilder {
 
     private final CodeSystem cs;
 

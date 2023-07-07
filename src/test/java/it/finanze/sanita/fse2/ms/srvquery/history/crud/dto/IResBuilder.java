@@ -6,7 +6,7 @@ import java.util.Date;
 
 import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 
-public interface IResBuilder<T extends BaseResource> {
+public interface IResBuilder {
 
     String OID_REF = "urn:ietf:rfc:3986";
     String OID_PREFIX = "urn:oid:";
@@ -18,6 +18,6 @@ public interface IResBuilder<T extends BaseResource> {
     void addStatus(PublicationStatus status);
     void addDate(Date date);
 
-    T build();
+    BaseResource build();
 
 }

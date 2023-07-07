@@ -10,7 +10,7 @@ import java.util.Date;
 import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
 import static org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 
-public class VSBuilder implements IResBuilder<ValueSet> {
+public class VSBuilder implements IResBuilder {
 
     private final ValueSet vs;
 
