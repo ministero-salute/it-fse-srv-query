@@ -994,9 +994,10 @@ class HistoryClientTest extends AbstractTestResources {
     }
     
     @ParameterizedTest
+    @Order(31)
     @MethodSource("getTestResourcesDraft")
-    @DisplayName("[33] t0->INSERT(draft)+UPDATE(active)")
-    void resourceFromAnyToActiveSingle(TestResource res) {
+    @DisplayName("[31] t0->INSERT(draft)")
+    void insertDraftResource(TestResource[] res) {
         // Verify emptiness
         assertEmptyServer(client.getHistoryMap(null));
         // ================
@@ -1005,21 +1006,60 @@ class HistoryClientTest extends AbstractTestResources {
         // Get time
         Date now = new Date();
         // Insert resource
-        String id = crud.createResource(res.resource());
+        crud.createResource(res[0].resource());
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(now));
+    }
+    
+    @ParameterizedTest
+    @Order(32)
+    @MethodSource("getTestResourcesDraft")
+    @DisplayName("[32] t0->INSERT(draft)+INSERT(draft)")
+    void insertTwDraftResources(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource 1
+        crud.createResource(res[0].resource());
+        // Insert resource 2
+        crud.createResource(res[1].resource());
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(now));
+    }
+    
+    @ParameterizedTest
+    @Order(33)
+    @MethodSource("getTestResourcesDraft")
+    @DisplayName("[33] t0->INSERT(draft)+UPDATE(active)")
+    void resourceFromAnyToActiveSingle(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
         // Verify emptiness
         assertEmptyServer(client.getHistoryMap(now));
         // Change status from DRAFT to ACTIVE
-        IResBuilder builder = RSBuilder.from(crud.readResource(id, res.type()));
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
         builder.addStatus(ACTIVE);
         BaseResource out = builder.build();
         // Update CS
         crud.updateResource(out);
         // Verify again
         Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
-        assertResource(changes, res.name(), id, "2", INSERT, "t0");
+        assertResource(changes, res[0].name(), id, "2", INSERT, "t0");
     }
     
     @ParameterizedTest
+    @Order(34)
     @MethodSource("getTestResources")
     @DisplayName("[34] t0->INSERT(active)+UPDATE(draft)")
     void resourceFromActiveToAnySingle(TestResource[] res) {
@@ -1084,7 +1124,7 @@ class HistoryClientTest extends AbstractTestResources {
     @ParameterizedTest
     @MethodSource("getTestResourcesDraft")
     @DisplayName("[43] t0->INSERT(draft)->t1->UPDATE(active)")
-    void resourceFromAnyToActive(TestResource res) {
+    void resourceFromAnyToActive(TestResource[] res) {
         // Verify emptiness
         assertEmptyServer(client.getHistoryMap(null));
         // ================
@@ -1093,7 +1133,7 @@ class HistoryClientTest extends AbstractTestResources {
         // Get time
         Date now = new Date();
         // Insert resource
-        String id = crud.createResource(res.resource());
+        String id = crud.createResource(res[0].resource());
         // Verify emptiness
         assertEmptyServer(client.getHistoryMap(now));
         // ================
@@ -1102,14 +1142,14 @@ class HistoryClientTest extends AbstractTestResources {
         // Get time
         now = new Date();
         // Change status from DRAFT to ACTIVE
-        IResBuilder builder = RSBuilder.from(crud.readResource(id, res.type()));
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
         builder.addStatus(ACTIVE);
         BaseResource out = builder.build();
         // Update CS
         crud.updateResource(out);
         // Verify again
         Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
-        assertResource(changes, res.name(), id, "2", INSERT, "t1");
+        assertResource(changes, res[0].name(), id, "2", INSERT, "t1");
     }
     
     /*

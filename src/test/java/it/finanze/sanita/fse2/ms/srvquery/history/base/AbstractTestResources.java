@@ -1,22 +1,23 @@
 package it.finanze.sanita.fse2.ms.srvquery.history.base;
 
-import it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum;
-import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.impl.CSBuilder;
-import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.impl.VSBuilder;
-import org.hl7.fhir.r4.model.BaseResource;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.jupiter.params.provider.Arguments;
+import static java.lang.String.format;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.DRAFT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO;
-import static java.lang.String.format;
-import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
-import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.params.provider.Arguments;
+
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO;
+import it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum;
+import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.impl.CSBuilder;
+import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.impl.VSBuilder;
 
 public abstract class AbstractTestResources {
     protected BaseResource createGenderTestCS() {
@@ -28,6 +29,12 @@ public abstract class AbstractTestResources {
 
     protected BaseResource createGenderTestCS(PublicationStatus id) {
         CodeSystem cs = (CodeSystem) createGenderTestCS();
+        cs.setStatus(id);
+        return cs;
+    }
+    
+    protected BaseResource createOreTestCS(PublicationStatus id) {
+        CodeSystem cs = (CodeSystem) createOreTestCS();
         cs.setStatus(id);
         return cs;
     }
@@ -52,6 +59,12 @@ public abstract class AbstractTestResources {
 
     protected BaseResource createColorsTestVS(PublicationStatus id) {
         ValueSet cs = (ValueSet) createColorsTestVS();
+        cs.setStatus(id);
+        return cs;
+    }
+    
+    protected BaseResource createDaysTestVS(PublicationStatus id) {
+        ValueSet cs = (ValueSet) createDaysTestVS();
         cs.setStatus(id);
         return cs;
     }
@@ -129,9 +142,10 @@ public abstract class AbstractTestResources {
     }
 
     protected Stream<Arguments> getTestResourcesDraft() {
-        return Stream.of(
-            Arguments.of(new TestResource("gender", createGenderTestCS(DRAFT))),
-            Arguments.of(new TestResource("colors", createColorsTestVS(DRAFT)))
+    	return Stream.of(
+            Arguments.of((Object) getTestResourcesCSDraft()),
+            Arguments.of((Object) getTestResourcesVSDraft()),
+            Arguments.of((Object) getTestResourcesMixedDraft())
         );
     }
 
@@ -153,6 +167,27 @@ public abstract class AbstractTestResources {
         return new TestResource[] {
             new TestResource("colors", createColorsTestVS()),
             new TestResource("days", createDaysTestVS())
+        };
+    }
+    
+    protected TestResource[] getTestResourcesMixedDraft() {
+        return new TestResource[] {
+            new TestResource("gender", createGenderTestCS(DRAFT)),
+            new TestResource("days", createDaysTestVS(DRAFT))
+        };
+    }
+
+    private TestResource[] getTestResourcesCSDraft() {
+        return new TestResource[] {
+            new TestResource("gender", createGenderTestCS(DRAFT)),
+            new TestResource("ore", createOreTestCS(DRAFT))
+        };
+    }
+
+    private TestResource[] getTestResourcesVSDraft() {
+        return new TestResource[] {
+            new TestResource("colors", createColorsTestVS(DRAFT)),
+            new TestResource("days", createDaysTestVS(DRAFT))
         };
     }
 
