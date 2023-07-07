@@ -1,26 +1,5 @@
 package it.finanze.sanita.fse2.ms.srvquery.history;
 
-import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Profile.TEST;
-import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.DELETE;
-import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.INSERT;
-import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.UPDATE;
-import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
-import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.DRAFT;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-
-import java.util.Date;
-import java.util.Map;
-
-import org.hl7.fhir.r4.model.BaseResource;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.HistoryClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO;
@@ -29,6 +8,25 @@ import it.finanze.sanita.fse2.ms.srvquery.history.base.TestResource;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.FhirCrudClient;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.IResBuilder;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.RSBuilder;
+import org.hl7.fhir.r4.model.BaseResource;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.runner.OrderWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
+import java.util.Date;
+import java.util.Map;
+
+import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Profile.TEST;
+import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.*;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.DRAFT;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
  * TerminologyServer MUST BE set as UTC time,
@@ -37,6 +35,7 @@ import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.RSBuilder;
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles(TEST)
 @TestInstance(PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class HistoryClientTest extends AbstractTestResources {
 
     private final HistoryClient client;
@@ -58,12 +57,14 @@ class HistoryClientTest extends AbstractTestResources {
 
 
     @Test
+    @Order(0)
     @DisplayName("[0] empty-server")
     public void emptyServer() {
         assertEmptyServer(client.getHistoryMap(null));
     }
 
     @ParameterizedTest
+    @Order(1)
     @MethodSource("getTestResources")
     @DisplayName("[1] null->INSERT")
     public void emptyThenAdd(TestResource[] res) {
@@ -79,6 +80,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     @ParameterizedTest
+    @Order(2)
     @MethodSource("getTestResources")
     @DisplayName("[2] null->INSERT+INSERT")
     public void emptyThenMultipleAdd(TestResource[] res) {
@@ -95,6 +97,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     @ParameterizedTest
+    @Order(3)
     @MethodSource("getTestResources")
     @DisplayName("[3] null->INSERT+UPDATE")
     public void emptyThenAddUpdate(TestResource[] res) {
@@ -113,6 +116,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     @ParameterizedTest
+    @Order(4)
     @MethodSource("getTestResources")
     @DisplayName("[4] null->INSERT+DELETE")
     public void emptyThenAddRemove(TestResource[] res) {
@@ -127,6 +131,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     @ParameterizedTest
+    @Order(5)
     @MethodSource("getTestResources")
     @DisplayName("[5] null->INSERT+UPDATE+DELETE")
     public void emptyThenAddUpdateRemove(TestResource[] res) {
@@ -145,6 +150,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     @ParameterizedTest
+    @Order(6)
     @MethodSource("getTestResources")
     @DisplayName("[6] null->INSERT+UPDATE+UPDATE")
     public void emptyThenAddUpdateUpdate(TestResource[] res) {
@@ -167,6 +173,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     @ParameterizedTest
+    @Order(7)
     @MethodSource("getTestResources")
     @DisplayName("[7] null->INSERT->null->INSERT")
     public void emptyThenAddThenAdd(TestResource[] res) {
@@ -188,6 +195,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     @ParameterizedTest
+    @Order(8)
     @MethodSource("getTestResources")
     @DisplayName("[8] null->INSERT->null->UPDATE")
     public void emptyThenAddThenUpdate(TestResource[] res) {
@@ -210,6 +218,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     @ParameterizedTest
+    @Order(9)
     @MethodSource("getTestResources")
     @DisplayName("[9] null->INSERT->null->DELETE")
     public void emptyThenAddThenRemove(TestResource[] res) {
@@ -228,6 +237,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     @ParameterizedTest
+    @Order(10)
     @MethodSource("getTestResources")
     @DisplayName("[10] null->INSERT->null->UPDATE+DELETE")
     public void emptyThenAddThenUpdateRemove(TestResource[] res) {
@@ -250,6 +260,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     @ParameterizedTest
+    @Order(11)
     @MethodSource("getTestResources")
     @DisplayName("[11] null->INSERT->null->UPDATE+UPDATE")
     public void emptyThenAddThenMultipleUpdate(TestResource[] res) {
@@ -276,6 +287,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     @ParameterizedTest
+    @Order(12)
     @MethodSource("getTestResources")
     @DisplayName("[12] null->INSERT->null->UPDATE->null->DELETE")
     public void emptyThenAddThenUpdateThenDelete(TestResource[] res) {
@@ -303,6 +315,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     @ParameterizedTest
+    @Order(13)
     @MethodSource("getTestResources")
     @DisplayName("[13] null->INSERT->null->UPDATE->null->UPDATE")
     public void emptyThenAddThenUpdateThenUpdate(TestResource[] res) {
@@ -334,6 +347,7 @@ class HistoryClientTest extends AbstractTestResources {
 
     @ParameterizedTest
     @MethodSource("getTestResources")
+    @Order(14)
     @DisplayName("[14] null->INSERT->null->UPDATE+UPDATE->null->UPDATE")
     public void emptyThenAddThenMultipleUpdateThenUpdate(TestResource[] res) {
         // Verify emptiness
@@ -369,12 +383,14 @@ class HistoryClientTest extends AbstractTestResources {
      * Verify an empty server t0 doesn't return any changeset
      */
     @Test
+    @Order(15)
     @DisplayName("[15] empty-server")
     void emptyServerT0() {
         assertEmptyServer(client.getHistoryMap(new Date()));
     }
     
     @ParameterizedTest
+    @Order(16)
     @MethodSource("getTestResources")
     @DisplayName("[16] t0->INSERT")
     void resourceIsCreated(TestResource[] res) {
@@ -391,6 +407,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
     
     @ParameterizedTest
+    @Order(17)
     @MethodSource("getTestResources")
     @DisplayName("[17] t0->INSERT+INSERT")
     void twoResourcesAreCreated(TestResource[] res) {
@@ -410,6 +427,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
     
     @ParameterizedTest
+    @Order(18)
     @MethodSource("getTestResources")
     @DisplayName("[18] t0->INSERT+UPDATE")
     void resourceIsCreatedAndUpdated(TestResource[] res) {
@@ -430,6 +448,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     @ParameterizedTest
+    @Order(19)
     @MethodSource("getTestResources")
     @DisplayName("[19] t0->INSERT+DELETE")
     void omitCreatedAndRemovedResources(TestResource[] res) {
@@ -446,6 +465,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
     
     @ParameterizedTest
+    @Order(20)
     @MethodSource("getTestResources")
     @DisplayName("[20] t0->INSERT+UPDATE+DELETE")
     void dateWithUpdatedDeletedItem(TestResource[] res) {
@@ -471,6 +491,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
     
     @ParameterizedTest
+    @Order(21)
     @MethodSource("getTestResources")
     @DisplayName("[21] t0->INSERT+UPDATE+UPDATE")
     void dateWithUpdatedItems(TestResource[] res) {
@@ -506,6 +527,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     @ParameterizedTest
+    @Order(22)
     @MethodSource("getTestResources")
     @DisplayName("[22] t0->INSERT->t1->INSERT")
     void dateWithAddItems(TestResource[] res) {
@@ -557,6 +579,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
     
     @ParameterizedTest
+    @Order(23)
     @MethodSource("getTestResources")
     @DisplayName("[23] t0->INSERT->t1->UPDATE")
     void dateWithInsertAndUpdatedItem(TestResource[] res) {
@@ -590,6 +613,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
     
     @ParameterizedTest
+    @Order(24)
     @MethodSource("getTestResources")
     @DisplayName("[24] t0->INSERT->t1->DELETE")
     void dateWithInsertThenDelete(TestResource[] res) {
@@ -631,6 +655,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
     
     @ParameterizedTest
+    @Order(25)
     @MethodSource("getTestResources")
     @DisplayName("[25] t0->INSERT->t1->UPDATE+DELETE")
     void insertUpdateDelete(TestResource[] res) {
@@ -677,6 +702,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
     
     @ParameterizedTest
+    @Order(26)
     @MethodSource("getTestResources")
     @DisplayName("[26] t0->INSERT->t1->UPDATE+UPDATE")
     void dateWithUpdatedTwoTimesItem(TestResource[] res) {
@@ -725,6 +751,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     @ParameterizedTest
+    @Order(27)
     @MethodSource("getTestResources")
     @DisplayName("[27] t0->INSERT->t1->UPDATE->t2->DELETE")
     void dateWithAddRemoveItems(TestResource[] res) {
@@ -782,6 +809,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
     
     @ParameterizedTest
+    @Order(28)
     @MethodSource("getTestResources")
     @DisplayName("[28] t0->INSERT->t1->UPDATE->t2->UPDATE")
     void insertThenUpdateTwoTimes(TestResource[] res) {
@@ -841,6 +869,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
     
     @ParameterizedTest
+    @Order(29)
     @MethodSource("getTestResources")
     @DisplayName("[29] t0->INSERT->t1->UPDATE+UPDATE->t2->UPDATE")
     void insertUpdateTwoTimesThenUpdate(TestResource[] res) {
@@ -904,6 +933,7 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     @ParameterizedTest
+    @Order(30)
     @MethodSource("getTestResources")
     @DisplayName("[30] t0->INSERT->t1->UPDATE+UPDATE->t2->DELETE")
     void dateWithUpdatedThenDeleteItems(TestResource[] res) {
