@@ -1405,6 +1405,40 @@ class HistoryClientTest extends AbstractTestResources {
         assertEmptyServer(client.getHistoryMap(now));
     }
 
+    @ParameterizedTest
+    @Order(46)
+    @MethodSource("getTestResourcesDraft")
+    @DisplayName("[46] t0->INSERT(draft)->t1->UPDATE(active)+UPDATE(active)")
+    void emptyThenInsertDraftThenMultipleActiveUpdates(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(now));
+        // ================
+        // ===== <T1> =====
+        // ================
+        // Get time
+        now = new Date();
+        // Update CS
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addStatus(ACTIVE);
+        crud.updateResource(builder.build());
+        builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Verify again
+        // Verify again
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "3", INSERT, "t1");
+    }
+
     /*
      * Verify the flow t0->INSERT+DELETE+UPDATE
      * Return only one inserted
