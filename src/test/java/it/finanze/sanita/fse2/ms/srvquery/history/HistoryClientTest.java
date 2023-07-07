@@ -1551,7 +1551,7 @@ class HistoryClientTest extends AbstractTestResources {
         builder = RSBuilder.from(crud.readResource(id, res[0].type()));
         builder.addCodes("U", "Unknown");
         crud.updateResource(builder.build());
-        // Verify insert
+        // Verify delete
         changes = client.getHistoryMap(now);
         assertResource(changes, res[0].name(), id, "3", DELETE, "t1");
         // ================
@@ -1563,7 +1563,8 @@ class HistoryClientTest extends AbstractTestResources {
         builder.addStatus(ACTIVE);
         crud.updateResource(builder.build());
         // Verify again
-        assertResource(changes, res[0].name(), id, "4", UPDATE, "t2");
+        changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "4", INSERT, "t2");
         assertResourceSize(1, changes);
     }
 
