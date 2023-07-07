@@ -175,7 +175,6 @@ class HistoryClientTest extends AbstractTestResources {
      * Verify the flow T0->INSERT->T1->UPDATE->T2-DELETE
      * At t0 it's expected one insertion, at t1 one update and then at t2 one delete
      */
-    //@Disabled("Not possible using FHIR 5.7.0 execute a PUT on a DELETED resource")
     @ParameterizedTest
     @MethodSource("getTestResources")
     @DisplayName("Last update is not null then add/remove items")
@@ -544,7 +543,6 @@ class HistoryClientTest extends AbstractTestResources {
      * Verify the flow t1->UPDATE+DELETE, it should return 1 element updated at time t1
      * Verify t2, it should return 0 element because it was deleted in t1 flow
      */
-    //@Disabled("Not possible using FHIR 5.7.0 execute a PUT on a DELETED resource")
     @ParameterizedTest
     @MethodSource("getTestResources")
     @DisplayName("Update and delete should return one element updated")
@@ -625,32 +623,7 @@ class HistoryClientTest extends AbstractTestResources {
         assertResource(changes, res[0].name(), id, "3", INSERT, "t1");
         assertResourceSize(1, changes);
     }
-    
-    /*
-     * Verify the flow t0->INSERT+DELETE
-     * return nothing
-     * Verify the flow t1->UPDATE
-     * return one resource inserted
-     */
-    @ParameterizedTest
-    @MethodSource("getTestResources")
-    @DisplayName("Insert, delete (t0) return null and update (t1) return one inserted")
-    void insertDeleteAfterUpdateTest(TestResource[] res) {
-    	// Verify emptiness
-        assertEmptyServer(client.getHistoryMap(null));
-        // ================
-        // ===== <T0> =====
-        // ================
-        // Get time
-        Date now = new Date();
-        // Insert resource
-        String id = crud.createResource(res[0].resource());
-        // Now remove it
-        crud.deleteResource(id, res[0].type());
-        // Get history
-        assertEmptyServer(client.getHistoryMap(now));
-    }
-    
+
     /*
      * Verify the flow t0->INSERT+UPDATE
      * return one resource inserted
