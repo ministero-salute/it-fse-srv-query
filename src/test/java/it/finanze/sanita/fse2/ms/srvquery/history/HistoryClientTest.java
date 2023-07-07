@@ -5,7 +5,7 @@ import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationE
 import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.INSERT;
 import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.UPDATE;
 import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
-import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.RETIRED;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.DRAFT;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -366,15 +366,149 @@ class HistoryClientTest extends AbstractTestResources {
     }
 
     /**
-     * Verify the flow T0->INSERT->T1->INSERT->T2->NO-OP
-     * does return an appropriate changeset reflecting
-     * t0 as two insertions, t1 as one insertion and t2 as no changes
-     * (because it's updated)
+     * Verify an empty server t0 doesn't return any changeset
      */
+    @Test
+    @DisplayName("[15] empty-server")
+    void emptyServerT0() {
+        assertEmptyServer(client.getHistoryMap(new Date()));
+    }
+    
     @ParameterizedTest
     @MethodSource("getTestResources")
-    @DisplayName("Last update is not null then add items")
-    public void dateWithAddItems(TestResource[] res) {
+    @DisplayName("[16] t0->INSERT")
+    void resourceIsCreated(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Verify again
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
+        assertResourceSize(1, changes);
+    }
+    
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[17] t0->INSERT+INSERT")
+    void twoResourcesAreCreated(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // Get time
+        Date now = new Date();
+        // Insert resource 1
+        String id1 = crud.createResource(res[0].resource());
+        // Insert resource 2
+        String id2 = crud.createResource(res[1].resource());
+        // Verify again
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id1, "1", INSERT, "t0");
+        assertResource(changes, res[0].name(), id2, "1", INSERT, "t0");
+        assertResourceSize(2, changes);
+    }
+    
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[18] t0->INSERT+UPDATE")
+    void resourceIsCreatedAndUpdated(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Now update it
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Verify again
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "2", INSERT, "t0");
+        assertResourceSize(1, changes);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[19] t0->INSERT+DELETE")
+    void omitCreatedAndRemovedResources(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Now remove it
+        crud.deleteResource(id, res[0].type());
+        // Verify again
+        assertEmptyServer(client.getHistoryMap(now), "t0");
+    }
+    
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[20] t0->INSERT+UPDATE+DELETE")
+    void dateWithUpdatedDeletedItem(TestResource[] res) {
+    	// Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+    	// ================
+        // ===== <T0> =====
+        // ================
+        // Retrieve current time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Update CS
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Now remove it
+        crud.deleteResource(id, res[0].type());
+        // Verify on T0
+        // Verify again
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        assertEmptyServer(changes, "t0");
+    }
+    
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[21] t0->INSERT+UPDATE+UPDATE")
+    void dateWithUpdatedItems(TestResource[] res) {
+    	// Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+    	// ================
+        // ===== <T0> =====
+        // ================
+        // Retrieve current time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Update CS
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("T", "Test");
+        crud.updateResource(builder.build());
+        // Verify again
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "3", INSERT, "t0");
+        // ================
+        // ===== <T1> =====
+        // ================
+        // => Given an updated server, verify no ids returns
+        // Retrieve current time
+        now = new Date();
+        // Verify again
+        changes = client.getHistoryMap(now);
+        // Verify emptiness
+        assertEmptyServer(changes, "t1");
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[22] t0->INSERT->t1->INSERT")
+    void dateWithAddItems(TestResource[] res) {
         // ================
         // ===== <T0> =====
         // ================
@@ -421,15 +555,179 @@ class HistoryClientTest extends AbstractTestResources {
         assertResource(changes, res[1].name(), id2, "1", INSERT, "t2");
         assertResourceSize(2, changes);
     }
-
-    /**
-     * Verify the flow T0->INSERT->T1->UPDATE->T2-DELETE
-     * At t0 it's expected one insertion, at t1 one update and then at t2 one delete
-     */
+    
     @ParameterizedTest
     @MethodSource("getTestResources")
-    @DisplayName("Last update is not null then add/remove items")
-    public void dateWithAddRemoveItems(TestResource[] res) {
+    @DisplayName("[23] t0->INSERT->t1->UPDATE")
+    void dateWithInsertAndUpdatedItem(TestResource[] res) {
+    	// Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+    	// ================
+        // ===== <T0> =====
+        // ================
+        // Retrieve current time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Verify again
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T1> =====
+        // ================
+        // => Update one resource and verify
+        // Retrieve current time
+        now = new Date();
+        // Update CS
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Verify again
+        changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "2", UPDATE, "t1");
+        assertResourceSize(1, changes);
+    }
+    
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[24] t0->INSERT->t1->DELETE")
+    void dateWithInsertThenDelete(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Get history
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        // Verify size 1 on fhir
+        assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T1> =====
+        // ================
+        // Retrieve current time
+        now = new Date();
+        // Now remove the resource
+        crud.deleteResource(id, res[0].type());
+        // Get history
+        changes = client.getHistoryMap(now);
+        // Verify again
+        assertResource(changes, res[0].name(), id, "2", DELETE, "t1");
+        // ================
+        // ===== <T2> =====
+        // ================
+        // => Given an updated server, verify no ids returns
+        // Retrieve current time
+        now = new Date();
+        // Verify again
+        changes = client.getHistoryMap(now);
+        // Verify emptiness
+        assertEmptyServer(changes, "t2");
+    }
+    
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[25] t0->INSERT->t1->UPDATE+DELETE")
+    void insertUpdateDelete(TestResource[] res) {
+    	// Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Get history
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        // Verify size 1 on fhir
+        assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T1> =====
+        // ================
+        // => Update one resource, delete it and verify
+        // Retrieve current time
+        now = new Date();
+        // Update CS
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Now remove it
+        crud.deleteResource(id, res[0].type());
+        // Verify on T1
+        changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "3", DELETE, "t1");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T2> =====
+        // ================
+        // => Given an updated server, verify no ids returns
+        // Retrieve current time
+        now = new Date();
+        // Verify again
+        changes = client.getHistoryMap(now);
+        // Verify emptiness
+        assertEmptyServer(changes, "t2");
+    }
+    
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[26] t0->INSERT->t1->UPDATE+UPDATE")
+    void dateWithUpdatedTwoTimesItem(TestResource[] res) {
+        // ================
+        // ===== <T0> =====
+        // ================
+        // => Check emptiness, then add one resource and verify
+        // Retrieve current time
+        Date now = new Date();
+        // Verify emptiness
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Verify again
+        changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T1> =====
+        // ================
+        // => Update one resource and verify
+        // Retrieve current time
+        now = new Date();
+        // Update CS
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("T", "Test");
+        crud.updateResource(builder.build());
+        // Verify again
+        changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "3", UPDATE, "t1");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T2> =====
+        // ================
+        // => Given an updated server, verify no ids returns
+        // Retrieve current time
+        now = new Date();
+        // Verify again
+        changes = client.getHistoryMap(now);
+        // Verify emptiness
+        assertEmptyServer(changes, "t2");
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[27] t0->INSERT->t1->UPDATE->t2->DELETE")
+    void dateWithAddRemoveItems(TestResource[] res) {
         // ================
         // ===== <T0> =====
         // ================
@@ -482,15 +780,133 @@ class HistoryClientTest extends AbstractTestResources {
         // Verify emptiness
         assertEmptyServer(changes, "t3");
     }
-
-    /**
-     * Verify the flow T0->INSERT(1)->T1->UPDATE(2)+UPDATE(3)+UPDATE(4)->T2-DELETE(4)
-     * At t0 it's expected one insertion, at t1 multiple updates and then at t2 one delete
-     */
+    
     @ParameterizedTest
     @MethodSource("getTestResources")
-    @DisplayName("Last update is not null then add/update/delete items")
-    public void dateWithUpdatedThenDeleteItems(TestResource[] res) {
+    @DisplayName("[28] t0->INSERT->t1->UPDATE->t2->UPDATE")
+    void insertThenUpdateTwoTimes(TestResource[] res) {
+        // ================
+        // ===== <T0> =====
+        // ================
+        // => Check emptiness, then add one resource and verify
+        // Retrieve current time
+        Date now = new Date();
+        // Verify emptiness
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Verify again
+        changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T1> =====
+        // ================
+        // => Update one resource and verify
+        // Retrieve current time
+        now = new Date();
+        // Update CS
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Verify again
+        changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "2", UPDATE, "t1");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T2> =====
+        // ================
+        // => Update resource and verify
+        // Retrieve current time
+        now = new Date();
+        // Update CS
+        builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("T", "Test");
+        crud.updateResource(builder.build());
+        // Verify again
+        changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "3", UPDATE, "t2");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T3> =====
+        // ================
+        // => Given an updated server, verify no ids returns
+        // Retrieve current time
+        now = new Date();
+        // Verify again
+        changes = client.getHistoryMap(now);
+        // Verify emptiness
+        assertEmptyServer(changes, "t3");
+    }
+    
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[29] t0->INSERT->t1->UPDATE+UPDATE->t2->UPDATE")
+    void insertUpdateTwoTimesThenUpdate(TestResource[] res) {
+        // ================
+        // ===== <T0> =====
+        // ================
+        // => Check emptiness, then add one resource and verify
+        // Retrieve current time
+        Date now = new Date();
+        // Verify emptiness
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Verify again
+        changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T1> =====
+        // ================
+        // => Update one resource and verify
+        // Retrieve current time
+        now = new Date();
+        // Update CS
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Update CS
+        builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("T", "Test");
+        crud.updateResource(builder.build());
+        // Verify again
+        changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "3", UPDATE, "t1");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T2> =====
+        // ================
+        // => Delete one resource and verify
+        // Retrieve current time
+        now = new Date();
+        // Update CS
+        builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("X", "XTest");
+        crud.updateResource(builder.build());
+        // Verify again
+        changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "4", UPDATE, "t2");
+        assertResourceSize(1, changes);
+        // ================
+        // ===== <T3> =====
+        // ================
+        // => Given an updated server, verify no ids returns
+        // Retrieve current time
+        now = new Date();
+        // Verify again
+        changes = client.getHistoryMap(now);
+        // Verify emptiness
+        assertEmptyServer(changes, "t3");
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[30] t0->INSERT->t1->UPDATE+UPDATE->t2->DELETE")
+    void dateWithUpdatedThenDeleteItems(TestResource[] res) {
         // ================
         // ===== <T0> =====
         // ================
@@ -519,12 +935,9 @@ class HistoryClientTest extends AbstractTestResources {
         builder = RSBuilder.from(crud.readResource(id, res[0].type()));
         builder.addCodes("T", "Test");
         crud.updateResource(builder.build());
-        builder = RSBuilder.from(crud.readResource(id, res[0].type()));
-        builder.addCodes("X", "XTest");
-        crud.updateResource(builder.build());
         // Verify again
         changes = client.getHistoryMap(now);
-        assertResource(changes, res[0].name(), id, "4", UPDATE, "t1");
+        assertResource(changes, res[0].name(), id, "3", UPDATE, "t1");
         assertResourceSize(1, changes);
         // ================
         // ===== <T2> =====
@@ -536,7 +949,7 @@ class HistoryClientTest extends AbstractTestResources {
         crud.deleteResource(id, res[0].type());
         // Verify again
         changes = client.getHistoryMap(now);
-        assertResource(changes, res[0].name(), id, "5", DELETE, "t2");
+        assertResource(changes, res[0].name(), id, "4", DELETE, "t2");
         assertResourceSize(1, changes);
         // ================
         // ===== <T3> =====
@@ -549,116 +962,99 @@ class HistoryClientTest extends AbstractTestResources {
         // Verify emptiness
         assertEmptyServer(changes, "t3");
     }
-
-    /**
-     * Verify the flow T0->EMPTY->T1->INSERT(1)+UPDATE(2)+UPDATE(3)
-     * At t0 it's expected no insertion, at t1 one insert and multiple updates
-     * and then at t2 one must be synchronised
-     */
+    
     @ParameterizedTest
-    @MethodSource("getTestResources")
-    @DisplayName("Last update is not null then add/update items")
-    public void dateWithUpdatedItems(TestResource[] res) {
+    @MethodSource("getTestResourcesDraft")
+    @DisplayName("[33] t0->INSERT(draft)+UPDATE(active)")
+    void resourceFromAnyToActiveSingle(TestResource res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
         // ================
         // ===== <T0> =====
         // ================
-        // => Check emptiness, then add one resource and verify
-        // Retrieve current time
+        // Get time
         Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res.resource());
         // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(now));
+        // Change status from DRAFT to ACTIVE
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res.type()));
+        builder.addStatus(ACTIVE);
+        BaseResource out = builder.build();
+        // Update CS
+        crud.updateResource(out);
+        // Verify again
         Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
-        assertTrue(changes.isEmpty(), "Expecting no ids from an empty server");
+        assertResource(changes, res.name(), id, "2", INSERT, "t0");
+    }
+    
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[34] t0->INSERT(active)+UPDATE(draft)")
+    void resourceFromActiveToAnySingle(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Get history
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        // Verify emptiness
+        assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
+        assertResourceSize(1, changes);
+        // Change status from ACTIVE to DEACTIVATED
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addStatus(DRAFT);
+        BaseResource out = builder.build();
+        // Update CS
+        crud.updateResource(out);
+        // Verify again
+        assertEmptyServer(client.getHistoryMap(now));
+    }
+
+    @ParameterizedTest
+    @MethodSource("getTestResources")
+    @DisplayName("[42] t0->INSERT(active)->t1->UPDATE(draft)")
+    void resourceFromActiveToAny(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Get history
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        // Verify emptiness
+        assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
+        assertResourceSize(1, changes);
         // ================
         // ===== <T1> =====
         // ================
-        // Retrieve current time
+        // Get time
         now = new Date();
-        // Insert resource
-        String id = crud.createResource(res[0].resource());
-        // Verify again
-        changes = client.getHistoryMap(now);
-        assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
-        assertResourceSize(1, changes);
+        // Change status from ACTIVE to DEACTIVATED
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addStatus(DRAFT);
+        BaseResource out = builder.build();
         // Update CS
-        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
-        builder.addCodes("U", "Unknown");
-        crud.updateResource(builder.build());
-        builder = RSBuilder.from(crud.readResource(id, res[0].type()));
-        builder.addCodes("T", "Test");
-        crud.updateResource(builder.build());
-        builder = RSBuilder.from(crud.readResource(id, res[0].type()));
-        builder.addCodes("X", "XTest");
-        crud.updateResource(builder.build());
+        crud.updateResource(out);
         // Verify again
         changes = client.getHistoryMap(now);
-        assertResource(changes, res[0].name(), id, "4", INSERT, "t1");
-        // ================
-        // ===== <T2> =====
-        // ================
-        // => Given an updated server, verify no ids returns
-        // Retrieve current time
-        now = new Date();
-        // Verify again
-        changes = client.getHistoryMap(now);
-        // Verify emptiness
-        assertEmptyServer(changes, "t2");
+        assertResource(changes, res[0].name(), id, "2", DELETE, "t1");
     }
-
-    /**
-     * Verify the flow t0->INSERT+DELETE returns an empty changeset
-     * because if an element has been inserted and deleted before an alignment
-     * there is no point into returning it
-     */
-    @ParameterizedTest
-    @MethodSource("getTestResources")
-    @DisplayName("Last update is not null then add/remove item in-between the time-range")
-    public void omitCreatedAndRemovedResources(TestResource[] res) {
-        // Verify emptiness
-        assertEmptyServer(client.getHistoryMap(null));
-        // Get time
-        Date now = new Date();
-        // Insert resource
-        String id = crud.createResource(res[0].resource());
-        // Now remove it
-        crud.deleteResource(id, res[0].type());
-        // Verify again
-        assertEmptyServer(client.getHistoryMap(now), "t0");
-    }
-
-    /**
-     * Verify the flow t0->INSERT+UPDATE returns an insert operation
-     * because if an element has been inserted and updated before an alignment
-     * there is no point into making a diff if it wasn't on the server in the first place
-     * just treat it as an insertion
-     */
-    @ParameterizedTest
-    @MethodSource("getTestResources")
-    @DisplayName("Last update is not null then add/update item in-between the time-range")
-    public void resourceIsCreatedAndUpdated(TestResource[] res) {
-        // Verify emptiness
-        assertEmptyServer(client.getHistoryMap(null));
-        // Get time
-        Date now = new Date();
-        // Insert resource
-        String id = crud.createResource(res[0].resource());
-        // Now update it
-        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
-        builder.addCodes("U", "Unknown");
-        crud.updateResource(builder.build());
-        // Verify again
-        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
-        assertResource(changes, res[0].name(), id, "2", INSERT, "t0");
-    }
-
-    /**
-     * Verify the flow t0->INSERT->t1->UPDATE, it should return an insert operation
-     * because if an element has been inserted as whatever status, then it becomes active
-     * it should be treated as an insertion
-     */
+    
     @ParameterizedTest
     @MethodSource("getTestResourcesDraft")
-    @DisplayName("Last update is not null then add/update element status from draft to active")
-    public void resourceFromAnyToActive(TestResource res) {
+    @DisplayName("[43] t0->INSERT(draft)->t1->UPDATE(active)")
+    void resourceFromAnyToActive(TestResource res) {
         // Verify emptiness
         assertEmptyServer(client.getHistoryMap(null));
         // ================
@@ -684,160 +1080,6 @@ class HistoryClientTest extends AbstractTestResources {
         // Verify again
         Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
         assertResource(changes, res.name(), id, "2", INSERT, "t1");
-    }
-
-    /**
-     * Verify the flow t0->INSERT+UPDATE, it should return an insert operation
-     * because if an element has been inserted as whatever status, then it becomes active
-     * it should be treated as an insertion
-     */
-    @ParameterizedTest
-    @MethodSource("getTestResourcesDraft")
-    @DisplayName("Last update is not null then add/update element status from draft to active")
-    public void resourceFromAnyToActiveSingle(TestResource res) {
-        // Verify emptiness
-        assertEmptyServer(client.getHistoryMap(null));
-        // ================
-        // ===== <T0> =====
-        // ================
-        // Get time
-        Date now = new Date();
-        // Insert resource
-        String id = crud.createResource(res.resource());
-        // Verify emptiness
-        assertEmptyServer(client.getHistoryMap(now));
-        // Change status from DRAFT to ACTIVE
-        IResBuilder builder = RSBuilder.from(crud.readResource(id, res.type()));
-        builder.addStatus(ACTIVE);
-        BaseResource out = builder.build();
-        // Update CS
-        crud.updateResource(out);
-        // Verify again
-        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
-        assertResource(changes, res.name(), id, "2", INSERT, "t0");
-    }
-
-    /**
-     * Verify the flow t0->INSERT->t1->UPDATE, it should return an insert operation
-     * because if an element has been inserted as active status, then it becomes deactivated
-     * it should be treated as a deletion
-     */
-    @ParameterizedTest
-    @MethodSource("getTestResources")
-    @DisplayName("Last update is not null then add/update element status from active to draft")
-    public void resourceFromActiveToAny(TestResource[] res) {
-        // Verify emptiness
-        assertEmptyServer(client.getHistoryMap(null));
-        // ================
-        // ===== <T0> =====
-        // ================
-        // Get time
-        Date now = new Date();
-        // Insert resource
-        String id = crud.createResource(res[0].resource());
-        // Get history
-        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
-        // Verify emptiness
-        assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
-        assertResourceSize(1, changes);
-        // ================
-        // ===== <T1> =====
-        // ================
-        // Get time
-        now = new Date();
-        // Change status from ACTIVE to DEACTIVATED
-        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
-        builder.addStatus(RETIRED);
-        BaseResource out = builder.build();
-        // Update CS
-        crud.updateResource(out);
-        // Verify again
-        changes = client.getHistoryMap(now);
-        assertResource(changes, res[0].name(), id, "2", DELETE, "t1");
-    }
-
-    /**
-     * Verify the flow t0->INSERT+UPDATE, it should return nothing
-     * because if an element has been inserted as active status, then it becomes deactivated
-     * before alignment, it should be omitted
-     */
-    @ParameterizedTest
-    @MethodSource("getTestResources")
-    @DisplayName("Last update is not null then add/update element status from draft to active")
-    public void resourceFromActiveToAnySingle(TestResource[] res) {
-        // Verify emptiness
-        assertEmptyServer(client.getHistoryMap(null));
-        // ================
-        // ===== <T0> =====
-        // ================
-        // Get time
-        Date now = new Date();
-        // Insert resource
-        String id = crud.createResource(res[0].resource());
-        // Get history
-        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
-        // Verify emptiness
-        assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
-        assertResourceSize(1, changes);
-        // Change status from ACTIVE to DEACTIVATED
-        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
-        builder.addStatus(RETIRED);
-        BaseResource out = builder.build();
-        // Update CS
-        crud.updateResource(out);
-        // Verify again
-        assertEmptyServer(client.getHistoryMap(now));
-    }
-    
-    /*
-     * Verify the flow t0->INSERT, it should return 1 element inserted
-     * Verify the flow t1->UPDATE+DELETE, it should return 1 element updated at time t1
-     * Verify t2, it should return 0 element because it was deleted in t1 flow
-     */
-    @ParameterizedTest
-    @MethodSource("getTestResources")
-    @DisplayName("Update and delete should return one element updated")
-    void insertUpdateDeleteTest(TestResource[] res) {
-    	// Verify emptiness
-        assertEmptyServer(client.getHistoryMap(null));
-        // ================
-        // ===== <T0> =====
-        // ================
-        // Get time
-        Date now = new Date();
-        // Insert resource
-        String id = crud.createResource(res[0].resource());
-        // Get history
-        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
-        // Verify size 1 on fhir
-        assertResource(changes, res[0].name(), id, "1", INSERT, "t0");
-        assertResourceSize(1, changes);
-        // ================
-        // ===== <T1> =====
-        // ================
-        // => Update one resource, delete it and verify
-        // Retrieve current time
-        now = new Date();
-        // Update CS
-        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
-        builder.addCodes("U", "Unknown");
-        crud.updateResource(builder.build());
-        // Now remove it
-        crud.deleteResource(id, res[0].type());
-        // Verify on T1
-        changes = client.getHistoryMap(now);
-        assertResource(changes, res[0].name(), id, "3", DELETE, "t1");
-        assertResourceSize(1, changes);
-        // ================
-        // ===== <T2> =====
-        // ================
-        // => Given an updated server, verify no ids returns
-        // Retrieve current time
-        now = new Date();
-        // Verify again
-        changes = client.getHistoryMap(now);
-        // Verify emptiness
-        assertEmptyServer(changes, "t2");
     }
     
     /*
