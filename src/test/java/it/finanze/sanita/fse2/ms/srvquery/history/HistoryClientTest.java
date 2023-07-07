@@ -1,5 +1,34 @@
 package it.finanze.sanita.fse2.ms.srvquery.history;
 
+import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Profile.TEST;
+import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.DELETE;
+import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.INSERT;
+import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.UPDATE;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
+import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.DRAFT;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+
+import java.util.Date;
+import java.util.Map;
+
+import org.hl7.fhir.r4.model.BaseResource;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.history.HistoryClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.history.RawHistoryDTO.HistoryDetailsDTO;
@@ -8,25 +37,6 @@ import it.finanze.sanita.fse2.ms.srvquery.history.base.TestResource;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.FhirCrudClient;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.IResBuilder;
 import it.finanze.sanita.fse2.ms.srvquery.history.crud.dto.RSBuilder;
-import org.hl7.fhir.r4.model.BaseResource;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.runner.OrderWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-
-import java.util.Date;
-import java.util.Map;
-
-import static it.finanze.sanita.fse2.ms.srvquery.config.Constants.Profile.TEST;
-import static it.finanze.sanita.fse2.ms.srvquery.enums.history.HistoryOperationEnum.*;
-import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE;
-import static org.hl7.fhir.r4.model.Enumerations.PublicationStatus.DRAFT;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
  * TerminologyServer MUST BE set as UTC time,
@@ -1085,6 +1095,190 @@ class HistoryClientTest extends AbstractTestResources {
         crud.updateResource(out);
         // Verify again
         assertEmptyServer(client.getHistoryMap(now));
+    }
+    
+    @ParameterizedTest
+    @Order(35)
+    @MethodSource("getTestResourcesDraft")
+    @DisplayName("[35] t0->INSERT(draft)+UPDATE(draft)")
+    void resourceUpdateDraft(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Update CS
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Verify again
+        assertEmptyServer(client.getHistoryMap(now));
+    }
+    
+    @ParameterizedTest
+    @Order(36)
+    @MethodSource("getTestResourcesDraft")
+    @DisplayName("[36] t0->INSERT(draft)+DELETE(draft)")
+    void resourceInsertDraftDelete(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Now remove it
+        crud.deleteResource(id, res[0].type());
+        // Verify again
+        assertEmptyServer(client.getHistoryMap(now));
+    }
+    
+    @ParameterizedTest
+    @Order(37)
+    @MethodSource("getTestResourcesDraft")
+    @DisplayName("[37] t0->INSERT(draft)+UPDATE(active)+DELETE")
+    void insertDraftUpdateActiveDelete(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(now));
+        // Change status from DRAFT to ACTIVE
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addStatus(ACTIVE);
+        BaseResource out = builder.build();
+        // Update CS
+        crud.updateResource(out);
+        // Now remove it
+        crud.deleteResource(id, res[0].type());
+        // Verify again
+        assertEmptyServer(client.getHistoryMap(now));
+    }
+    
+    @ParameterizedTest
+    @Order(38)
+    @MethodSource("getTestResourcesDraft")
+    @DisplayName("[38] t0->INSERT(draft)+UPDATE(active)+UPDATE(active)")
+    void insertDraftUpdateUpdate(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(now));
+        // Change status from DRAFT to ACTIVE
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addStatus(ACTIVE);
+        BaseResource out = builder.build();
+        // Update CS
+        crud.updateResource(out);
+        // Update resource
+        builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Verify again
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        assertResource(changes, res[0].name(), id, "3", INSERT, "t0");
+    }
+    
+    @ParameterizedTest
+    @Order(39)
+    @MethodSource("getTestResources")
+    @DisplayName("[39] t0->INSERT(active)+UPDATE(draft)+DELETE")
+    void insertActiveUpdateDraftDelete(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Change status from ACTIVE to DRAFT
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addStatus(DRAFT);
+        BaseResource out = builder.build();
+        // Update CS
+        crud.updateResource(out);
+        // Now remove it
+        crud.deleteResource(id, res[0].type());
+        // Verify again
+        assertEmptyServer(client.getHistoryMap(now));
+    }
+    
+    @ParameterizedTest
+    @Order(40)
+    @MethodSource("getTestResources")
+    @DisplayName("[40] t0->INSERT(active)+UPDATE(draft)+UPDATE(draft)")
+    void insertActiveUpdateDraftUpdate(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        String id = crud.createResource(res[0].resource());
+        // Change status from ACTIVE to DRAFT
+        IResBuilder builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addStatus(DRAFT);
+        BaseResource out = builder.build();
+        // Update CS
+        crud.updateResource(out);
+        // Update resource
+        builder = RSBuilder.from(crud.readResource(id, res[0].type()));
+        builder.addCodes("U", "Unknown");
+        crud.updateResource(builder.build());
+        // Verify again
+        assertEmptyServer(client.getHistoryMap(now));
+    }
+    
+    @ParameterizedTest
+    @Order(41)
+    @MethodSource("getTestResourcesDraft")
+    @DisplayName("[41] t0->INSERT(draft)->t1->INSERT(active)")
+    void insertDraftInsertActiveResource(TestResource[] res) {
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(null));
+        // ================
+        // ===== <T0> =====
+        // ================
+        // Get time
+        Date now = new Date();
+        // Insert resource
+        crud.createResource(res[0].resource());
+        // Verify emptiness
+        assertEmptyServer(client.getHistoryMap(now));
+        // ================
+        // ===== <T1> =====
+        // ================
+        // Get time
+        now = new Date();
+        // Insert resource
+        String id = crud.createResource(createOreTestCS());
+        // Verify again
+        Map<String, HistoryDetailsDTO> changes = client.getHistoryMap(now);
+        assertResource(changes, "ore", id, "1", INSERT, "t1");
+        assertResourceSize(1, changes);
     }
 
     @ParameterizedTest
