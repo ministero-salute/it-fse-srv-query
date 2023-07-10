@@ -37,7 +37,7 @@ public abstract class HistoryAbstractClient {
         this.client = client;
     }
 
-    protected HistorySnapshotDTO createSnapshotByLastUpdate() {
+    protected HistorySnapshotDTO createSnapshot() {
         // Create timestamp
         Date timestamp = new Date();
         // Create composer

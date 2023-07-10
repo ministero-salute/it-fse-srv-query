@@ -42,7 +42,7 @@ public class HistoryClient extends HistoryAbstractClient {
     }
 
     public HistorySnapshotDTO getSnapshot() {
-        return createSnapshotByLastUpdate();
+        return createSnapshot();
     }
 
 }
