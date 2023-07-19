@@ -112,6 +112,24 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		return out;
 
 	}
+
+	public List<ValueSet> searchSummaryNamesVS(){
+		List<ValueSet> out = new ArrayList<>();
+
+		Bundle results = tc.search().forResource(ValueSet.class)
+				.where(ValueSet.STATUS.exactly().identifier("active"))
+				.elementsSubset("identifier", "version")
+				.returnBundle(Bundle.class)
+				.cacheControl(CacheControlDirective.noCache())
+				.execute();
+
+		for (Bundle.BundleEntryComponent entry : results.getEntry()) {
+			ValueSet valueset = (ValueSet) entry.getResource();
+			out.add(valueset);
+		}
+		return out;
+
+	}
 	
 	public CodeSystem getCodeSystemVersionByIdAndDate(String id, Date date) {
         CodeSystem out = null;

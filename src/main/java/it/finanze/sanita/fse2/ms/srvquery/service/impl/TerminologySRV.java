@@ -12,6 +12,7 @@ import java.util.List;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -187,11 +188,20 @@ public class TerminologySRV implements ITerminologySRV {
 		List<GetActiveResourceDTO> out = new ArrayList<>();
 		TerminologyClient terminologyClient = getTerminologyClient();
 		List<CodeSystem> codeSystems = terminologyClient.searchSummaryNames();
+		List<ValueSet> valueSets = terminologyClient.searchActiveValueSet();
 		for(CodeSystem codeSystem : codeSystems) {
 			String id = codeSystem.getIdElement().getIdPartAsLong().toString();
 			if(!codeSystem.getIdentifier().isEmpty() && !codeSystem.getVersion().isEmpty()) {
 				String oid = StringUtility.removeUrnOidFromSystem(codeSystem.getIdentifier().get(0).getValue());
 				String version = codeSystem.getVersion();
+				out.add(new GetActiveResourceDTO(id, oid, version));
+			}
+		}
+		for(ValueSet valueSet : valueSets) {
+			String id = valueSet.getIdElement().getIdPartAsLong().toString();
+			if(!valueSet.getIdentifier().isEmpty() && !valueSet.getVersion().isEmpty()) {
+				String oid = StringUtility.removeUrnOidFromSystem(valueSet.getIdentifier().get(0).getValue());
+				String version = valueSet.getVersion();
 				out.add(new GetActiveResourceDTO(id, oid, version));
 			}
 		}
