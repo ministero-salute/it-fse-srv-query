@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
@@ -212,35 +214,76 @@ public class TerminologySRV implements ITerminologySRV {
 	public GetResDTO export(String id, FormatEnum format) {
 		GetResDTO out = new GetResDTO();
 		TerminologyClient terminologyClient = getTerminologyClient();
-		CodeSystem codeSystem = terminologyClient.getContentById(id);
-		String resource = FHIRR4Helper.serializeResource(codeSystem, true, true, false);
+		Optional<IBaseResource> base = terminologyClient.getResource(id);
 
+		if(base.isPresent()) {
+			IBaseResource res = base.get();
+			if (res instanceof CodeSystem) {
+				CodeSystem codeSystem = (CodeSystem) res;
+				out = setContentCS(codeSystem, format);
+			} else if (res instanceof ValueSet) {
+				ValueSet valueset = (ValueSet) res;
+				out = setContentVS(valueset, format);
+			}
+		}
+		
+		return out;
+	}
+
+	private GetResDTO setContentCS(CodeSystem codeSystem, FormatEnum format) {
+		GetResDTO out = new GetResDTO();
+
+		String resource = FHIRR4Helper.serializeResource(codeSystem, true, true, false);
 		String oid = StringUtility.removeUrnOidFromSystem(codeSystem.getIdentifier().get(0).getValue());
 		out.setOid(oid);
 		out.setExportable(false);
 
-		
 		if(codeSystem.getMeta().getSecurity()==null || 
-				codeSystem.getMeta().getSecurity().isEmpty() || codeSystem.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_NORMAL)!=null) {
+			codeSystem.getMeta().getSecurity().isEmpty() ||
+			codeSystem.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_NORMAL)!=null) {
 			try {
 				out.setExportable(true);
-				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-				if(FormatEnum.FHIR_R4_JSON.equals(format)) {
-					outputStream.write(resource.getBytes());
-					byte[] finalBytes = outputStream.toByteArray();
-					out.setContent(finalBytes);
-				} else {
-					ConversionResponseDTO conversionResponseDTO = converter.callConvertFromFhirJson(format, oid,resource.getBytes());
-					outputStream.write(conversionResponseDTO.getResult().getBytes());
-					byte[] finalBytes = outputStream.toByteArray();
-					out.setContent(finalBytes);
-				}
-			}catch(Exception ex) {
+				out.setContent(createByteContent(resource, oid, format));
+			} catch(Exception ex) {
 				log.error("Error while export : " , ex);
 				throw new BusinessException(ex);
 			}
-		}  
+		}
 		return out;
 	}
 
+	private GetResDTO setContentVS(ValueSet valueset, FormatEnum format) {
+		GetResDTO out = new GetResDTO();
+
+		String resource = FHIRR4Helper.serializeResource(valueset, true, true, false);
+		String oid = StringUtility.removeUrnOidFromSystem(valueset.getIdentifier().get(0).getValue());
+		out.setOid(oid);
+		out.setExportable(false);
+
+		if(valueset.getMeta().getSecurity()==null || 
+			valueset.getMeta().getSecurity().isEmpty() ||
+			valueset.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_NORMAL)!=null) {
+			try {
+				out.setExportable(true);
+				out.setContent(createByteContent(resource, oid, format));
+			} catch(Exception ex) {
+				log.error("Error while export : " , ex);
+				throw new BusinessException(ex);
+			}
+		}
+		return out;
+	}
+
+	private byte[] createByteContent(String resource, String oid, FormatEnum format) throws IOException {
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		if(FormatEnum.FHIR_R4_JSON.equals(format)) {
+			outputStream.write(resource.getBytes());
+			return outputStream.toByteArray();
+		} else {
+			ConversionResponseDTO conversionResponseDTO = converter.callConvertFromFhirJson(format, oid,resource.getBytes());
+			outputStream.write(conversionResponseDTO.getResult().getBytes());
+			return outputStream.toByteArray();
+		}
+	}
+	
 }

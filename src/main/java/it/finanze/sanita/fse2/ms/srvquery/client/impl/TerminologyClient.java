@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -25,6 +26,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
+import org.hl7.fhir.r4.model.ResourceType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -34,6 +36,7 @@ import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.UriClientParam;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ParametersUtil;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.ValidateCodeResultDTO;
@@ -588,4 +591,49 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		}
 	}
 
+	public Optional<IBaseResource> getResource(String resourceId) {
+        IBaseResource out = getResourceByType(CodeSystem.class, resourceId);
+        if(out == null) {
+            out = getResourceByType(ValueSet.class, resourceId);
+            if(out != null) {
+                isExpansionNeeded((ValueSet) out, resourceId);
+            }
+        }
+        return Optional.ofNullable(out);
+    }
+
+	private void isExpansionNeeded(ValueSet vs, String resourceId) {
+        // Expand only if empty
+        if(vs.getExpansion().isEmpty()) {
+            applyResourceExpansion(vs, resourceId);
+        }
+    }
+
+	private void applyResourceExpansion(ValueSet vs, String resourceId) {
+        ValueSet expanded = tc
+            .operation()
+            .onInstance(new IdType(ResourceType.ValueSet.name(), resourceId))
+            .named("expand")
+            .withNoParameters(Parameters.class)
+            .cacheControl(CacheControlDirective.noCache())
+            .returnResourceType(ValueSet.class)
+            .execute();
+        // Assign
+        vs.setExpansion(expanded.getExpansion());
+    }
+
+	private IBaseResource getResourceByType(Class<? extends IBaseResource> type, String resourceId) {
+        IBaseResource resource;
+        try {
+             resource = tc
+                .read()
+                .resource(type)
+                .withId(resourceId)
+                .execute();
+        } catch (ResourceNotFoundException e) {
+            resource = null;
+        }
+        return resource;
+    }
+	
 }
