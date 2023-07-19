@@ -100,7 +100,7 @@ public class TerminologyClient extends AbstractTerminologyClient {
 
 		Bundle results = tc.search().forResource(CodeSystem.class)
 				.where(CodeSystem.STATUS.exactly().identifier("active"))
-				.elementsSubset("identifier")
+				.elementsSubset("identifier", "version")
 				.returnBundle(Bundle.class)
 				.cacheControl(CacheControlDirective.noCache())
 				.execute();
