@@ -8,8 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 public class GetActiveResourceDTO {
-
 	private String id;
-	
 	private String oid;
+	private String version;
 }

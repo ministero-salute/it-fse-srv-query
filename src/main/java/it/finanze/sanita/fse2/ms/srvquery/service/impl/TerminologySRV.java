@@ -189,9 +189,10 @@ public class TerminologySRV implements ITerminologySRV {
 		List<CodeSystem> codeSystems = terminologyClient.searchSummaryNames();
 		for(CodeSystem codeSystem : codeSystems) {
 			String id = codeSystem.getIdElement().getIdPartAsLong().toString();
-			if(!codeSystem.getIdentifier().isEmpty()) {
+			if(!codeSystem.getIdentifier().isEmpty() && !codeSystem.getVersion().isEmpty()) {
 				String oid = StringUtility.removeUrnOidFromSystem(codeSystem.getIdentifier().get(0).getValue());
-				out.add(new GetActiveResourceDTO(id,oid));
+				String version = codeSystem.getVersion();
+				out.add(new GetActiveResourceDTO(id, oid, version));
 			}
 		}
 		return out;
