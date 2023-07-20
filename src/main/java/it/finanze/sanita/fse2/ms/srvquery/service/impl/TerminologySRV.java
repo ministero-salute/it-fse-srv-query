@@ -230,19 +230,23 @@ public class TerminologySRV implements ITerminologySRV {
 		return out;
 	}
 
+	private boolean isExportable(IBaseResource resource) {
+		return resource.getMeta().getSecurity()==null ||
+			resource.getMeta().getSecurity().isEmpty() ||
+			resource.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_NORMAL)!=null;
+	}
+
 	private GetResDTO setContentCS(CodeSystem codeSystem, FormatEnum format, boolean strict) {
 		GetResDTO out = new GetResDTO();
 
 		String resource = FHIRR4Helper.serializeResource(codeSystem, true, true, false);
 		String oid = StringUtility.removeUrnOidFromSystem(codeSystem.getIdentifier().get(0).getValue());
+		boolean exportable = isExportable(codeSystem);
 		out.setOid(oid);
-		out.setExportable(false);
+		out.setExportable(exportable);
 
-		if(!strict || codeSystem.getMeta().getSecurity()==null ||
-			codeSystem.getMeta().getSecurity().isEmpty() ||
-			codeSystem.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_NORMAL)!=null) {
+		if(!strict || exportable) {
 			try {
-				out.setExportable(true);
 				out.setContent(createByteContent(resource, oid, format));
 			} catch(Exception ex) {
 				log.error("Error while export : " , ex);
@@ -257,14 +261,12 @@ public class TerminologySRV implements ITerminologySRV {
 
 		String resource = FHIRR4Helper.serializeResource(valueset, true, true, false);
 		String oid = StringUtility.removeUrnOidFromSystem(valueset.getIdentifier().get(0).getValue());
+		boolean exportable = isExportable(valueset);
 		out.setOid(oid);
-		out.setExportable(false);
+		out.setExportable(exportable);
 
-		if(!strict || valueset.getMeta().getSecurity()==null ||
-			valueset.getMeta().getSecurity().isEmpty() ||
-			valueset.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_NORMAL)!=null) {
+		if(!strict || exportable) {
 			try {
-				out.setExportable(true);
 				out.setContent(createByteContent(resource, oid, format));
 			} catch(Exception ex) {
 				log.error("Error while export : " , ex);
