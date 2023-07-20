@@ -211,7 +211,7 @@ public class TerminologySRV implements ITerminologySRV {
 	}
 
 	@Override
-	public GetResDTO export(String id, FormatEnum format) {
+	public GetResDTO export(String id, FormatEnum format, boolean strict) {
 		GetResDTO out = new GetResDTO();
 		TerminologyClient terminologyClient = getTerminologyClient();
 		Optional<IBaseResource> base = terminologyClient.getResource(id);
@@ -220,17 +220,17 @@ public class TerminologySRV implements ITerminologySRV {
 			IBaseResource res = base.get();
 			if (res instanceof CodeSystem) {
 				CodeSystem codeSystem = (CodeSystem) res;
-				out = setContentCS(codeSystem, format);
+				out = setContentCS(codeSystem, format, strict);
 			} else if (res instanceof ValueSet) {
 				ValueSet valueset = (ValueSet) res;
-				out = setContentVS(valueset, format);
+				out = setContentVS(valueset, format, strict);
 			}
 		}
 		
 		return out;
 	}
 
-	private GetResDTO setContentCS(CodeSystem codeSystem, FormatEnum format) {
+	private GetResDTO setContentCS(CodeSystem codeSystem, FormatEnum format, boolean strict) {
 		GetResDTO out = new GetResDTO();
 
 		String resource = FHIRR4Helper.serializeResource(codeSystem, true, true, false);
@@ -238,7 +238,7 @@ public class TerminologySRV implements ITerminologySRV {
 		out.setOid(oid);
 		out.setExportable(false);
 
-		if(codeSystem.getMeta().getSecurity()==null || 
+		if(!strict || codeSystem.getMeta().getSecurity()==null ||
 			codeSystem.getMeta().getSecurity().isEmpty() ||
 			codeSystem.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_NORMAL)!=null) {
 			try {
@@ -252,7 +252,7 @@ public class TerminologySRV implements ITerminologySRV {
 		return out;
 	}
 
-	private GetResDTO setContentVS(ValueSet valueset, FormatEnum format) {
+	private GetResDTO setContentVS(ValueSet valueset, FormatEnum format, boolean strict) {
 		GetResDTO out = new GetResDTO();
 
 		String resource = FHIRR4Helper.serializeResource(valueset, true, true, false);
@@ -260,7 +260,7 @@ public class TerminologySRV implements ITerminologySRV {
 		out.setOid(oid);
 		out.setExportable(false);
 
-		if(valueset.getMeta().getSecurity()==null || 
+		if(!strict || valueset.getMeta().getSecurity()==null ||
 			valueset.getMeta().getSecurity().isEmpty() ||
 			valueset.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_NORMAL)!=null) {
 			try {

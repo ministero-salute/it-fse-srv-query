@@ -37,5 +37,5 @@ public interface ITerminologySRV {
 	
 	List<GetActiveResourceDTO> getSummaryNameActiveResource();
 	
-	GetResDTO export(String id, FormatEnum format);
+	GetResDTO export(String id, FormatEnum format, boolean strict);
 }

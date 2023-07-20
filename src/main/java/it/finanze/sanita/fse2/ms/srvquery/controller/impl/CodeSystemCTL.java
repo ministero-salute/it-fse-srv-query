@@ -42,8 +42,8 @@ public class CodeSystemCTL extends AbstractCTL implements ICodeSystemCTL {
 	}
 	 
 	@Override
-	public GetResDTO getResource(String id,FormatEnum format, HttpServletRequest request) {
-		return terminologySRV.export(id, format);
+	public GetResDTO getResource(String id,FormatEnum format, boolean strict, HttpServletRequest request) {
+		return terminologySRV.export(id, format, strict);
 	}
 
 }

@@ -88,10 +88,10 @@ class CodeSystemCTLTest {
         GetResDTO expectedResponse = new GetResDTO();
 
         // Mock terminologySRV.export()
-        when(terminologySRV.export(id, format)).thenReturn(expectedResponse);
+        when(terminologySRV.export(id, format, true)).thenReturn(expectedResponse);
 
         // Perform getResource()
-        GetResDTO actualResponse = codeSystemController.getResource(id, format, request);
+        GetResDTO actualResponse = codeSystemController.getResource(id, format, true, request);
 
         assertEquals(expectedResponse, actualResponse);
 
