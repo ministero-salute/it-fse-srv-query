@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -196,7 +197,8 @@ public class TerminologySRV implements ITerminologySRV {
 			if(!codeSystem.getIdentifier().isEmpty() && !codeSystem.getVersion().isEmpty()) {
 				String oid = StringUtility.removeUrnOidFromSystem(codeSystem.getIdentifier().get(0).getValue());
 				String version = codeSystem.getVersion();
-				out.add(new GetActiveResourceDTO(id, oid, version));
+				Date lastUpdate = codeSystem.getMeta().getLastUpdated();
+				out.add(new GetActiveResourceDTO(id, oid, version, lastUpdate));
 			}
 		}
 		for(ValueSet valueSet : valueSets) {
@@ -204,7 +206,8 @@ public class TerminologySRV implements ITerminologySRV {
 			if(!valueSet.getIdentifier().isEmpty() && !valueSet.getVersion().isEmpty()) {
 				String oid = StringUtility.removeUrnOidFromSystem(valueSet.getIdentifier().get(0).getValue());
 				String version = valueSet.getVersion();
-				out.add(new GetActiveResourceDTO(id, oid, version));
+				Date lastUpdate = valueSet.getMeta().getLastUpdated();
+				out.add(new GetActiveResourceDTO(id, oid, version, lastUpdate));
 			}
 		}
 		return out;
