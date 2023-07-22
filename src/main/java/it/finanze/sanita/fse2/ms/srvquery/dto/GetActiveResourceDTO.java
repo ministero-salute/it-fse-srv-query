@@ -10,8 +10,8 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 public class GetActiveResourceDTO {
-	private String oid;
 	private String id;
+	private String oid;
 	private String version;
 	private Date lastUpdate;
 }
