@@ -16,8 +16,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * 
- *
  *	DTO used to return check exist result.
  */
 @Getter

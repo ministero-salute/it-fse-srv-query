@@ -11,9 +11,14 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.web.client.RestTemplate;
+
+import it.finanze.sanita.fse2.ms.srvquery.client.handler.RestTemplateResponseErrorHandler;
 
 /** 
  * SpringBoot Application 
@@ -31,4 +36,16 @@ public class SrvQueryApplication {
 		SpringApplication.run(SrvQueryApplication.class, args);
 	}
 
+	/**
+	 * Definizione rest template.
+	 * 
+	 * @return	rest template
+	 */
+	@Bean 
+	@Qualifier("restTemplate")
+	public RestTemplate restTemplate() {
+		RestTemplate restTemplate = new RestTemplate();
+		restTemplate.setErrorHandler(new RestTemplateResponseErrorHandler());
+		return new RestTemplate();
+	} 
 }

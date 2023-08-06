@@ -57,12 +57,11 @@ import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 class FhirSRVTest {
     
     @Autowired
-    IFHIRSRV fhirSRV;
+    private IFHIRSRV fhirSRV;
 
+    private Bundle bundle;
 
-    Bundle bundle;
-
-    DocumentReference documentReference;
+    private DocumentReference documentReference;
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -196,4 +195,5 @@ class FhirSRVTest {
 
         assertThrows(BusinessException.class, () -> fhirSRV.updateMetadata(null));
     }
+    
 }

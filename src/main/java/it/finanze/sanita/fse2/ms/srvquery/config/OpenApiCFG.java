@@ -15,18 +15,24 @@ import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.springdoc.core.customizers.OpenApiCustomiser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.servers.Server;
 import it.finanze.sanita.fse2.ms.srvquery.config.CustomSwaggerCFG;
 
@@ -78,9 +84,41 @@ public class OpenApiCFG {
 			servers.add(devServer);
 			openApi.setServers(servers);
 
+			openApi.getPaths().values().stream().map(this::getFileSchema).filter(Objects::nonNull).forEach(schema -> {
+				schema.additionalProperties(false);
+				schema.getProperties().get("file").setMaxLength(customOpenapi.getFileMaxLength());
+			});
 		};
 	}
 
+	private Schema<?> getFileSchema(PathItem item) {
+        MediaType mediaType = getMultipartFile(item);
+        if (mediaType == null)
+            return null;
+        return mediaType.getSchema();
+    }
+	
+	private MediaType getMultipartFile(PathItem item) {
+        Operation operation = getOperation(item);
+        if (operation == null)
+            return null;
+        RequestBody body = operation.getRequestBody();
+        if (body == null)
+            return null;
+        Content content = body.getContent();
+        if (content == null)
+            return null;
+        return content.get(org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE);
+    }
+	private Operation getOperation(PathItem item) {
+        if (item.getPost() != null)
+            return item.getPost();
+        if (item.getPatch() != null)
+            return item.getPatch();
+        if (item.getPut() != null)
+            return item.getPut();
+        return null;
+    }
 	private void disableAdditionalPropertiesToMultipart(Content content) {
         if (content.containsKey(MULTIPART_FORM_DATA_VALUE)) {
             content.get(MULTIPART_FORM_DATA_VALUE).getSchema().setAdditionalProperties(false);
@@ -113,5 +151,13 @@ public class OpenApiCFG {
 	    try { return clazz.cast(schema); }
 	    catch(ClassCastException e) { return null; }
 	}
+	
+	@Bean
+    public MappingJackson2HttpMessageConverter octetStreamJsonConverter() {
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setSupportedMediaTypes(
+                Collections.singletonList(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM));
+        return converter;
+    }
 
 }

@@ -17,8 +17,6 @@ import brave.Tracer;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO; 
 
 /**
- * 
- *
  *	Abstract controller.
  */
 public abstract class AbstractCTL {
@@ -37,6 +35,7 @@ public abstract class AbstractCTL {
 		}
 		return out;
 	}
+
 
 }
 

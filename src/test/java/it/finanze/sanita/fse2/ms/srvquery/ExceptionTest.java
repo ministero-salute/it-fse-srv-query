@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.DocumentAlreadyPresentException;
 
 
 class ExceptionTest {
@@ -27,7 +28,7 @@ class ExceptionTest {
 		assertEquals(BusinessException.class, exc.getClass()); 
 		assertEquals("Error", exc.getMessage()); 
 		
-	} 
+	}
 	
 	@Test
 	void businessExceptionTestWithoutMsg() {
@@ -35,7 +36,15 @@ class ExceptionTest {
 		
 		assertEquals(BusinessException.class, exc.getClass()); 
 		
-	} 
+	}
 
+	@Test
+	void documentAlreadyPresentExceptionTest() {
+		DocumentAlreadyPresentException exc = new DocumentAlreadyPresentException("Error"); 
+		
+		assertEquals(DocumentAlreadyPresentException.class, exc.getClass()); 
+		assertEquals("Error", exc.getError().getDetail()); 
+		
+	}
 	
 } 
