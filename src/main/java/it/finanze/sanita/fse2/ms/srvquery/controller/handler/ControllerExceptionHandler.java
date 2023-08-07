@@ -5,8 +5,8 @@ package it.finanze.sanita.fse2.ms.srvquery.controller.handler;
 
 
 import static it.finanze.sanita.fse2.ms.srvquery.dto.response.error.ErrorBuilderDTO.createGenericError;
-import static it.finanze.sanita.fse2.ms.srvquery.enums.ErrorClassEnum.TIMEOUT;
 import static it.finanze.sanita.fse2.ms.srvquery.enums.ErrorClassEnum.METADATARESOURCE_NOTFOUND;
+import static it.finanze.sanita.fse2.ms.srvquery.enums.ErrorClassEnum.TIMEOUT;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -25,7 +25,9 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseD
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.ClientException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.DiffCheckerFirstVersionException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.DocumentAlreadyPresentException;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.MetadataResourceNotFoundException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.base.ConflictException;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.base.NotFoundException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.base.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -99,6 +101,19 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 	 */
 	@ExceptionHandler(value = {ResourceNotFoundException.class})
 	protected ResponseEntity<ErrorResponseDTO> handleResourceAccessException(ResourceNotFoundException ex) {
+		ErrorResponseDTO out = new ErrorResponseDTO(getLogTraceInfo(), METADATARESOURCE_NOTFOUND.getType(), METADATARESOURCE_NOTFOUND.getTitle(), METADATARESOURCE_NOTFOUND.getDetail(), 404, METADATARESOURCE_NOTFOUND.getInstance());
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
+		return new ResponseEntity<>(out, headers, out.getStatus());
+	}
+	
+	/**
+	 * Handles generic or unknown exceptions, unexpected thrown during the execution of any operation.
+	 *
+	 * @param ex exception
+	 */
+	@ExceptionHandler(value = {MetadataResourceNotFoundException.class})
+	protected ResponseEntity<ErrorResponseDTO> handleNotFoundException(NotFoundException ex) {
 		ErrorResponseDTO out = new ErrorResponseDTO(getLogTraceInfo(), METADATARESOURCE_NOTFOUND.getType(), METADATARESOURCE_NOTFOUND.getTitle(), METADATARESOURCE_NOTFOUND.getDetail(), 404, METADATARESOURCE_NOTFOUND.getInstance());
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);

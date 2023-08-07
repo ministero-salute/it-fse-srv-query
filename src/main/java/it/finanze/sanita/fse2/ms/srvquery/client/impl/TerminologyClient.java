@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -34,7 +33,6 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
-import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.UriClientParam;
 import ca.uhn.fhir.util.ParametersUtil;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
@@ -585,5 +583,25 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		output = (MetadataResource) tc.search().byUrl(sb.toString()).preferResponseType(MetadataResource.class).execute();
 		return output;
 	}
+	
+	public MetadataResource getMetadataResourceByIdAndVersion(final String id, final String version, Class<? extends MetadataResource> mr) {
+		MetadataResource out = null;
+	    
+	    Bundle results = searchForResource(tc, mr, id, version);
+ 
+	    // Process the search results
+	    if (results != null && results.hasEntry()) {
+	        // Access the code system resources
+	        for (Bundle.BundleEntryComponent bundleEntry : results.getEntry()) {
+	            if (bundleEntry.getResource() instanceof CodeSystem) {
+	                out = (MetadataResource) bundleEntry.getResource();
+	                break;
+	            }
+	        }
+	    }
+
+	    return out;
+	}
+
 
 }

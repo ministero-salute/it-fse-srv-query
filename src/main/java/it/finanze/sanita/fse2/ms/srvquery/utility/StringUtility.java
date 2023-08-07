@@ -17,6 +17,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isWhitespace;
@@ -27,6 +28,8 @@ import static org.apache.commons.lang3.StringUtils.isWhitespace;
 public final class StringUtility {
 
 	private static final String MASTER_ID_SEPARATOR = "^";
+	
+	private static final String REGEX_OID = "urn:oid:[0-2](\\.(0|[1-9][0-9]*))+";
 	/**
 	 * The allowed chars are: [a-zA-Z0-9_.]
 	 * It's expected a string shape as follows: [chars][^][chars]
@@ -108,6 +111,12 @@ public final class StringUtility {
 	        return oid.substring(prefix.length());
 	    }
 	    return oid;
+	}
+	
+	public static boolean validateOid(final String input) {
+		Pattern pattern = Pattern.compile(REGEX_OID);
+		Matcher matcher = pattern.matcher(input);
+		return matcher.matches();
 	}
 }
 

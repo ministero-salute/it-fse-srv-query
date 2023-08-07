@@ -39,6 +39,7 @@ import it.finanze.sanita.fse2.ms.srvquery.enums.SubscriptionEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.TypeEnum;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.DiffCheckerFirstVersionException;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.MetadataResourceNotFoundException;
 import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
@@ -238,8 +239,19 @@ public class TerminologySRV implements ITerminologySRV {
 	@Override
 	public List<ResourceDTO> searchResourceByIdAndVersion(String identifier, String versionFrom, String versionTo, TypeEnum type) {
 		List<ResourceDTO> out = new ArrayList<>();
-		TerminologyClient terminologyClient = getTerminologyClient();
+		
+		if(StringUtility.validateOid(identifier)){
+			out.addAll(searchResourceByIdAndResourceVersion(identifier, versionFrom, versionTo, type));
+		} else {
+			out.addAll(searchResourceByIdAndHistoryVersion(identifier, versionFrom, versionTo, type));
+		}
 	 
+		return out;
+	}
+	
+	private List<ResourceDTO> searchResourceByIdAndHistoryVersion(String identifier, String versionFrom, String versionTo, TypeEnum type){
+		List<ResourceDTO> out = new ArrayList<>();
+		TerminologyClient terminologyClient = getTerminologyClient();
 		MetadataResource mrNew = terminologyClient.searchMetadataResourceByIdAndHistory(terminologyCFG.getFhirServerUrl(), type.getMetadataResourceClass(), identifier, versionTo);
 		Integer toVersionRetrieved = Integer.parseInt(mrNew.getMeta().getVersionIdElement().asStringValue());
 		
@@ -264,5 +276,32 @@ public class TerminologySRV implements ITerminologySRV {
 		out.add(resourceNew);
 		return out;
 	}
+	
+	private List<ResourceDTO> searchResourceByIdAndResourceVersion(String identifier, String versionFrom, String versionTo, TypeEnum type){
+		List<ResourceDTO> out = new ArrayList<>();
+		TerminologyClient terminologyClient = getTerminologyClient();
+		MetadataResource mrNew = terminologyClient.getMetadataResourceByIdAndVersion(identifier,versionTo,type.getMetadataResourceClass());
+		if(mrNew==null) {
+			throw new MetadataResourceNotFoundException(String.format("Risorsa con oid %s e version %s non trovata sul server fhir", identifier,versionTo));
+		}
+		
+		
+		ResourceDTO resourceNew = new ResourceDTO();
+		resourceNew.setMetadataresource(FHIRR4Helper.serializeResource(mrNew, false, true, false));
+		resourceNew.setVersion(versionTo);
+		
+		MetadataResource mrOld = terminologyClient.getMetadataResourceByIdAndVersion(identifier,versionFrom ,type.getMetadataResourceClass());
+		if(mrOld==null) {
+			throw new MetadataResourceNotFoundException(String.format("Risorsa con oid %s e version %s non trovata sul server fhir", identifier,versionFrom));
+		}
+		ResourceDTO resourceOld = new ResourceDTO();
+		resourceOld.setMetadataresource(FHIRR4Helper.serializeResource(mrOld, false, true, false));
+		resourceOld.setVersion(versionFrom);
+
+		out.add(resourceOld);
+		out.add(resourceNew);
+		return out;
+	}
+
 
 }
