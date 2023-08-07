@@ -3,6 +3,8 @@ package it.finanze.sanita.fse2.ms.srvquery.controller.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionDesignationComponent;
@@ -15,10 +17,13 @@ import it.finanze.sanita.fse2.ms.srvquery.client.impl.TranslatorClient;
 import it.finanze.sanita.fse2.ms.srvquery.controller.AbstractCTL;
 import it.finanze.sanita.fse2.ms.srvquery.controller.IMetadataResourceCTL;
 import it.finanze.sanita.fse2.ms.srvquery.dto.MetadataResourceDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.ResourceDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.SearchResultDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.SystemUrlDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.MetadataResourceResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.TranslateResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.LanguageEnum;
+import it.finanze.sanita.fse2.ms.srvquery.enums.TypeEnum;
 import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 
@@ -94,4 +99,10 @@ public class MetadataResourceCTL extends AbstractCTL implements IMetadataResourc
     	return concepts;
 	}
 
+	@Override
+	public SearchResultDTO searchResourceByIdAndVersion(String identifier, String versionFrom, String versionTo, TypeEnum type, HttpServletRequest request) {
+		List<ResourceDTO> resources = terminologySRV.searchResourceByIdAndVersion(identifier, versionFrom, versionTo, type);
+		return new SearchResultDTO(getLogTraceInfo(), resources);
+	}
+	
 }

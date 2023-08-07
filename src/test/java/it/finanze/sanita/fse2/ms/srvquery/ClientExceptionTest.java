@@ -2,6 +2,7 @@ package it.finanze.sanita.fse2.ms.srvquery;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 
 import it.finanze.sanita.fse2.ms.srvquery.dto.ErrorDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
@@ -13,7 +14,7 @@ class ClientExceptionTest {
 	@Test
     void testClientException() {
         ErrorDTO error = new ErrorDTO();
-        ErrorResponseDTO errorResponse = new ErrorResponseDTO(new LogTraceInfoDTO(null, null), error);
+        ErrorResponseDTO errorResponse = new ErrorResponseDTO(new LogTraceInfoDTO(null, null), error, HttpStatus.NOT_FOUND.value());
         Integer statusCode = 404;
 
         ClientException clientException = new ClientException(errorResponse, statusCode);

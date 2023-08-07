@@ -27,8 +27,11 @@ import java.util.List;
 
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent;
+import org.hl7.fhir.r4.model.MetadataResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -40,6 +43,10 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.google.gson.internal.LinkedTreeMap;
 
+import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.IHistoryTyped;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.Constants;
 import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
@@ -48,6 +55,7 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
 import it.finanze.sanita.fse2.ms.srvquery.service.impl.FHIRSRV;
+import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FileUtility;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 
@@ -55,145 +63,180 @@ import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 @ActiveProfiles(Constants.Profile.TEST)
 @AutoConfigureMockMvc
 class FhirSRVTest {
-    
-    @Autowired
-    private IFHIRSRV fhirSRV;
 
-    private Bundle bundle;
+	@Autowired
+	private IFHIRSRV fhirSRV;
 
-    private DocumentReference documentReference;
+	private Bundle bundle;
 
-    @BeforeEach
-    public void setUp() throws Exception {
+	private DocumentReference documentReference;
 
-        FhirCFG fhirCFG = Mockito.mock(FhirCFG.class);
+	@BeforeEach
+	public void setUp() throws Exception {
 
-    	when(fhirCFG.getFhirServerUser()).thenReturn("mock");
-        when(fhirCFG.getFhirServerPwd()).thenReturn("mock");
-        when(fhirCFG.getFhirServerUrl()).thenReturn("http://localhost:8080/mock");
+		FhirCFG fhirCFG = Mockito.mock(FhirCFG.class);
 
-        // Create a mock of the private client
-        FHIRClient fhirClient = Mockito.mock(FHIRClient.class);
-        when(fhirClient.create(any(Bundle.class))).thenReturn(true);
-        when(fhirClient.update(any(DocumentReference.class))).thenReturn(true);
-        when(fhirClient.delete(any(Bundle.class))).thenReturn(true);
-        when(fhirClient.replace(any(Bundle.class))).thenReturn(true);
+		when(fhirCFG.getFhirServerUser()).thenReturn("mock");
+		when(fhirCFG.getFhirServerPwd()).thenReturn("mock");
+		when(fhirCFG.getFhirServerUrl()).thenReturn("http://localhost:8080/mock");
 
-        bundle = mockBundle();
-        documentReference = mockDocumentReference();
+		// Create a mock of the private client
+		FHIRClient fhirClient = Mockito.mock(FHIRClient.class);
+		when(fhirClient.create(any(Bundle.class))).thenReturn(true);
+		when(fhirClient.update(any(DocumentReference.class))).thenReturn(true);
+		when(fhirClient.delete(any(Bundle.class))).thenReturn(true);
+		when(fhirClient.replace(any(Bundle.class))).thenReturn(true);
 
-        when(fhirClient.getDocument(anyString(), anyString())).thenReturn(bundle);
-        when(fhirClient.getDocumentReferenceBundle(anyString())).thenReturn(documentReference);
-        when(fhirClient.findByMasterIdentifier(anyString())).thenReturn(bundle);
+		bundle = mockBundle();
+		documentReference = mockDocumentReference();
 
-        fhirSRV = new FHIRSRV();
+		when(fhirClient.getDocument(anyString(), anyString())).thenReturn(bundle);
+		when(fhirClient.getDocumentReferenceBundle(anyString())).thenReturn(documentReference);
+		when(fhirClient.findByMasterIdentifier(anyString())).thenReturn(bundle);
 
-        Field privateField = fhirSRV.getClass().getDeclaredField("fhirClient");
-        privateField.setAccessible(true);
-        privateField.set(fhirSRV, fhirClient);
+		fhirSRV = new FHIRSRV();
 
-        Field configField = fhirSRV.getClass().getDeclaredField("fhirCFG");
-        configField.setAccessible(true);
-        configField.set(fhirSRV, fhirCFG);
-    }
+		Field privateField = fhirSRV.getClass().getDeclaredField("fhirClient");
+		privateField.setAccessible(true);
+		privateField.set(fhirSRV, fhirClient);
 
-    private DocumentReference mockDocumentReference() {
-        DocumentReference documentReference = new DocumentReference();
+		Field configField = fhirSRV.getClass().getDeclaredField("fhirCFG");
+		configField.setAccessible(true);
+		configField.set(fhirSRV, fhirCFG);
+	}
 
-        DocumentReferenceContextComponent context = new DocumentReferenceContextComponent();
-        context.addRelated().setReference("http://localhost:8080/DocumentReference/1234567890");
+	private DocumentReference mockDocumentReference() {
+		DocumentReference documentReference = new DocumentReference();
 
-        documentReference.setContext(context);
-        
-        return documentReference;
-    }
+		DocumentReferenceContextComponent context = new DocumentReferenceContextComponent();
+		context.addRelated().setReference("http://localhost:8080/DocumentReference/1234567890");
 
-    private Bundle mockBundle() {
-        Bundle bundle = new Bundle();
-        List<BundleEntryComponent> entryList = new ArrayList<>();
-        BundleEntryComponent entry = new BundleEntryComponent();
-        entry.setResource(new DocumentReference());
-        entryList.add(entry);
+		documentReference.setContext(context);
 
-        bundle.setEntry(entryList);
+		return documentReference;
+	}
 
-        return bundle;
-    }
+	private Bundle mockBundle() {
+		Bundle bundle = new Bundle();
+		List<BundleEntryComponent> entryList = new ArrayList<>();
+		BundleEntryComponent entry = new BundleEntryComponent();
+		entry.setResource(new DocumentReference());
+		entryList.add(entry);
 
-    @Test
-    void checkExistsTest() {
-        boolean outcome = fhirSRV.checkExists("masterId");
-        assertTrue(outcome);
+		bundle.setEntry(entryList);
 
-        assertThrows(BusinessException.class, () -> fhirSRV.checkExists(null));
-    }
+		return bundle;
+	}
 
-   
-    @Test
-    void createTest() {
+	@Test
+	void checkExistsTest() {
+		boolean outcome = fhirSRV.checkExists("masterId");
+		assertTrue(outcome);
 
-        FhirPublicationDTO fhirPublicationDTO = new FhirPublicationDTO();
-        byte[] jsonFhir = FileUtility.getFileFromInternalResources("Files/CreationJsonFhir.json");
+		assertThrows(BusinessException.class, () -> fhirSRV.checkExists(null));
+	}
 
-        fhirPublicationDTO.setIdentifier("masterId");
-        fhirPublicationDTO.setJsonString(new String(jsonFhir, StandardCharsets.UTF_8));
 
-        boolean outcome = fhirSRV.create(fhirPublicationDTO);
-        assertTrue(outcome);
+	@Test
+	void createTest() {
 
-        assertThrows(BusinessException.class, () -> fhirSRV.create(null));
-    }
+		FhirPublicationDTO fhirPublicationDTO = new FhirPublicationDTO();
+		byte[] jsonFhir = FileUtility.getFileFromInternalResources("Files/CreationJsonFhir.json");
 
-    @Test
-    void deleteTest() {
-        boolean outcome = fhirSRV.delete("masterId");
-        assertTrue(outcome);
-    }
+		fhirPublicationDTO.setIdentifier("masterId");
+		fhirPublicationDTO.setJsonString(new String(jsonFhir, StandardCharsets.UTF_8));
 
-    @Test
-    void replaceTest() {
+		boolean outcome = fhirSRV.create(fhirPublicationDTO);
+		assertTrue(outcome);
 
-        FhirPublicationDTO fhirPublicationDTO = new FhirPublicationDTO();
-        byte[] jsonFhir = FileUtility.getFileFromInternalResources("Files/CreationJsonFhir.json");
+		assertThrows(BusinessException.class, () -> fhirSRV.create(null));
+	}
 
-        fhirPublicationDTO.setIdentifier("masterId");
-        fhirPublicationDTO.setJsonString(new String(jsonFhir, StandardCharsets.UTF_8));
+	@Test
+	void deleteTest() {
+		boolean outcome = fhirSRV.delete("masterId");
+		assertTrue(outcome);
+	}
 
-        // To revise replace() due to NPE"
-        // boolean outcome = fhirSRV.replace(fhirPublicationDTO);
-        // assertTrue(outcome);
+	@Test
+	void replaceTest() {
 
-        assertThrows(BusinessException.class, () -> fhirSRV.replace(null));
-    }
+		FhirPublicationDTO fhirPublicationDTO = new FhirPublicationDTO();
+		byte[] jsonFhir = FileUtility.getFileFromInternalResources("Files/CreationJsonFhir.json");
 
-    @Test
+		fhirPublicationDTO.setIdentifier("masterId");
+		fhirPublicationDTO.setJsonString(new String(jsonFhir, StandardCharsets.UTF_8));
+
+		// To revise replace() due to NPE"
+		// boolean outcome = fhirSRV.replace(fhirPublicationDTO);
+		// assertTrue(outcome);
+
+		assertThrows(BusinessException.class, () -> fhirSRV.replace(null));
+	}
+
+	@Test
 	@SuppressWarnings("unchecked")	
-    void updateTest() {
-        FhirPublicationDTO fhirPublicationDTO = new FhirPublicationDTO();
-        byte[] jsonFhir = FileUtility.getFileFromInternalResources("Files/CreationJsonFhir.json");
+	void updateTest() {
+		FhirPublicationDTO fhirPublicationDTO = new FhirPublicationDTO();
+		byte[] jsonFhir = FileUtility.getFileFromInternalResources("Files/CreationJsonFhir.json");
 
-        UpdateBodyDTO updateBodyDTO = new UpdateBodyDTO();
-        updateBodyDTO.setAssettoOrganizzativo("Assetto organizzativo");
-        updateBodyDTO.setAttiCliniciRegoleAccesso(Arrays.asList("Atti clinici regole accesso"));
-        updateBodyDTO.setConservazioneANorma("Conservazione a norma");
-        updateBodyDTO.setDataFinePrestazione(new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
-        updateBodyDTO.setDataInizioPrestazione(new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
-        updateBodyDTO.setTipoAttivitaClinica("Tipo attivita clinica");
-        updateBodyDTO.setTipoDocumentoLivAlto("Tipo documento liv alto");
-        updateBodyDTO.setTipologiaStruttura("Tipologia struttura");
+		UpdateBodyDTO updateBodyDTO = new UpdateBodyDTO();
+		updateBodyDTO.setAssettoOrganizzativo("Assetto organizzativo");
+		updateBodyDTO.setAttiCliniciRegoleAccesso(Arrays.asList("Atti clinici regole accesso"));
+		updateBodyDTO.setConservazioneANorma("Conservazione a norma");
+		updateBodyDTO.setDataFinePrestazione(new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
+		updateBodyDTO.setDataInizioPrestazione(new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
+		updateBodyDTO.setTipoAttivitaClinica("Tipo attivita clinica");
+		updateBodyDTO.setTipoDocumentoLivAlto("Tipo documento liv alto");
+		updateBodyDTO.setTipologiaStruttura("Tipologia struttura");
 
-        LinkedTreeMap<String, Object> objT = StringUtility.fromJSON(new String(jsonFhir, StandardCharsets.UTF_8), LinkedTreeMap.class);
-        objT.put("body", updateBodyDTO);
+		LinkedTreeMap<String, Object> objT = StringUtility.fromJSON(new String(jsonFhir, StandardCharsets.UTF_8), LinkedTreeMap.class);
+		objT.put("body", updateBodyDTO);
 
-        String jsonFhirUpdate = StringUtility.toJSON(objT);
+		String jsonFhirUpdate = StringUtility.toJSON(objT);
 
-        fhirPublicationDTO.setIdentifier("masterId");
-        fhirPublicationDTO.setJsonString(jsonFhirUpdate);
+		fhirPublicationDTO.setIdentifier("masterId");
+		fhirPublicationDTO.setJsonString(jsonFhirUpdate);
 
-        boolean outcome = fhirSRV.updateMetadata(fhirPublicationDTO);
-        assertTrue(outcome);
+		boolean outcome = fhirSRV.updateMetadata(fhirPublicationDTO);
+		assertTrue(outcome);
 
-        assertThrows(BusinessException.class, () -> fhirSRV.updateMetadata(null));
-    }
-    
+		assertThrows(BusinessException.class, () -> fhirSRV.updateMetadata(null));
+	}
+
+	@Test
+	void testVI() {
+		String serverURL = "http://localhost:8080/fhir";
+		String username = "admin";
+		String pwd = "admin";
+		
+//		String identifier = "urn:oid:2.16.840.1.113883.6.1";
+		String identifier = "loinc";
+		
+		String version = "";
+		IGenericClient tc =  FHIRR4Helper.createClient(serverURL, username, pwd);
+//		getDocument(tc,CodeSystem.class, "954", "1");
+//		getDocument(tc,CodeSystem.class, "954", "2");
+//		 System.out.println("Stop");
+		
+		CodeSystem metadata = tc.read().resource(CodeSystem.class).withIdAndVersion("954", "1").execute();
+		System.out.println("METADATA 1" + metadata.getTitle());
+		CodeSystem metadata2 = tc.read().resource(CodeSystem.class).withIdAndVersion("954", "2").execute();
+		System.out.println("METADATA 2" + metadata2.getTitle());
+		CodeSystem metadata3 = tc.read().resource(CodeSystem.class).withIdAndVersion("954", null).execute();
+		System.out.println("METADATA 3" +metadata3.getTitle());
+		
+		CodeSystem metadata4 = tc.read().resource(CodeSystem.class).withIdAndVersion("fratm", null).execute();
+		System.out.println("METADATA 3" +metadata4.getTitle());
+		
+	}
+	
+	public void getDocument(IGenericClient tc,Class mr, final String id, final String version) {
+		try {
+			CodeSystem cs = (CodeSystem)tc.search().byUrl("http://localhost:8080/fhir/CodeSystem/" + id +"/_history/" + version).execute();
+			System.out.println(cs.getTitle());
+		} catch(Exception ex) {
+			throw new BusinessException("Errore while perform getDocument client method:", ex);
+		}
+	}
 }

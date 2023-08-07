@@ -10,6 +10,7 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.GetActiveResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.MetadataResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.RequestDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.ResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.SystemUrlDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.CreateCodeSystemReqDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.CreateCodeSystemResDTO;
@@ -18,6 +19,7 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.GetResponseDT
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.UploadResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.SubscriptionEnum;
+import it.finanze.sanita.fse2.ms.srvquery.enums.TypeEnum;
 
 public interface ITerminologySRV {
 
@@ -38,4 +40,6 @@ public interface ITerminologySRV {
 	List<GetActiveResourceDTO> getSummaryNameActiveResource();
 	
 	GetResDTO export(String id, FormatEnum format);
+	
+	List<ResourceDTO> searchResourceByIdAndVersion(String identifier, String versionFrom, String versionTo, TypeEnum type);
 }

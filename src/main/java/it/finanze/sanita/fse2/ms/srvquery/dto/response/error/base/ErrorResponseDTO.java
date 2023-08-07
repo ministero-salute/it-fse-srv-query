@@ -77,13 +77,14 @@ public class ErrorResponseDTO extends ResponseDTO {
 		instance = inInstance;
 	}
 	
-	public ErrorResponseDTO(final LogTraceInfoDTO traceInfo, final ErrorDTO inError) {
+	public ErrorResponseDTO(final LogTraceInfoDTO traceInfo, final ErrorDTO inError, final Integer inStatus) {
 		traceID = traceInfo.getTraceID();
 		spanID = traceInfo.getSpanID();
 		type = inError.getType();
 		title = inError.getTitle();
 		detail = inError.getDetail();
 		instance = inError.getInstance();
+		status = inStatus;
 	}
 
 }

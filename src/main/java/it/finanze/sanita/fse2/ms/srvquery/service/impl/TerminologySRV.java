@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.GetActiveResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.MetadataResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.RequestDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.ResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.SystemUrlDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.CreateCodeSystemReqDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.ConversionResponseDTO;
@@ -36,6 +38,7 @@ import it.finanze.sanita.fse2.ms.srvquery.enums.ResultPushEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.SubscriptionEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.TypeEnum;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.DiffCheckerFirstVersionException;
 import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
@@ -208,7 +211,7 @@ public class TerminologySRV implements ITerminologySRV {
 		out.setOid(oid);
 		out.setExportable(false);
 
-		
+
 		if(codeSystem.getMeta().getSecurity()==null || 
 				codeSystem.getMeta().getSecurity().isEmpty() || codeSystem.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_NORMAL)!=null) {
 			try {
@@ -229,6 +232,36 @@ public class TerminologySRV implements ITerminologySRV {
 				throw new BusinessException(ex);
 			}
 		}  
+		return out;
+	}
+
+	@Override
+	public List<ResourceDTO> searchResourceByIdAndVersion(String identifier, String versionFrom, String versionTo, TypeEnum type) {
+		List<ResourceDTO> out = new ArrayList<>();
+		TerminologyClient terminologyClient = getTerminologyClient();
+	 
+		MetadataResource mrNew = terminologyClient.searchMetadataResourceByIdAndHistory(terminologyCFG.getFhirServerUrl(), type.getMetadataResourceClass(), identifier, versionTo);
+		Integer toVersionRetrieved = Integer.parseInt(mrNew.getMeta().getVersionIdElement().asStringValue());
+		
+		if(toVersionRetrieved==1) {
+			throw new DiffCheckerFirstVersionException("Esiste solo una versione per l'id selezionato. Non è possibile eseguire la diff");
+		}
+		
+		ResourceDTO resourceNew = new ResourceDTO();
+		resourceNew.setMetadataresource(FHIRR4Helper.serializeResource(mrNew, false, true, false));
+		resourceNew.setVersion(""+toVersionRetrieved);
+		
+		
+		if(StringUtility.isNullOrEmpty(versionFrom)) {
+			versionFrom = "" + (toVersionRetrieved - 1);
+		}
+		MetadataResource mrOld = terminologyClient.searchMetadataResourceByIdAndHistory(terminologyCFG.getFhirServerUrl(),type.getMetadataResourceClass(), identifier, versionFrom);
+		ResourceDTO resourceOld = new ResourceDTO();
+		resourceOld.setMetadataresource(FHIRR4Helper.serializeResource(mrOld, false, true, false));
+		resourceOld.setVersion(versionFrom);
+
+		out.add(resourceOld);
+		out.add(resourceNew);
 		return out;
 	}
 

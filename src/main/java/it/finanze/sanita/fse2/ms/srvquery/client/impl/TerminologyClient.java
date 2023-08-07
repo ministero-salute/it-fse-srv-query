@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -33,6 +34,7 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.UriClientParam;
 import ca.uhn.fhir.util.ParametersUtil;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
@@ -43,6 +45,7 @@ import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.DocumentAlreadyPresentException;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
+import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -568,6 +571,19 @@ public class TerminologyClient extends AbstractTerminologyClient {
 			log.error("Errore while perform searchActive client method:", ex);
 			throw new BusinessException("Errore while perform searchActive client method:", ex);
 		}
+	}
+	
+	
+	public MetadataResource searchMetadataResourceByIdAndHistory(String baseUrl,Class<? extends MetadataResource> mr, final String id, final String version) {
+		MetadataResource output = null;		
+ 
+		StringBuilder sb = new StringBuilder(baseUrl + "/"+ mr.getSimpleName() + "/" + id);
+		if(!StringUtility.isNullOrEmpty(version)) {
+			sb.append("/_history/" + version);
+		}
+		
+		output = (MetadataResource) tc.search().byUrl(sb.toString()).preferResponseType(MetadataResource.class).execute();
+		return output;
 	}
 
 }

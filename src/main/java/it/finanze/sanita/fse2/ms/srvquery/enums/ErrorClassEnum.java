@@ -14,8 +14,10 @@ public enum ErrorClassEnum {
 	 */
 	GENERIC("/errors", "Generic", "Errore generico", "/generic"),
 	VALIDATION_MANDATORY("/errors/fields", "Missing", "Campo obbligatorio non presente", "/mandatory"),
+	VALIDATION_VERSION("/errors/fields", "Search", "Unica versione esiste per fare la diff", "/diff-metadataresource"),
 	CONFLICT("/errors/conflict", "Conflict", "Documento già esistente", "/conflict"),
-    TIMEOUT("/errors", "Timeout", "Errore di timeout", "/timeout");
+    TIMEOUT("/errors", "Timeout", "Errore di timeout", "/timeout"),
+    METADATARESOURCE_NOTFOUND("/errors/not-found", "Missing", "Metadata resource non trovato sul server fhir", "/metadata-resource");
 
 
 	/**
