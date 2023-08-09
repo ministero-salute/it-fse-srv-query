@@ -16,11 +16,11 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class GetActiveCSResponseDTO extends ResponseDTO {
+public class GetActiveResourceResponseDTO extends ResponseDTO {
 
 	private List<GetActiveResourceDTO> activeResources;
 	
-	public GetActiveCSResponseDTO(final LogTraceInfoDTO traceInfo, final List<GetActiveResourceDTO> inActiveResources) {
+	public GetActiveResourceResponseDTO(final LogTraceInfoDTO traceInfo, final List<GetActiveResourceDTO> inActiveResources) {
 		super(traceInfo);
 		activeResources = inActiveResources;
 	}

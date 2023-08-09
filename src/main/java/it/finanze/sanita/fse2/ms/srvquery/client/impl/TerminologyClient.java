@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
+import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.UriClientParam;
 import ca.uhn.fhir.util.ParametersUtil;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
@@ -96,18 +97,31 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		return searchModified(tc, start, CodeSystem.class,summaryEnum);
 	}
 	
-	public List<CodeSystem> searchSummaryNames(){
-		List<CodeSystem> out = new ArrayList<>();
+	public List<MetadataResource> searchAllMRSummaryNames(boolean searchAllActive){
+		List<MetadataResource> out = new ArrayList<>();
+		out.addAll(searchSummaryNames(CodeSystem.class,searchAllActive));
+		out.addAll(searchSummaryNames(ValueSet.class,searchAllActive));
+		out.addAll(searchSummaryNames(ConceptMap.class,searchAllActive));
+		return out;
+	}
+	
+	
+	public List<MetadataResource> searchSummaryNames(Class<? extends MetadataResource> mr, boolean searchAllActive){
+		List<MetadataResource> out = new ArrayList<>();
 
-		Bundle results = tc.search().forResource(CodeSystem.class)
-				.where(CodeSystem.STATUS.exactly().identifier("active"))
-				.elementsSubset("identifier")
+		IQuery<Bundle> query = tc.search().forResource(mr)
+				.elementsSubset("content","url", "version", "status","identifier")
 				.returnBundle(Bundle.class)
-				.cacheControl(CacheControlDirective.noCache())
-				.execute();
+				.cacheControl(CacheControlDirective.noCache());
+		
+		if(searchAllActive) {
+			query.where(CodeSystem.STATUS.exactly().identifier("active"));
+		}
 
+		Bundle results = query.execute();
+		
 		for (Bundle.BundleEntryComponent entry : results.getEntry()) {
-			CodeSystem codeSystem = (CodeSystem) entry.getResource();
+			MetadataResource codeSystem = (MetadataResource) entry.getResource();
 			out.add(codeSystem);
 		}
 		return out;

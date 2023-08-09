@@ -20,7 +20,10 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.MetadataResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.ResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.SearchResultDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.SystemUrlDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetActiveResourceResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.MetadataResourceResponseDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.SummaryResourceDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.SummaryResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.TranslateResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.LanguageEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.TypeEnum;
@@ -34,17 +37,17 @@ public class MetadataResourceCTL extends AbstractCTL implements IMetadataResourc
 	private ITerminologySRV terminologySRV;
 
 	@Value("${translator-server-url}")
-    private String translatorServerURL;
+	private String translatorServerURL;
 
 	@Value("${terminology-server-url}")
-    private String terminologyServerURL;
+	private String terminologyServerURL;
 
 	@Value("${terminology-server-user}")
 	private String terminologyServerUSR;
-	
+
 	@Value("${terminology-server-pwd}")
-    private String terminologyServerPWD;
-	
+	private String terminologyServerPWD;
+
 	@Override
 	public MetadataResourceResponseDTO manageMetadataResource(List<SystemUrlDTO> requestBody) {
 		List<MetadataResourceDTO> out = terminologySRV.manageMetadataResource(requestBody);
@@ -53,50 +56,50 @@ public class MetadataResourceCTL extends AbstractCTL implements IMetadataResourc
 
 	@Override
 	public TranslateResponseDTO translateCodeSystem(String id, LanguageEnum from, LanguageEnum to) {
-    	TerminologyClient tc = new TerminologyClient(terminologyServerURL, terminologyServerUSR, terminologyServerPWD);
-    	TranslatorClient txc = new TranslatorClient(translatorServerURL);
-    	Boolean status = true;
-    	String msg = null;
-    	CodeSystem cs = null;
-    	try {
-        	cs = tc.readCS(id);
-        	List<ConceptDefinitionComponent> concepts = translateConcepts(txc, cs.getConcept(), from, to);
-        	cs.setConcept(concepts);
-        	String str = FHIRR4Helper.serializeResource(cs, true, false, false);
-        	System.out.println(str);
-        	tc.updateCS(cs);
-    	} catch (Exception e) {
-    		status = false;
-    		msg = e.getMessage();
-    	}
+		TerminologyClient tc = new TerminologyClient(terminologyServerURL, terminologyServerUSR, terminologyServerPWD);
+		TranslatorClient txc = new TranslatorClient(translatorServerURL);
+		Boolean status = true;
+		String msg = null;
+		CodeSystem cs = null;
+		try {
+			cs = tc.readCS(id);
+			List<ConceptDefinitionComponent> concepts = translateConcepts(txc, cs.getConcept(), from, to);
+			cs.setConcept(concepts);
+			String str = FHIRR4Helper.serializeResource(cs, true, false, false);
+			System.out.println(str);
+			tc.updateCS(cs);
+		} catch (Exception e) {
+			status = false;
+			msg = e.getMessage();
+		}
 		return new TranslateResponseDTO(getLogTraceInfo(), status, msg, cs);
 	}
 
 	private List<ConceptDefinitionComponent> translateConcepts(TranslatorClient txc, List<ConceptDefinitionComponent> concepts, LanguageEnum from, LanguageEnum to) {
-    	for (ConceptDefinitionComponent cmc:concepts) {
-    		Boolean bFound = false;
-    		if (cmc.getDesignation()!=null) {
-        		for (ConceptDefinitionDesignationComponent cddc:cmc.getDesignation()) {
-        			if (to.getDescription().equals(cddc.getLanguage())) {
-                		bFound = true;
-        				break;
-        			}
-        		}
-    		} else {
-    			cmc.setDesignation(new ArrayList<ConceptDefinitionDesignationComponent>());
-    		}
-    		if (!bFound) {
-    			ConceptDefinitionDesignationComponent cddc = new ConceptDefinitionDesignationComponent();
-    			cddc.setLanguage(to.getDescription());
-    			String fromLan = "auto";
-    			if (from!=null) {
-    				fromLan = from.getCode();
-    			}
-    			cddc.setValue(txc.translate(cmc.getDisplay(), fromLan, to.getCode()).getTranslatedText());
-    			cmc.getDesignation().add(cddc);
-    		}
-    	}
-    	return concepts;
+		for (ConceptDefinitionComponent cmc:concepts) {
+			Boolean bFound = false;
+			if (cmc.getDesignation()!=null) {
+				for (ConceptDefinitionDesignationComponent cddc:cmc.getDesignation()) {
+					if (to.getDescription().equals(cddc.getLanguage())) {
+						bFound = true;
+						break;
+					}
+				}
+			} else {
+				cmc.setDesignation(new ArrayList<ConceptDefinitionDesignationComponent>());
+			}
+			if (!bFound) {
+				ConceptDefinitionDesignationComponent cddc = new ConceptDefinitionDesignationComponent();
+				cddc.setLanguage(to.getDescription());
+				String fromLan = "auto";
+				if (from!=null) {
+					fromLan = from.getCode();
+				}
+				cddc.setValue(txc.translate(cmc.getDisplay(), fromLan, to.getCode()).getTranslatedText());
+				cmc.getDesignation().add(cddc);
+			}
+		}
+		return concepts;
 	}
 
 	@Override
@@ -104,5 +107,11 @@ public class MetadataResourceCTL extends AbstractCTL implements IMetadataResourc
 		List<ResourceDTO> resources = terminologySRV.searchResourceByIdAndVersion(identifier, versionFrom, versionTo, type);
 		return new SearchResultDTO(getLogTraceInfo(), resources);
 	}
-	
+
+	@Override
+	public SummaryResponseDTO getMetadataResourceSummary(HttpServletRequest request) {
+		List<SummaryResourceDTO> resources = terminologySRV.getSummaryNameAllResource();
+		return new SummaryResponseDTO(getLogTraceInfo(), resources);
+	}
+
 }

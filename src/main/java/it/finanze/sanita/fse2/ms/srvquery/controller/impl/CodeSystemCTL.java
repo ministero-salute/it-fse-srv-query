@@ -14,7 +14,7 @@ import it.finanze.sanita.fse2.ms.srvquery.controller.ICodeSystemCTL;
 import it.finanze.sanita.fse2.ms.srvquery.dto.GetActiveResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.CreateCodeSystemReqDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.CreateCodeSystemResDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetActiveCSResponseDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetActiveResourceResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
@@ -36,14 +36,20 @@ public class CodeSystemCTL extends AbstractCTL implements ICodeSystemCTL {
 	}
 
 	@Override
-	public GetActiveCSResponseDTO getActiveResource(HttpServletRequest request) {
+	public GetActiveResourceResponseDTO getActiveResource(HttpServletRequest request) {
 		List<GetActiveResourceDTO> list = terminologySRV.getSummaryNameActiveResource();
-		return new GetActiveCSResponseDTO(getLogTraceInfo(), list);
+		return new GetActiveResourceResponseDTO(getLogTraceInfo(), list);
 	}
 	 
 	@Override
 	public GetResDTO getResource(String id,FormatEnum format, HttpServletRequest request) {
 		return terminologySRV.export(id, format);
+	}
+
+	@Override
+	public void expand(String oid, HttpServletRequest request) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

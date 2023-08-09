@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.CreateCodeSystemReqDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.CreateCodeSystemResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.CreateResponseDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetActiveCSResponseDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetActiveResourceResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
@@ -47,12 +47,12 @@ public interface ICodeSystemCTL {
      * @return ResourceExistResDTO  A DTO with a boolean, representing whether the resource already exists 
      */
     @GetMapping(value = "/get-active-resource")
-	@ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetActiveCSResponseDTO.class)))
+	@ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetActiveResourceResponseDTO.class)))
 	@Operation(summary = "Controllo esistenza risorsa", description = "Controlla se su Elasticsearch è presente una risorsa con l'id fornito.")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetActiveCSResponseDTO.class))),
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetActiveResourceResponseDTO.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
-    GetActiveCSResponseDTO getActiveResource(HttpServletRequest request);
+    GetActiveResourceResponseDTO getActiveResource(HttpServletRequest request);
 
 
     /** 
@@ -69,6 +69,22 @@ public interface ICodeSystemCTL {
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
 	GetResDTO getResource(@PathVariable String id, @PathVariable FormatEnum format, HttpServletRequest request);
+
+    
+    /** 
+     * Check if the document exists on the secondary storage (MongoDB). 
+     * 
+     * @param id  The ID of the document to search 
+     * @param request  The HTTP Servlet Request 
+     * @return ResourceExistResDTO  A DTO with a boolean, representing whether the resource already exists 
+     */
+    @GetMapping(value = "/expand/{oid}")
+	@ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = void.class)))
+	@Operation(summary = "Ep per espandere un codesystem", description = "Ep per espandere un codesystem tramite oid.")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = void.class))),
+			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
+			@ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
+	void expand(@PathVariable String oid, HttpServletRequest request);
 
 }
 

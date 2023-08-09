@@ -23,7 +23,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.finanze.sanita.fse2.ms.srvquery.dto.SearchResultDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.SystemUrlDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetActiveResourceResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.MetadataResourceResponseDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.SummaryResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.TranslateResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.LanguageEnum;
@@ -67,4 +69,20 @@ public interface IMetadataResourceCTL {
 			@RequestParam (required = false) String versionFrom,
 			@RequestParam (required = false) String versionTo,
 			@RequestParam TypeEnum type, HttpServletRequest request);
+	
+	  /** 
+     * Check if the document exists on the secondary storage (MongoDB). 
+     * 
+     * @param id  The ID of the document to search 
+     * @param request  The HTTP Servlet Request 
+     * @return ResourceExistResDTO  A DTO with a boolean, representing whether the resource already exists 
+     */
+    @GetMapping(value = "/get-metadata-resource-summary")
+	@ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SummaryResponseDTO.class)))
+	@Operation(summary = "Get metadata resource summary", description = "Get metadata resource summary.")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SummaryResponseDTO.class))),
+			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
+			@ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
+    SummaryResponseDTO getMetadataResourceSummary(HttpServletRequest request);
+
 }

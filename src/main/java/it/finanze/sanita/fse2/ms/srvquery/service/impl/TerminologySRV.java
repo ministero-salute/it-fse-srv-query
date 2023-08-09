@@ -8,11 +8,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,9 +34,11 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.request.CreateCodeSystemReqDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.ConversionResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.CreateCodeSystemResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetResDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.SummaryResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.GetResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.UploadResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
+import it.finanze.sanita.fse2.ms.srvquery.enums.MetadataResourceTypeEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.ResultPushEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.SubscriptionEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.TypeEnum;
@@ -190,13 +195,32 @@ public class TerminologySRV implements ITerminologySRV {
 	public List<GetActiveResourceDTO> getSummaryNameActiveResource() {
 		List<GetActiveResourceDTO> out = new ArrayList<>();
 		TerminologyClient terminologyClient = getTerminologyClient();
-		List<CodeSystem> codeSystems = terminologyClient.searchSummaryNames();
-		for(CodeSystem codeSystem : codeSystems) {
-			String id = codeSystem.getIdElement().getIdPartAsLong().toString();
-			if(!codeSystem.getIdentifier().isEmpty()) {
-				String oid = StringUtility.removeUrnOidFromSystem(codeSystem.getIdentifier().get(0).getValue());
-				out.add(new GetActiveResourceDTO(id,oid));
+		List<MetadataResource> metadataResources = terminologyClient.searchAllMRSummaryNames(true);
+		for(MetadataResource metadataResource : metadataResources) {
+			GetActiveResourceDTO activeResource = new GetActiveResourceDTO();
+			String id = metadataResource.getIdElement().getIdPartAsLong().toString();
+			activeResource.setId(id); 
+			String oid = "";
+			if(metadataResource instanceof CodeSystem) {
+				CodeSystem codeSystem = (CodeSystem)metadataResource;
+				oid = (codeSystem.getIdentifier()!=null && !codeSystem.getIdentifier().isEmpty()) ? codeSystem.getIdentifier().get(0).getValue() : "";
+				activeResource.setMetadataType(MetadataResourceTypeEnum.CODE_SYSTEM);
+			} else if(metadataResource instanceof ValueSet) {
+				ValueSet valueSet = (ValueSet)metadataResource;
+				oid = valueSet.getIdentifier().get(0).getValue();
+				activeResource.setMetadataType(MetadataResourceTypeEnum.VALUE_SET);
+			} else if(metadataResource instanceof ConceptMap) {
+				ConceptMap conceptMap = (ConceptMap)metadataResource;
+				oid = conceptMap.getIdentifier().getValue();
+				activeResource.setMetadataType(MetadataResourceTypeEnum.CONCEPT_MAP);
 			}
+			
+			if(!StringUtility.isNullOrEmpty(oid)) {
+				oid = StringUtility.removeUrnOidFromSystem(oid);
+				activeResource.setOid(oid);
+			}
+				
+			out.add(activeResource);
 		}
 		return out;
 	}
@@ -303,5 +327,54 @@ public class TerminologySRV implements ITerminologySRV {
 		return out;
 	}
 
+	@Override
+	public void expand(String oid) {
+		TerminologyClient terminologyClient = getTerminologyClient();
+		CodeSystem codeSystem = terminologyClient.getCodeSystemById(oid);
+		String valueset = codeSystem.getValueSet();
+//		terminologyClient.
+//		codeSystem.getValueSetElement().get
+		Map<String, String>	maps = terminologyClient.expandVS("loinc-all");
+		System.out.println("Stop");
+	}
+
+	
+	@Override
+	public List<SummaryResourceDTO> getSummaryNameAllResource() {
+		List<SummaryResourceDTO> out = new ArrayList<>();
+		TerminologyClient terminologyClient = getTerminologyClient();
+		List<MetadataResource> metadataResources = terminologyClient.searchAllMRSummaryNames(false);
+		for(MetadataResource metadataResource : metadataResources) {
+			SummaryResourceDTO summaryResource = new SummaryResourceDTO();
+			String id = metadataResource.getIdElement().getIdPartAsLong().toString();
+			summaryResource.setResourceId(id);
+			summaryResource.setStatus(metadataResource.hasStatusElement() ? metadataResource.getStatusElement().asStringValue() : "");
+			summaryResource.setUrl(metadataResource.getUrl());
+			summaryResource.setVersion(metadataResource.getVersion());
+			String oid = "";
+			if(metadataResource instanceof CodeSystem) {
+				CodeSystem codeSystem = (CodeSystem)metadataResource;
+				oid = (codeSystem.getIdentifier()!=null && !codeSystem.getIdentifier().isEmpty()) ? codeSystem.getIdentifier().get(0).getValue() : "";
+				summaryResource.setMetadataType(MetadataResourceTypeEnum.CODE_SYSTEM);
+				summaryResource.setContent(codeSystem.getContent().getDisplay());
+			} else if(metadataResource instanceof ValueSet) {
+				ValueSet valueSet = (ValueSet)metadataResource;
+				oid = valueSet.getIdentifier().get(0).getValue();
+				summaryResource.setMetadataType(MetadataResourceTypeEnum.VALUE_SET);
+			} else if(metadataResource instanceof ConceptMap) {
+				ConceptMap conceptMap = (ConceptMap)metadataResource;
+				oid = conceptMap.getIdentifier().getValue();
+				summaryResource.setMetadataType(MetadataResourceTypeEnum.CONCEPT_MAP);
+			}
+			
+			if(!StringUtility.isNullOrEmpty(oid)) {
+				oid = StringUtility.removeUrnOidFromSystem(oid);
+				summaryResource.setOid(oid);
+			}
+				
+			out.add(summaryResource);
+		}
+		return out;
+	}
 
 }

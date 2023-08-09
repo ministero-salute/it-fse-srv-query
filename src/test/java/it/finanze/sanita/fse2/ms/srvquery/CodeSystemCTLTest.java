@@ -14,10 +14,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.client.RestClientException;
 
 import brave.Tracer;
 import it.finanze.sanita.fse2.ms.srvquery.config.Constants;
@@ -25,7 +31,7 @@ import it.finanze.sanita.fse2.ms.srvquery.controller.impl.CodeSystemCTL;
 import it.finanze.sanita.fse2.ms.srvquery.dto.GetActiveResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.CreateCodeSystemReqDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.CreateCodeSystemResDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetActiveCSResponseDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetActiveResourceResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
@@ -35,7 +41,7 @@ import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
 @ActiveProfiles(Constants.Profile.TEST)
 class CodeSystemCTLTest {
 
-	@Mock
+	@Autowired
     private ITerminologySRV terminologySRV;
 	
 	@Mock
@@ -69,13 +75,13 @@ class CodeSystemCTLTest {
     void testGetActiveResource() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         List<GetActiveResourceDTO> expectedList = new ArrayList<>();
-        GetActiveCSResponseDTO expectedResponse = new GetActiveCSResponseDTO(new LogTraceInfoDTO(null, null), expectedList);
+        GetActiveResourceResponseDTO expectedResponse = new GetActiveResourceResponseDTO(new LogTraceInfoDTO(null, null), expectedList);
 
         // Mock terminologySRV.getSummaryNameActiveResource()
         when(terminologySRV.getSummaryNameActiveResource()).thenReturn(expectedList);
 
         // Perform getActiveResource()
-        GetActiveCSResponseDTO actualResponse = codeSystemController.getActiveResource(request);
+        GetActiveResourceResponseDTO actualResponse = codeSystemController.getActiveResource(request);
 
         assertEquals(expectedResponse.getActiveResources(), actualResponse.getActiveResources());
     }
@@ -97,4 +103,9 @@ class CodeSystemCTLTest {
 
     }
 	
+    @Test
+    void getValuesetFromCSAndExpandTest() {
+    	String loincOID = "urn:oid:2.16.840.1.113883.6.1";
+    	terminologySRV.expand(loincOID);
+    }
 }
