@@ -7,8 +7,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -328,14 +328,19 @@ public class TerminologySRV implements ITerminologySRV {
 	}
 
 	@Override
-	public void expand(String oid) {
+	public void expandValuesetAfterChangeCodeySystem(final String oid) {
 		TerminologyClient terminologyClient = getTerminologyClient();
 		CodeSystem codeSystem = terminologyClient.getCodeSystemById(oid);
-		String valueset = codeSystem.getValueSet();
-//		terminologyClient.
-//		codeSystem.getValueSetElement().get
-		Map<String, String>	maps = terminologyClient.expandVS("loinc-all");
-		System.out.println("Stop");
+		if(codeSystem!=null) {
+			List<ValueSet> valuesets = terminologyClient.getAllVSByCodeSystemUrl(codeSystem.getUrl());
+			for(ValueSet valueset : valuesets) {
+				String valuesetId = valueset.getId();
+				Date lastExpandedDate = terminologyClient.getLastDateExpandVS(valuesetId);
+				if(lastExpandedDate.before(codeSystem.getDate())) {
+					terminologyClient.getInvalidateExpandVS(valuesetId);
+				}
+			}
+		}
 	}
 
 	

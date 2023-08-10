@@ -105,7 +105,7 @@ class CodeSystemCTLTest {
 	
     @Test
     void getValuesetFromCSAndExpandTest() {
-    	String loincOID = "urn:oid:2.16.840.1.113883.6.1";
-    	terminologySRV.expand(loincOID);
+    	String loincOID = "urn:oid:2.16.840.1.113883.5.1";
+    	terminologySRV.expandValuesetAfterChangeCodeySystem(loincOID);
     }
 }

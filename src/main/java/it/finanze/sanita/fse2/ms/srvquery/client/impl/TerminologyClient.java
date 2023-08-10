@@ -53,7 +53,7 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	private IGenericClient tc;
 
 	private String srvURL;
-	
+
 	public TerminologyClient(final String serverURL, final String username, final String pwd) {
 		log.info("Terminology client initialize");
 		tc = FHIRR4Helper.createClient(serverURL, username, pwd);
@@ -91,12 +91,12 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	public List<CodeSystem> searchModifiedCodeSystem(Date start) {
 		return searchModifiedCodeSystem(start, false);
 	}
-	
+
 	public List<CodeSystem> searchModifiedCodeSystem(Date start, boolean summaryMode) {
 		SummaryEnum summaryEnum = summaryMode ? SummaryEnum.TRUE : SummaryEnum.FALSE;  
 		return searchModified(tc, start, CodeSystem.class,summaryEnum);
 	}
-	
+
 	public List<MetadataResource> searchAllMRSummaryNames(boolean searchAllActive){
 		List<MetadataResource> out = new ArrayList<>();
 		out.addAll(searchSummaryNames(CodeSystem.class,searchAllActive));
@@ -104,8 +104,8 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		out.addAll(searchSummaryNames(ConceptMap.class,searchAllActive));
 		return out;
 	}
-	
-	
+
+
 	public List<MetadataResource> searchSummaryNames(Class<? extends MetadataResource> mr, boolean searchAllActive){
 		List<MetadataResource> out = new ArrayList<>();
 
@@ -113,13 +113,13 @@ public class TerminologyClient extends AbstractTerminologyClient {
 				.elementsSubset("content","url", "version", "status","identifier")
 				.returnBundle(Bundle.class)
 				.cacheControl(CacheControlDirective.noCache());
-		
+
 		if(searchAllActive) {
 			query.where(CodeSystem.STATUS.exactly().identifier("active"));
 		}
 
 		Bundle results = query.execute();
-		
+
 		for (Bundle.BundleEntryComponent entry : results.getEntry()) {
 			MetadataResource codeSystem = (MetadataResource) entry.getResource();
 			out.add(codeSystem);
@@ -127,96 +127,95 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		return out;
 
 	}
-	
-	public CodeSystem getCodeSystemVersionByIdAndDate(String id, Date date) {
-        CodeSystem out = null;
-        Bundle resultBundle = tc
-            .search()
-            .forResource(CodeSystem.class)
-            .where(CodeSystem.RES_ID.exactly().code(id))
-            .and(new DateClientParam("_lastUpdated").beforeOrEquals().millis(date))
-            .sort().descending("_lastUpdated")
-            .cacheControl(CacheControlDirective.noCache())
-            .returnBundle(Bundle.class)
-            .execute();
 
-        List<Bundle.BundleEntryComponent> entries = resultBundle.getEntry();
-        if (!entries.isEmpty()) {
-            out = (CodeSystem) entries.get(0).getResource();
-        }
-        return out;
-    }
+	public CodeSystem getCodeSystemVersionByIdAndDate(String id, Date date) {
+		CodeSystem out = null;
+		Bundle resultBundle = tc
+				.search()
+				.forResource(CodeSystem.class)
+				.where(CodeSystem.RES_ID.exactly().code(id))
+				.and(new DateClientParam("_lastUpdated").beforeOrEquals().millis(date))
+				.sort().descending("_lastUpdated")
+				.cacheControl(CacheControlDirective.noCache())
+				.returnBundle(Bundle.class)
+				.execute();
+
+		List<Bundle.BundleEntryComponent> entries = resultBundle.getEntry();
+		if (!entries.isEmpty()) {
+			out = (CodeSystem) entries.get(0).getResource();
+		}
+		return out;
+	}
 
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	//									SVCM: Expand Value Set [ITI-97]
 	///////////////////////////////////////////////////////////////////////////////////////////////
+	/*
+		String uuid = UUID.randomUUID().toString();
+		String codeSystem = "{\"resourceType\":\"CodeSystem\",\"id\":\"example-codesystem" + uuid + "\",\"url\":\"http://localhost:8080/fhir/CodeSystem/example-codesystem" + uuid + "\",\"version\":\"1.0.0\",\"name\":\"Example CodeSystem\",\"status\":\"active\",\"content\":\"complete\",\"concept\":[{\"code\":\"gold\",\"display\":\"Gold\"},{\"code\":\"silver\",\"display\":\"Silver\"},{\"code\":\"bronze\",\"display\":\"Bronze\"}]}";
+		handlePullMetadataResource(codeSystem,false);
+		String valueSetInclude = "{\"resourceType\":\"ValueSet\",\"id\":\"example-valueset" + uuid + "\",\"url\":\"http://localhost:8080/fhir/ValueSet/example-valueset" + uuid + "\",\"version\":\"1.0.0\",\"name\":\"Example ValueSet\",\"status\":\"active\",\"compose\":{\"include\":[{\"system\":\"http://localhost:8080/fhir/CodeSystem/example-codesystem" + uuid + "\"}]}}";
+		handlePullMetadataResource(valueSetInclude,false);
 
-	/*		
-	String uuid = UUID.randomUUID().toString();
-	String codeSystem = "{\"resourceType\":\"CodeSystem\",\"id\":\"example-codesystem" + uuid + "\",\"url\":\"http://localhost:8080/fhir/CodeSystem/example-codesystem" + uuid + "\",\"version\":\"1.0.0\",\"name\":\"Example CodeSystem\",\"status\":\"active\",\"content\":\"complete\",\"concept\":[{\"code\":\"gold\",\"display\":\"Gold\"},{\"code\":\"silver\",\"display\":\"Silver\"},{\"code\":\"bronze\",\"display\":\"Bronze\"}]}";
-	tc.handlePullMetadataResource(codeSystem);
-	String valueSetInclude = "{\"resourceType\":\"ValueSet\",\"id\":\"example-valueset" + uuid + "\",\"url\":\"http://localhost:8080/fhir/ValueSet/example-valueset" + uuid + "\",\"version\":\"1.0.0\",\"name\":\"Example ValueSet\",\"status\":\"active\",\"compose\":{\"include\":[{\"system\":\"http://localhost:8080/fhir/CodeSystem/example-codesystem" + uuid + "\"}]}}";
-	tc.handlePullMetadataResource(valueSetInclude);
-
-	Map<String, String> out = tc.expandVS("54104");
-	for (Entry<String, String> c:out.entrySet()) {
-		System.out.println(c.getKey() + " " + c.getValue());
-	}
+		Map<String, String> out = tc.expandVS("54104");
+		for (Entry<String, String> c:out.entrySet()) {
+			System.out.println(c.getKey() + " " + c.getValue());
+		}
 	 */
 
 	public Map<String, String> expandVS(String id) {
 		Map<String, String> out = new HashMap<>();
 
-        Parameters response = tc
-			.operation()
-			.onInstance("ValueSet/"+id)
-			.named("expand")
-			.withNoParameters(Parameters.class)
-			.execute();  
-        
+		Parameters response = tc
+				.operation()
+				.onInstance("ValueSet/"+id)
+				.named("expand")
+				.withNoParameters(Parameters.class)
+				.execute();  
+
 		ValueSet expandedValueSet = (ValueSet) response.getParameter().get(0).getResource();
 		List<ValueSet.ValueSetExpansionContainsComponent> concepts = expandedValueSet.getExpansion().getContains();
 		for (ValueSet.ValueSetExpansionContainsComponent concept : concepts) {
-		    String code = concept.getCode();
-		    String display = concept.getDisplay();
-		    // Process each concept as needed
-		    out.put(code, display);
+			String code = concept.getCode();
+			String display = concept.getDisplay();
+			// Process each concept as needed
+			out.put(code, display);
 		}		
 		return out;
 	}
-	
+
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	//									SVCM: Lookup Code [ITI-98]
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
-//	tc.handlePullMetadataResource("{\"resourceType\":\"CodeSystem\",\"id\":\"loinc-codes\",\"url\":\"http://loinc.org\",\"version\":\"2.68\",\"name\":\"LOINC Codes\",\"title\":\"LOINC Codes\",\"status\":\"active\",\"content\":\"complete\",\"concept\":[{\"code\":\"LA6751-7\",\"display\":\"Glucose [Moles/volume] in Urine\"}]}");
-//	tc.lookupMetadataResource("http://loinc.org", "LA6751-7");
+	//	tc.handlePullMetadataResource("{\"resourceType\":\"CodeSystem\",\"id\":\"loinc-codes\",\"url\":\"http://loinc.org\",\"version\":\"2.68\",\"name\":\"LOINC Codes\",\"title\":\"LOINC Codes\",\"status\":\"active\",\"content\":\"complete\",\"concept\":[{\"code\":\"LA6751-7\",\"display\":\"Glucose [Moles/volume] in Urine\"}]}");
+	//	tc.lookupMetadataResource("http://loinc.org", "LA6751-7");
 	public Map<String, String> lookupMetadataResource(String url, String code) {
-		
+
 		IBaseParameters params = ParametersUtil.newInstance(tc.getFhirContext());
 		ParametersUtil.addParameterToParametersString(tc.getFhirContext(), params, "code", code);
 		ParametersUtil.addParameterToParametersUri(tc.getFhirContext(), params, "system", url);
 
 
-        // Perform the lookup operation
+		// Perform the lookup operation
 		IBaseParameters output = tc
-                .operation()
-                .onType(CodeSystem.class)
-                .named("$lookup")
-                .withParameters(params)
-                .execute();
+				.operation()
+				.onType(CodeSystem.class)
+				.named("$lookup")
+				.withParameters(params)
+				.execute();
 		Parameters out = (Parameters) output;
-		
-		Map<String, String> hashMap = new HashMap<>();
-        for (ParametersParameterComponent ppc:out.getParameter()) {
-            String name = ppc.getName();
-            String value = ((IPrimitiveType<?>) ppc.getValue()).getValueAsString();
 
-            hashMap.put(name, value);
-        }
-        
-        System.out.println(hashMap);
+		Map<String, String> hashMap = new HashMap<>();
+		for (ParametersParameterComponent ppc:out.getParameter()) {
+			String name = ppc.getName();
+			String value = ((IPrimitiveType<?>) ppc.getValue()).getValueAsString();
+
+			hashMap.put(name, value);
+		}
+
+		System.out.println(hashMap);
 		return hashMap;
 	}
 
@@ -293,7 +292,7 @@ public class TerminologyClient extends AbstractTerminologyClient {
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	//									SVCM: Query Concept Map [ITI-100]
 	///////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	public ConceptMap readCM(String id) {
 		return read(tc, id, ConceptMap.class);
 	}
@@ -353,7 +352,7 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		}
 		return out;
 	}
-	
+
 	public CodeDTO translate(String system, String code, MetadataResource source, MetadataResource target) {
 
 		IBaseParameters params = ParametersUtil.newInstance(tc.getFhirContext());
@@ -384,7 +383,7 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		}
 		return out;
 	}
-	
+
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	//											CUSTOM: INSERT
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -415,7 +414,7 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		if (tmpUrl==null || tmpUrl.isEmpty()) {
 			tmpUrl = srvURL + "/ConceptMap/" + UUID.randomUUID().toString();
 		}
-		
+
 		conceptMap.setUrl(tmpUrl);
 
 		String systemSource = mrSource.getId().split("/_history")[0];
@@ -433,11 +432,11 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		for (Entry<String, String> entry:sourceToTargetCodes.entrySet()) {
 			group.addElement().setCode(entry.getKey()).addTarget().setCode(entry.getValue());		
 		}
-		
+
 		// set other relevant details
 		conceptMap.setStatus(PublicationStatus.ACTIVE);
 		conceptMap.setDate(new Date());
-		
+
 		conceptMap.setName(name);
 		conceptMap.setDate(new Date());
 
@@ -447,57 +446,57 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		String out = ((ConceptMap)resources.get(0)).getId();
 		return out.split("/_history")[0];
 	}
-	
+
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	//											CUSTOM: UPDATE
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	public void updateCS(CodeSystem cs) {
-	    tc.update().resource(cs).execute();
+		tc.update().resource(cs).execute();
 	}
-	
+
 	public void updateCS(CodeSystem cs, List<CodeDTO> append) {
-	    for (CodeDTO code : append) {
-	        if (!isConceptAlreadyExists(cs, code.getCode())) {
-	            ConceptDefinitionComponent cdc = new ConceptDefinitionComponent();
-	            cdc.setDisplay(code.getDisplay());
-	            cdc.setCode(code.getCode());
-	            cs.getConcept().add(cdc);
-	        }
-	    }
+		for (CodeDTO code : append) {
+			if (!isConceptAlreadyExists(cs, code.getCode())) {
+				ConceptDefinitionComponent cdc = new ConceptDefinitionComponent();
+				cdc.setDisplay(code.getDisplay());
+				cdc.setCode(code.getCode());
+				cs.getConcept().add(cdc);
+			}
+		}
 		updateCS(cs);
 	}
 
 	private boolean isConceptAlreadyExists(CodeSystem cs, String code) {
-	    for (ConceptDefinitionComponent concept : cs.getConcept()) {
-	        if (concept.getCode().equals(code)) {
-	            return true; // Concept with the same code already exists
-	        }
-	    }
-	    return false; // Concept with the same code doesn't exist
+		for (ConceptDefinitionComponent concept : cs.getConcept()) {
+			if (concept.getCode().equals(code)) {
+				return true; // Concept with the same code already exists
+			}
+		}
+		return false; // Concept with the same code doesn't exist
 	}
-	
+
 	public CodeSystem getCodeSystemById(final String id) {
 		return getCodeSystemByIdAndVersion(id, null);
 	}
-	
-	public CodeSystem getCodeSystemByIdAndVersion(final String id, final String version) {
-	    CodeSystem out = null;
-	    
-	    Bundle results = searchForResource(tc, CodeSystem.class, id, version);
- 
-	    // Process the search results
-	    if (results != null && results.hasEntry()) {
-	        // Access the code system resources
-	        for (Bundle.BundleEntryComponent bundleEntry : results.getEntry()) {
-	            if (bundleEntry.getResource() instanceof CodeSystem) {
-	                out = (CodeSystem) bundleEntry.getResource();
-	                break;
-	            }
-	        }
-	    }
 
-	    return out;
+	public CodeSystem getCodeSystemByIdAndVersion(final String id, final String version) {
+		CodeSystem out = null;
+
+		Bundle results = searchForResource(tc, CodeSystem.class, id, version);
+
+		// Process the search results
+		if (results != null && results.hasEntry()) {
+			// Access the code system resources
+			for (Bundle.BundleEntryComponent bundleEntry : results.getEntry()) {
+				if (bundleEntry.getResource() instanceof CodeSystem) {
+					out = (CodeSystem) bundleEntry.getResource();
+					break;
+				}
+			}
+		}
+
+		return out;
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
@@ -553,15 +552,15 @@ public class TerminologyClient extends AbstractTerminologyClient {
 			out = ResultPushEnum.ERROR;
 			log.error("Error while handle pull metadata resource:", ex);
 		}
-		
+
 		if(out == null) {
 			out = ResultPushEnum.ERROR;
 		}
-		
+
 		return out;
 	}
-	
-	
+
+
 	public String transaction(final CodeSystem codeSystem) {
 		if(existMetadataResource(tc, codeSystem)) {
 			String oid = codeSystem.getIdentifier().get(0).getValue();
@@ -575,47 +574,86 @@ public class TerminologyClient extends AbstractTerminologyClient {
 
 	public CodeSystem getContentById(String id) {
 		try {
-			 return tc.read()
-		                .resource(CodeSystem.class)
-		                .withId(id)
-		                .execute();
+			return tc.read()
+					.resource(CodeSystem.class)
+					.withId(id)
+					.execute();
 		} catch(Exception ex) {
 			log.error("Errore while perform searchActive client method:", ex);
 			throw new BusinessException("Errore while perform searchActive client method:", ex);
 		}
 	}
-	
-	
+
+
 	public MetadataResource searchMetadataResourceByIdAndHistory(String baseUrl,Class<? extends MetadataResource> mr, final String id, final String version) {
 		MetadataResource output = null;		
- 
+
 		StringBuilder sb = new StringBuilder(baseUrl + "/"+ mr.getSimpleName() + "/" + id);
 		if(!StringUtility.isNullOrEmpty(version)) {
 			sb.append("/_history/" + version);
 		}
-		
+
 		output = (MetadataResource) tc.search().byUrl(sb.toString()).preferResponseType(MetadataResource.class).execute();
 		return output;
 	}
-	
+
 	public MetadataResource getMetadataResourceByIdAndVersion(final String id, final String version, Class<? extends MetadataResource> mr) {
 		MetadataResource out = null;
-	    
-	    Bundle results = searchForResource(tc, mr, id, version);
- 
-	    // Process the search results
-	    if (results != null && results.hasEntry()) {
-	        // Access the code system resources
-	        for (Bundle.BundleEntryComponent bundleEntry : results.getEntry()) {
-	            if (bundleEntry.getResource() instanceof CodeSystem) {
-	                out = (MetadataResource) bundleEntry.getResource();
-	                break;
-	            }
-	        }
-	    }
 
-	    return out;
+		Bundle results = searchForResource(tc, mr, id, version);
+
+		// Process the search results
+		if (results != null && results.hasEntry()) {
+			// Access the code system resources
+			for (Bundle.BundleEntryComponent bundleEntry : results.getEntry()) {
+				if (bundleEntry.getResource() instanceof CodeSystem) {
+					out = (MetadataResource) bundleEntry.getResource();
+					break;
+				}
+			}
+		}
+
+		return out;
+	}
+
+	public List<ValueSet> getAllVSByCodeSystemUrl(final String url) {
+		List<ValueSet> out = new ArrayList<>();
+
+		Bundle result = tc.search().forResource(ValueSet.class).where(ValueSet.REFERENCE.matches().value(url))
+				.returnBundle(Bundle.class)
+				.cacheControl(CacheControlDirective.noCache()).execute();
+
+		for (Bundle.BundleEntryComponent entry : result.getEntry()) {
+			if(entry.getResource() instanceof ValueSet) {
+				ValueSet codeSystem = (ValueSet) entry.getResource();
+				out.add(codeSystem);	
+			}
+		}
+		return out;
 	}
 
 
+	public Date getLastDateExpandVS(String id) {
+		Parameters response = tc
+				.operation()
+				.onInstance("ValueSet/"+id)
+				.named("expand")
+				.withNoParameters(Parameters.class)
+				.execute();  
+
+		ValueSet expandedValueSet = (ValueSet) response.getParameter().get(0).getResource();
+		return expandedValueSet.getDate();
+	}
+	
+	public void getInvalidateExpandVS(String id) {
+		Parameters response = tc
+				.operation()
+				.onInstance("ValueSet/"+id)
+				.named("invalidate-expansion")
+				.withNoParameters(Parameters.class)
+				.execute();  
+
+		ValueSet invalidatedValueset = (ValueSet) response.getParameter().get(0).getResource();
+		System.out.println("Stop");
+	}
 }

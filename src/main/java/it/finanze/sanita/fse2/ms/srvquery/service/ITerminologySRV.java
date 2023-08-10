@@ -44,7 +44,7 @@ public interface ITerminologySRV {
 	
 	List<ResourceDTO> searchResourceByIdAndVersion(String identifier, String versionFrom, String versionTo, TypeEnum type);
 	
-	void expand(String oid);
-
+	void expandValuesetAfterChangeCodeySystem(String oid);
+	
 	List<SummaryResourceDTO> getSummaryNameAllResource();
 }
