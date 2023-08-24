@@ -11,4 +11,5 @@ public class InvalidateResultDTO {
 	private Boolean status;
 	private String msg;
 	private String id;
+	private String url;
 }

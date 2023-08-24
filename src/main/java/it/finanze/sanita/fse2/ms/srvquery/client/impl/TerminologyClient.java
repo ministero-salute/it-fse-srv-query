@@ -700,8 +700,12 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		String msg = null;
 		String id = null;
 		Boolean status = true;
+		String url = null;
 		try {
-	        if (vs!=null && vs.hasUrl()) {
+	        if (vs!=null) {
+	            if (vs.hasUrl()) {
+	            	url = vs.getUrl();
+	            }
 	        	id = vs.getIdElement().getIdPart();
         		Parameters response = tc
     				.operation()
@@ -718,7 +722,7 @@ public class TerminologyClient extends AbstractTerminologyClient {
 			status = false;
         	msg = "Errore generico: " + e.getMessage();
 		}
-		return new InvalidateResultDTO(status, msg, id);
+		return new InvalidateResultDTO(status, msg, id, url);
 	}
 
 }
