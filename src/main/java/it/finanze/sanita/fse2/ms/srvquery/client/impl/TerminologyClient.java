@@ -24,6 +24,7 @@ import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.MetadataResource;
 import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
@@ -34,9 +35,12 @@ import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.DateClientParam;
 import ca.uhn.fhir.rest.gclient.IQuery;
+import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInput;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.UriClientParam;
 import ca.uhn.fhir.util.ParametersUtil;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.InvalidateResultDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.ValidateCodeResultDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.ResultPushEnum;
 import it.finanze.sanita.fse2.ms.srvquery.enums.SubscriptionEnum;
@@ -656,4 +660,65 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		ValueSet invalidatedValueset = (ValueSet) response.getParameter().get(0).getResource();
 		System.out.println("Stop");
 	}
+	
+	public List<ValueSet> getRelatedVS(CodeSystem codeSystem) {
+		String csURL = null;
+		if (codeSystem!=null) {
+			csURL = codeSystem.getUrl();
+		}
+		List<ValueSet> out = new ArrayList<>();
+		if (csURL!=null) {
+			
+			Bundle bundle = tc.search().forResource(ValueSet.class).where(ValueSet.REFERENCE.matches().value(csURL))
+					.returnBundle(Bundle.class)
+					.cacheControl(CacheControlDirective.noCache()).execute();
+			/*
+			Bundle bundle = tc.search().forResource(ValueSet.class)
+			    .where(new StringClientParam("compose.include.system").matches().value(csURL))
+	            .cacheControl(CacheControlDirective.noCache())
+			    .returnBundle(Bundle.class)
+			    .execute();
+			*/
+			for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+			    if (entry.getResource() instanceof ValueSet) {
+			    	out.add((ValueSet) entry.getResource());
+			    }
+			}
+		}
+		return out;
+	}
+	
+	public List<InvalidateResultDTO> invalidateExpansion(List<ValueSet> vss) {
+		List<InvalidateResultDTO> out = new ArrayList<>();
+		for (ValueSet vs:vss) {
+			out.add(invalidateExpansion(vs));
+		}
+		return out;
+	}
+	
+	private InvalidateResultDTO invalidateExpansion(ValueSet vs) {
+		String msg = null;
+		String id = null;
+		Boolean status = true;
+		try {
+	        if (vs!=null && vs.hasUrl()) {
+	        	id = vs.getIdElement().getIdPart();
+        		Parameters response = tc
+    				.operation()
+    				.onInstance(new IdType("ValueSet", id))
+    				.named("invalidate-expansion")
+    				.withNoParameters(Parameters.class)
+    				.execute();  
+        		msg = response.getParameter("message").toString();
+	        } else {
+	        	status = false;
+	        	msg = "ValueSet non valido";
+	        }
+		} catch (Exception e) {
+			status = false;
+        	msg = "Errore generico: " + e.getMessage();
+		}
+		return new InvalidateResultDTO(status, msg, id);
+	}
+
 }

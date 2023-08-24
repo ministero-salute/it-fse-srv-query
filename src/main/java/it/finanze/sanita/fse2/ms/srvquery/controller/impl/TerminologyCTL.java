@@ -1,6 +1,7 @@
 package it.finanze.sanita.fse2.ms.srvquery.controller.impl;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -10,10 +11,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import it.finanze.sanita.fse2.ms.srvquery.controller.AbstractCTL;
 import it.finanze.sanita.fse2.ms.srvquery.controller.ITerminologyCTL;
+import it.finanze.sanita.fse2.ms.srvquery.dto.InvalidateResultDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.RequestDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.DelDocsResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.GetResponseDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.InvalidateExpansionResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.UploadResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
 import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
@@ -49,6 +52,13 @@ public class TerminologyCTL extends AbstractCTL implements ITerminologyCTL {
 	public DelDocsResDTO deleteTerminology(String idResource, HttpServletRequest request) {
 		terminologySRV.deleteById(idResource);
 		return new DelDocsResDTO(getLogTraceInfo());
+	}
+
+
+	@Override
+	public InvalidateExpansionResponseDTO invalidateExpansion(String oidCS, String versionCS, HttpServletRequest request) {
+		List<InvalidateResultDTO> invInfo = terminologySRV.invalidateExpansion(oidCS, versionCS);
+		return new InvalidateExpansionResponseDTO(getLogTraceInfo(), invInfo);
 	}
 
 }

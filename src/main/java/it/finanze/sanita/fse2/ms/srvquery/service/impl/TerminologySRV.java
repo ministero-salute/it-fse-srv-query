@@ -26,6 +26,7 @@ import it.finanze.sanita.fse2.ms.srvquery.client.impl.TerminologyClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.TerminologyCFG;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.GetActiveResourceDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.InvalidateResultDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.MetadataResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.RequestDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.ResourceDTO;
@@ -382,4 +383,11 @@ public class TerminologySRV implements ITerminologySRV {
 		return out;
 	}
 
+	public List<InvalidateResultDTO> invalidateExpansion(String oidCS, String versionCS) {
+		TerminologyClient tc = getTerminologyClient();
+		CodeSystem codeSystem = tc.getCodeSystemByIdAndVersion(oidCS, versionCS);
+		List<ValueSet> vss = tc.getRelatedVS(codeSystem);
+		return tc.invalidateExpansion(vss);
+	}
+	
 }

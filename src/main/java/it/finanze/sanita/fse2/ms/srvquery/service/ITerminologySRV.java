@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.GetActiveResourceDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.InvalidateResultDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.MetadataResourceDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.RequestDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.ResourceDTO;
@@ -41,10 +42,12 @@ public interface ITerminologySRV {
 	List<GetActiveResourceDTO> getSummaryNameActiveResource();
 	
 	GetResDTO export(String id, FormatEnum format);
-	
+
+	List<InvalidateResultDTO> invalidateExpansion(String oidCS, String versionCS);
 	List<ResourceDTO> searchResourceByIdAndVersion(String identifier, String versionFrom, String versionTo, TypeEnum type);
 	
 	void expandValuesetAfterChangeCodeySystem(String oid);
 	
 	List<SummaryResourceDTO> getSummaryNameAllResource();
+
 }
