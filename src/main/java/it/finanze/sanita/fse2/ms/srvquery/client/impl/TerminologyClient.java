@@ -601,10 +601,10 @@ public class TerminologyClient extends AbstractTerminologyClient {
 		return output;
 	}
 
-	public MetadataResource getMetadataResourceByIdAndVersion(final String id, final String version, Class<? extends MetadataResource> mr) {
+	public MetadataResource getMetadataResourceByOidAndVersion(final String id, final String version, Class<? extends MetadataResource> mr) {
 		MetadataResource out = null;
 
-		Bundle results = searchForResource(tc, mr, id, version);
+		Bundle results = searchForResourceByOID(tc, mr, id, version);
 
 		// Process the search results
 		if (results != null && results.hasEntry()) {

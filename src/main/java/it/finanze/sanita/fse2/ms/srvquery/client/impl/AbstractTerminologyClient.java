@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -156,6 +157,17 @@ public abstract class AbstractTerminologyClient {
 	            .cacheControl(CacheControlDirective.noCache())
 	            .returnBundle(Bundle.class)
 	            .execute();
+	}
+
+	protected Bundle searchForResourceByOID(IGenericClient tc, Class<? extends Resource> resourceClass, String identifier, String version) {
+		return tc
+			.search()
+			.forResource(resourceClass)
+			.where(new TokenClientParam("identifier").exactly().systemAndValues(identifier))
+			.and(new StringClientParam("version").matchesExactly().value(version))
+			.cacheControl(CacheControlDirective.noCache())
+			.returnBundle(Bundle.class)
+			.execute();
 	}
 
 	private boolean isResponseNotEmpty(Bundle response) {

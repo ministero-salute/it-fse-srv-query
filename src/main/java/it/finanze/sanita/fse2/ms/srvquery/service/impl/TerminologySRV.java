@@ -285,7 +285,7 @@ public class TerminologySRV implements ITerminologySRV {
 		}
 		
 		ResourceDTO resourceNew = new ResourceDTO();
-		resourceNew.setMetadataresource(FHIRR4Helper.serializeResource(mrNew, false, true, false));
+		resourceNew.setMetadataresource(FHIRR4Helper.serializeResource(mrNew, false, false, false));
 		resourceNew.setVersion(""+toVersionRetrieved);
 		
 		
@@ -294,7 +294,7 @@ public class TerminologySRV implements ITerminologySRV {
 		}
 		MetadataResource mrOld = terminologyClient.searchMetadataResourceByIdAndHistory(terminologyCFG.getFhirServerUrl(),type.getMetadataResourceClass(), identifier, versionFrom);
 		ResourceDTO resourceOld = new ResourceDTO();
-		resourceOld.setMetadataresource(FHIRR4Helper.serializeResource(mrOld, false, true, false));
+		resourceOld.setMetadataresource(FHIRR4Helper.serializeResource(mrOld, false, false, false));
 		resourceOld.setVersion(versionFrom);
 
 		out.add(resourceOld);
@@ -305,22 +305,22 @@ public class TerminologySRV implements ITerminologySRV {
 	private List<ResourceDTO> searchResourceByIdAndResourceVersion(String identifier, String versionFrom, String versionTo, TypeEnum type){
 		List<ResourceDTO> out = new ArrayList<>();
 		TerminologyClient terminologyClient = getTerminologyClient();
-		MetadataResource mrNew = terminologyClient.getMetadataResourceByIdAndVersion(identifier,versionTo,type.getMetadataResourceClass());
+		MetadataResource mrNew = terminologyClient.getMetadataResourceByOidAndVersion(identifier,versionTo,type.getMetadataResourceClass());
 		if(mrNew==null) {
 			throw new MetadataResourceNotFoundException(String.format("Risorsa con oid %s e version %s non trovata sul server fhir", identifier,versionTo));
 		}
 		
 		
 		ResourceDTO resourceNew = new ResourceDTO();
-		resourceNew.setMetadataresource(FHIRR4Helper.serializeResource(mrNew, false, true, false));
+		resourceNew.setMetadataresource(FHIRR4Helper.serializeResource(mrNew, false, false, false));
 		resourceNew.setVersion(versionTo);
 		
-		MetadataResource mrOld = terminologyClient.getMetadataResourceByIdAndVersion(identifier,versionFrom ,type.getMetadataResourceClass());
+		MetadataResource mrOld = terminologyClient.getMetadataResourceByOidAndVersion(identifier,versionFrom ,type.getMetadataResourceClass());
 		if(mrOld==null) {
 			throw new MetadataResourceNotFoundException(String.format("Risorsa con oid %s e version %s non trovata sul server fhir", identifier,versionFrom));
 		}
 		ResourceDTO resourceOld = new ResourceDTO();
-		resourceOld.setMetadataresource(FHIRR4Helper.serializeResource(mrOld, false, true, false));
+		resourceOld.setMetadataresource(FHIRR4Helper.serializeResource(mrOld, false, false, false));
 		resourceOld.setVersion(versionFrom);
 
 		out.add(resourceOld);
