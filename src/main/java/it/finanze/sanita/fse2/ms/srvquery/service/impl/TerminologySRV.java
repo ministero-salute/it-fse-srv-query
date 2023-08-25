@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -48,6 +49,7 @@ import it.finanze.sanita.fse2.ms.srvquery.exceptions.DiffCheckerFirstVersionExce
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.MetadataResourceNotFoundException;
 import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
+import it.finanze.sanita.fse2.ms.srvquery.utility.MetadataUtility;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 
@@ -201,24 +203,23 @@ public class TerminologySRV implements ITerminologySRV {
 			GetActiveResourceDTO activeResource = new GetActiveResourceDTO();
 			String id = metadataResource.getIdElement().getIdPartAsLong().toString();
 			activeResource.setId(id); 
-			String oid = "";
+			Optional<String> oid = Optional.empty();
 			if(metadataResource instanceof CodeSystem) {
 				CodeSystem codeSystem = (CodeSystem)metadataResource;
-				oid = (codeSystem.getIdentifier()!=null && !codeSystem.getIdentifier().isEmpty()) ? codeSystem.getIdentifier().get(0).getValue() : "";
+				oid = MetadataUtility.hasOID(codeSystem);
 				activeResource.setMetadataType(MetadataResourceTypeEnum.CODE_SYSTEM);
 			} else if(metadataResource instanceof ValueSet) {
 				ValueSet valueSet = (ValueSet)metadataResource;
-				oid = valueSet.getIdentifier().get(0).getValue();
+				oid = MetadataUtility.hasOID(valueSet);
 				activeResource.setMetadataType(MetadataResourceTypeEnum.VALUE_SET);
 			} else if(metadataResource instanceof ConceptMap) {
 				ConceptMap conceptMap = (ConceptMap)metadataResource;
-				oid = conceptMap.getIdentifier().getValue();
+				oid = MetadataUtility.hasOID(conceptMap);
 				activeResource.setMetadataType(MetadataResourceTypeEnum.CONCEPT_MAP);
 			}
 			
-			if(!StringUtility.isNullOrEmpty(oid)) {
-				oid = StringUtility.removeUrnOidFromSystem(oid);
-				activeResource.setOid(oid);
+			if(oid.isPresent()) {
+				activeResource.setOid(StringUtility.removeUrnOidFromSystem(oid.get()));
 			}
 				
 			out.add(activeResource);
@@ -357,25 +358,26 @@ public class TerminologySRV implements ITerminologySRV {
 			summaryResource.setStatus(metadataResource.hasStatusElement() ? metadataResource.getStatusElement().asStringValue() : "");
 			summaryResource.setUrl(metadataResource.getUrl());
 			summaryResource.setVersion(metadataResource.getVersion());
-			String oid = "";
+			Optional<String> oid = Optional.empty();
 			if(metadataResource instanceof CodeSystem) {
 				CodeSystem codeSystem = (CodeSystem)metadataResource;
-				oid = (codeSystem.getIdentifier()!=null && !codeSystem.getIdentifier().isEmpty()) ? codeSystem.getIdentifier().get(0).getValue() : "";
+				oid = MetadataUtility.hasOID(codeSystem);
 				summaryResource.setMetadataType(MetadataResourceTypeEnum.CODE_SYSTEM);
-				summaryResource.setContent(codeSystem.getContent().getDisplay());
+				if(codeSystem.getContent() != null) {
+					summaryResource.setContent(codeSystem.getContent().getDisplay());
+				}
 			} else if(metadataResource instanceof ValueSet) {
 				ValueSet valueSet = (ValueSet)metadataResource;
-				oid = valueSet.getIdentifier().get(0).getValue();
+				oid = MetadataUtility.hasOID(valueSet);
 				summaryResource.setMetadataType(MetadataResourceTypeEnum.VALUE_SET);
 			} else if(metadataResource instanceof ConceptMap) {
 				ConceptMap conceptMap = (ConceptMap)metadataResource;
-				oid = conceptMap.getIdentifier().getValue();
+				oid = MetadataUtility.hasOID(conceptMap);
 				summaryResource.setMetadataType(MetadataResourceTypeEnum.CONCEPT_MAP);
 			}
 			
-			if(!StringUtility.isNullOrEmpty(oid)) {
-				oid = StringUtility.removeUrnOidFromSystem(oid);
-				summaryResource.setOid(oid);
+			if(oid.isPresent()) {
+				summaryResource.setOid(StringUtility.removeUrnOidFromSystem(oid.get()));
 			}
 				
 			out.add(summaryResource);
