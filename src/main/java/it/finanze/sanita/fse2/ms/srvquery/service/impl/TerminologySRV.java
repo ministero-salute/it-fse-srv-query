@@ -358,6 +358,8 @@ public class TerminologySRV implements ITerminologySRV {
 			summaryResource.setStatus(metadataResource.hasStatusElement() ? metadataResource.getStatusElement().asStringValue() : "");
 			summaryResource.setUrl(metadataResource.getUrl());
 			summaryResource.setVersion(metadataResource.getVersion());
+			summaryResource.setLastUpdated(metadataResource.getMeta().getLastUpdated());
+			summaryResource.setExportable(isExportable(metadataResource));
 			Optional<String> oid = Optional.empty();
 			if(metadataResource instanceof CodeSystem) {
 				CodeSystem codeSystem = (CodeSystem)metadataResource;
@@ -390,6 +392,12 @@ public class TerminologySRV implements ITerminologySRV {
 		CodeSystem codeSystem = tc.getCodeSystemByIdAndVersion(oidCS, versionCS);
 		List<ValueSet> vss = tc.getRelatedVS(codeSystem);
 		return tc.invalidateExpansion(vss);
+	}
+	
+	public boolean isExportable(MetadataResource resource) {
+		return  resource.getMeta().getSecurity() == null || 
+				resource.getMeta().getSecurity().isEmpty() ||
+				resource.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_NORMAL) != null;
 	}
 	
 }
