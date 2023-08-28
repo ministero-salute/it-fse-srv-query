@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -351,43 +352,9 @@ public class TerminologySRV implements ITerminologySRV {
 	
 	@Override
 	public List<SummaryResourceDTO> getSummaryNameAllResource() {
-		List<SummaryResourceDTO> out = new ArrayList<>();
-		TerminologyClient terminologyClient = getTerminologyClient();
-		List<MetadataResource> metadataResources = terminologyClient.searchAllMRSummaryNames(false);
-		for(MetadataResource metadataResource : metadataResources) {
-			SummaryResourceDTO summaryResource = new SummaryResourceDTO();
-			String id = metadataResource.getIdElement().getIdPartAsLong().toString();
-			summaryResource.setResourceId(id);
-			summaryResource.setStatus(metadataResource.hasStatusElement() ? metadataResource.getStatusElement().asStringValue() : "");
-			summaryResource.setUrl(metadataResource.getUrl());
-			summaryResource.setVersion(metadataResource.getVersion());
-			summaryResource.setLastUpdated(metadataResource.getMeta().getLastUpdated());
-			summaryResource.setExportable(isExportable(metadataResource));
-			Optional<String> oid = Optional.empty();
-			if(metadataResource instanceof CodeSystem) {
-				CodeSystem codeSystem = (CodeSystem)metadataResource;
-				oid = MetadataUtility.hasOID(codeSystem);
-				summaryResource.setMetadataType(MetadataResourceTypeEnum.CODE_SYSTEM);
-				if(codeSystem.getContent() != null) {
-					summaryResource.setContent(codeSystem.getContent().getDisplay());
-				}
-			} else if(metadataResource instanceof ValueSet) {
-				ValueSet valueSet = (ValueSet)metadataResource;
-				oid = MetadataUtility.hasOID(valueSet);
-				summaryResource.setMetadataType(MetadataResourceTypeEnum.VALUE_SET);
-			} else if(metadataResource instanceof ConceptMap) {
-				ConceptMap conceptMap = (ConceptMap)metadataResource;
-				oid = MetadataUtility.hasOID(conceptMap);
-				summaryResource.setMetadataType(MetadataResourceTypeEnum.CONCEPT_MAP);
-			}
-			
-			if(oid.isPresent()) {
-				summaryResource.setOid(StringUtility.removeUrnOidFromSystem(oid.get()));
-			}
-				
-			out.add(summaryResource);
-		}
-		return out;
+		TerminologyClient client = getTerminologyClient();
+		List<MetadataResource> metadataResources = client.searchAllMRSummaryNames(false);
+		return metadataResources.stream().map(SummaryResourceDTO::fromResource).collect(Collectors.toList());
 	}
 
 	public List<InvalidateResultDTO> invalidateExpansion(String oidCS, String versionCS) {
@@ -397,7 +364,7 @@ public class TerminologySRV implements ITerminologySRV {
 		return tc.invalidateExpansion(vss);
 	}
 	
-	public boolean isExportable(MetadataResource resource) {
+	public static boolean isExportable(MetadataResource resource) {
 		return  resource.getMeta().getSecurity() == null || 
 				resource.getMeta().getSecurity().isEmpty() ||
 				resource.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_NORMAL) != null;

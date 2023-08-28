@@ -4,24 +4,35 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.Identifier;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.*;
 
 public class MetadataUtility {
 	
 	private static final String OID_REF = "urn:oid:";
 
-	public static Optional<String> hasOID(CodeSystem res) {
+	public static Optional<String> hasOID(MetadataResource res) {
+		Optional<String> out;
+		if(res instanceof CodeSystem) {
+			out = hasOID((CodeSystem) res);
+		} else if(res instanceof ValueSet) {
+			out = hasOID((ValueSet) res);
+		} else if(res instanceof ConceptMap) {
+			out = hasOID((ConceptMap) res);
+		} else {
+			throw new IllegalArgumentException("Cannot retrieve OID on unknown/unsupported type: " + res.fhirType());
+		}
+		return out;
+	}
+
+	private static Optional<String> hasOID(CodeSystem res) {
 	    return findOID(res.getIdentifier());
 	}
 
-	public static Optional<String> hasOID(ValueSet res) {
+	private static Optional<String> hasOID(ValueSet res) {
 	    return findOID(res.getIdentifier());
 	}
 
-	public static Optional<String> hasOID(ConceptMap res) {
+	private static Optional<String> hasOID(ConceptMap res) {
 	    return findOID(Collections.singletonList(res.getIdentifier()));
 	}
 
