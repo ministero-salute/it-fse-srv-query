@@ -55,6 +55,7 @@ import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.MetadataUtility;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
+import it.finanze.sanita.fse2.ms.srvquery.utility.ValueSetComparator;
 import lombok.extern.slf4j.Slf4j;
 
 /** 
@@ -370,8 +371,8 @@ public class TerminologySRV implements ITerminologySRV {
 				resource.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_NORMAL) != null;
 	}
 	
-	public List<ValueSet> getValueSetWarning() {
-		Set<ValueSet> out = new TreeSet<>();
+	public List<MetadataResource> getValueSetWarning() {
+		Set<ValueSet> out = new TreeSet<>(ValueSetComparator.init());
 		TerminologyClient tc = getTerminologyClient();
 		List<CodeSystem> codesystems = tc.searchAllCodeSystem();
 		for (CodeSystem codeSystem : codesystems) {
@@ -384,7 +385,7 @@ public class TerminologySRV implements ITerminologySRV {
 				}
 			}
 		}
-		return Arrays.asList(out.toArray(new ValueSet[0]));
+		return Arrays.asList(out.toArray(new MetadataResource[0]));
 	}
 	
 }

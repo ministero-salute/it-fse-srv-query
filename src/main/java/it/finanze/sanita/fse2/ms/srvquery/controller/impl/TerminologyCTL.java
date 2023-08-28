@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r4.model.MetadataResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,10 +16,10 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.InvalidateResultDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.RequestDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.DelDocsResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.SummaryResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.GetResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.InvalidateExpansionResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.UploadResponseDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.ValueSetWarningDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
 import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
 
@@ -65,9 +65,8 @@ public class TerminologyCTL extends AbstractCTL implements ITerminologyCTL {
 
 
 	@Override
-	public ValueSetWarningDTO getValueSetWarning() {
-		List<ValueSet> valuesets = terminologySRV.getValueSetWarning();
-		return new ValueSetWarningDTO(getLogTraceInfo(), valuesets);
+	public SummaryResponseDTO getValueSetWarning() {
+		return SummaryResponseDTO.fromResources(getLogTraceInfo(), terminologySRV.getValueSetWarning());
 	}
 
 }

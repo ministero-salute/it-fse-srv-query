@@ -23,11 +23,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import it.finanze.sanita.fse2.ms.srvquery.dto.RequestDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.DelDocsResDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.SummaryResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.GetResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.InvalidateExpansionResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.UploadResponseDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.ValueSetWarningDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
 
 @RequestMapping(path = "/v1/terminology")
@@ -78,9 +78,9 @@ public interface ITerminologyCTL {
  	@Operation(summary = "ValueSet warning", description = "ValueSet espansi prima della modifica dei CodeSystem che li generano.")
  	@ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class)))
  	@ApiResponses(value = {
- 			@ApiResponse(responseCode = "200", description = "Operazione avvenuta con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ValueSetWarningDTO.class))),
+ 			@ApiResponse(responseCode = "200", description = "Operazione avvenuta con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SummaryResponseDTO.class))),
  			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
  			@ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
-    ValueSetWarningDTO getValueSetWarning();
+    SummaryResponseDTO getValueSetWarning();
     
 }
