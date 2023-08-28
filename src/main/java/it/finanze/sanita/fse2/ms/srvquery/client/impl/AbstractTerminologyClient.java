@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -30,6 +29,7 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +52,27 @@ public abstract class AbstractTerminologyClient {
 			Bundle bundle = tc.search().forResource(mr).cacheControl(CacheControlDirective.noCache())
 					.where(CodeSystem.STATUS.exactly().identifier("active")).returnBundle(Bundle.class).execute();
 			for (BundleEntryComponent bec:bundle.getEntry()) {
+				T cs= (T) bec.getResource();
+				out.add(cs);
+			}
+			return out;
+		} catch(Exception ex) {
+			log.error("Errore while perform searchActive client method:", ex);
+			throw new BusinessException("Errore while perform searchActive client method:", ex);
+		}
+	}
+	
+	protected <T> List<T> searchAny(IGenericClient tc, Class<? extends MetadataResource> mr) {
+		List<T> out = new ArrayList<>();
+		try {
+			Bundle bundle = 
+					tc.search()
+					.forResource(mr)
+					.cacheControl(CacheControlDirective.noCache())
+					.summaryMode(SummaryEnum.TRUE)
+					.returnBundle(Bundle.class)
+					.execute();
+			for (BundleEntryComponent bec : bundle.getEntry()) {
 				T cs= (T) bec.getResource();
 				out.add(cs);
 			}

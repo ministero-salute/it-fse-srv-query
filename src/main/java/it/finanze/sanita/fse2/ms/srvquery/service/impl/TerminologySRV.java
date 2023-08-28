@@ -7,9 +7,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -398,6 +401,23 @@ public class TerminologySRV implements ITerminologySRV {
 		return  resource.getMeta().getSecurity() == null || 
 				resource.getMeta().getSecurity().isEmpty() ||
 				resource.getMeta().getSecurity(SECURITY_SYSTEM, SECURITY_CODE_NORMAL) != null;
+	}
+	
+	public List<ValueSet> getValueSetWarning() {
+		Set<ValueSet> out = new TreeSet<>();
+		TerminologyClient tc = getTerminologyClient();
+		List<CodeSystem> codesystems = tc.searchAllCodeSystem();
+		for (CodeSystem codeSystem : codesystems) {
+			Date dateCS = codeSystem.getMeta().getLastUpdated();
+			List<ValueSet> valuesets = tc.getRelatedVS(codeSystem);
+			for (ValueSet valueSet : valuesets) {
+				Date dateVS = valueSet.getMeta().getLastUpdated();
+				if(dateVS.before(dateCS)) {
+					out.add(valueSet);
+				}
+			}
+		}
+		return Arrays.asList(out.toArray(new ValueSet[0]));
 	}
 	
 }

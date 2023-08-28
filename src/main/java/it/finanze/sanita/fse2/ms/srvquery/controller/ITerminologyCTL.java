@@ -27,6 +27,7 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseD
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.GetResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.InvalidateExpansionResponseDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.UploadResponseDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.response.terminology.ValueSetWarningDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
 
 @RequestMapping(path = "/v1/terminology")
@@ -53,7 +54,7 @@ public interface ITerminologyCTL {
  			@ApiResponse(responseCode = "200", description = "Upload avvenuta con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetResponseDTO.class))),
  			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
  			@ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
-     GetResponseDTO getTerminology(@PathVariable String oid,@PathVariable String version,HttpServletRequest request);
+    GetResponseDTO getTerminology(@PathVariable String oid,@PathVariable String version,HttpServletRequest request);
     
     @DeleteMapping(path = "/{idResource}", produces = { MediaType.APPLICATION_JSON_VALUE })
  	@Operation(summary = "Delete avvenuta con successo", description = "Delete avvenuta con successo.")
@@ -73,4 +74,13 @@ public interface ITerminologyCTL {
 			@ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
     InvalidateExpansionResponseDTO invalidateExpansion(@PathVariable String oidCS,@PathVariable String versionCS, HttpServletRequest request);
 
+    @GetMapping(path = "/valueset-warning", produces = { MediaType.APPLICATION_JSON_VALUE })
+ 	@Operation(summary = "ValueSet warning", description = "ValueSet espansi prima della modifica dei CodeSystem che li generano.")
+ 	@ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class)))
+ 	@ApiResponses(value = {
+ 			@ApiResponse(responseCode = "200", description = "Operazione avvenuta con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ValueSetWarningDTO.class))),
+ 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
+ 			@ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
+    ValueSetWarningDTO getValueSetWarning();
+    
 }

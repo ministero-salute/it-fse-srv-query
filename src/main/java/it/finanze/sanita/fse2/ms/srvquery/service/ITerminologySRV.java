@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.web.multipart.MultipartFile;
 
 import it.finanze.sanita.fse2.ms.srvquery.dto.CodeDTO;
@@ -49,5 +50,7 @@ public interface ITerminologySRV {
 	void expandValuesetAfterChangeCodeySystem(String oid);
 	
 	List<SummaryResourceDTO> getSummaryNameAllResource();
+	
+	List<ValueSet> getValueSetWarning();
 
 }
