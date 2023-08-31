@@ -9,7 +9,7 @@
  * 
  * You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
-package it.finanze.sanita.fse2.ms.srvquery;
+package it.finanze.sanita.fse2.ms.srvquery.controller;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,7 +56,7 @@ import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 @ActiveProfiles(Constants.Profile.TEST)
 @AutoConfigureMockMvc
 @DisplayName("Query Controller Unit Test")
-class DocumentControllerTest {
+class DocumentCTLTest {
 
 	static final String IDENTIFIER = "identifier";
 

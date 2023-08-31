@@ -1,4 +1,4 @@
-package it.finanze.sanita.fse2.ms.srvquery;
+package it.finanze.sanita.fse2.ms.srvquery.client;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;

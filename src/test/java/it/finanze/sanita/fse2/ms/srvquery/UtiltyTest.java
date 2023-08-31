@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 
 import org.hl7.fhir.r4.model.Bundle;
@@ -75,4 +76,10 @@ class UtiltyTest {
 		assertTrue(StringUtility.isNullOrEmpty(str));
 		assertFalse(StringUtility.isNullOrEmpty("notEmpty"));
 	}
+
+    @Test
+    void generateRandomBundle() {
+        byte[] bundleLDO = FileUtility.getFileFromInternalResources("Files" + File.separator + "BundleLDO.json");
+        System.out.println(new String(bundleLDO));
+    }
 }
