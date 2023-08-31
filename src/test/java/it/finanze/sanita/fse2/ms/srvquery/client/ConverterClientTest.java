@@ -61,7 +61,7 @@ class ConverterClientTest {
         expectedResponse.setResult("Result");
 
         // Mock restTemplate.postForObject()
-        String url = "mock-converter/v1/metadata-resource/from/" + format.toString() + "/to-fhir-json";
+        String url = "mock-converter/v1/metadata-resource/from/" + format + "/to-fhir-json";
         when(restTemplate.postForObject(eq(url), any(HttpEntity.class), eq(ConversionResponseDTO.class))).thenReturn(expectedResponse);
 
         // Perform callConvertToFhirJson()
@@ -91,7 +91,7 @@ class ConverterClientTest {
         expectedResponse.setResult("Result");
         
         // Mock restTemplate.postForObject()
-        String url = msUrlCFG.getMsConverterHost()+"/v1/metadata-resource/from-fhir-json/to/"+format.toString();
+        String url = msUrlCFG.getMsConverterHost()+"/v1/metadata-resource/from-fhir-json/to/"+ format;
         when(restTemplate.postForObject(eq(url), any(HttpEntity.class), eq(ConversionResponseDTO.class))).thenReturn(expectedResponse);
 
         // Perform callConvertFromFhirJson()

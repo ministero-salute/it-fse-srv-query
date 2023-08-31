@@ -11,20 +11,18 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.service;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
-
-import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import com.google.gson.internal.LinkedTreeMap;
+import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
+import it.finanze.sanita.fse2.ms.srvquery.config.Constants;
+import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
+import it.finanze.sanita.fse2.ms.srvquery.dto.UpdateBodyDTO;
+import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
+import it.finanze.sanita.fse2.ms.srvquery.service.impl.FHIRSRV;
+import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
+import it.finanze.sanita.fse2.ms.srvquery.utility.FileUtility;
+import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -38,20 +36,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.google.gson.internal.LinkedTreeMap;
+import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
-import it.finanze.sanita.fse2.ms.srvquery.config.Constants;
-import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
-import it.finanze.sanita.fse2.ms.srvquery.dto.UpdateBodyDTO;
-import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
-import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
-import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
-import it.finanze.sanita.fse2.ms.srvquery.service.impl.FHIRSRV;
-import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
-import it.finanze.sanita.fse2.ms.srvquery.utility.FileUtility;
-import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(Constants.Profile.TEST)
@@ -60,10 +54,6 @@ class FhirSRVTest {
 
 	@Autowired
 	private IFHIRSRV fhirSRV;
-
-	private Bundle bundle;
-
-	private DocumentReference documentReference;
 
 	@BeforeEach
 	public void setUp() throws Exception {
@@ -81,8 +71,8 @@ class FhirSRVTest {
 		when(fhirClient.delete(any(Bundle.class))).thenReturn(true);
 		when(fhirClient.replace(any(Bundle.class))).thenReturn(true);
 
-		bundle = mockBundle();
-		documentReference = mockDocumentReference();
+		Bundle bundle = mockBundle();
+		DocumentReference documentReference = mockDocumentReference();
 
 		when(fhirClient.getDocument(anyString(), anyString())).thenReturn(bundle);
 		when(fhirClient.getDocumentReferenceBundle(anyString())).thenReturn(documentReference);
@@ -176,7 +166,7 @@ class FhirSRVTest {
 
 		UpdateBodyDTO updateBodyDTO = new UpdateBodyDTO();
 		updateBodyDTO.setAssettoOrganizzativo("Assetto organizzativo");
-		updateBodyDTO.setAttiCliniciRegoleAccesso(Arrays.asList("Atti clinici regole accesso"));
+		updateBodyDTO.setAttiCliniciRegoleAccesso(Collections.singletonList("Atti clinici regole accesso"));
 		updateBodyDTO.setConservazioneANorma("Conservazione a norma");
 		updateBodyDTO.setDataFinePrestazione(new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
 		updateBodyDTO.setDataInizioPrestazione(new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
@@ -204,15 +194,8 @@ class FhirSRVTest {
 		String username = "admin";
 		String pwd = "admin";
 		
-//		String identifier = "urn:oid:2.16.840.1.113883.6.1";
-		String identifier = "loinc";
-		
-		String version = "";
 		IGenericClient tc =  FHIRR4Helper.createClient(serverURL, username, pwd);
-//		getDocument(tc,CodeSystem.class, "954", "1");
-//		getDocument(tc,CodeSystem.class, "954", "2");
-//		 System.out.println("Stop");
-		
+
 		CodeSystem metadata = tc.read().resource(CodeSystem.class).withIdAndVersion("954", "1").execute();
 		System.out.println("METADATA 1" + metadata.getTitle());
 		CodeSystem metadata2 = tc.read().resource(CodeSystem.class).withIdAndVersion("954", "2").execute();
@@ -223,14 +206,5 @@ class FhirSRVTest {
 		CodeSystem metadata4 = tc.read().resource(CodeSystem.class).withIdAndVersion("fratm", null).execute();
 		System.out.println("METADATA 3" +metadata4.getTitle());
 		
-	}
-	
-	public void getDocument(IGenericClient tc,Class mr, final String id, final String version) {
-		try {
-			CodeSystem cs = (CodeSystem)tc.search().byUrl("http://localhost:8080/fhir/CodeSystem/" + id +"/_history/" + version).execute();
-			System.out.println(cs.getTitle());
-		} catch(Exception ex) {
-			throw new BusinessException("Errore while perform getDocument client method:", ex);
-		}
 	}
 }
