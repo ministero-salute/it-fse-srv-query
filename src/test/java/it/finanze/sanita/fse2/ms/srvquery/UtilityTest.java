@@ -38,7 +38,7 @@ import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(Constants.Profile.TEST)
 @AutoConfigureMockMvc
-class UtiltyTest {
+class UtilityTest {
     
     @Test
     void searchParamsTest() {
