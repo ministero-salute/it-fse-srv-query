@@ -61,10 +61,10 @@ class DocumentControllerTest {
 	static final String IDENTIFIER = "identifier";
 
 	@Autowired
-	MockMvc mvc;
+	private MockMvc mvc;
 
 	@MockBean
-	IFHIRSRV fhirSRV;
+	private IFHIRSRV fhirSRV;
 
 	@Test
 	@SuppressWarnings("rawtypes")

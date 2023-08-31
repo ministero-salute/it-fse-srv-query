@@ -11,10 +11,9 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -36,18 +35,17 @@ import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
 @ActiveProfiles(Constants.Profile.TEST)
 class ConverterClientTest {
 
-	@Mock
+	@MockBean
     private MsUrlCFG msUrlCFG;
 	
-    @Mock
+    @MockBean
     private RestTemplate restTemplate;
 
-    @InjectMocks
+    @Autowired
     private ConverterClient converterClient;
 
     @BeforeEach
     void setup() {
-        MockitoAnnotations.openMocks(this);
         when(msUrlCFG.getMsConverterHost()).thenReturn("mock-converter");
     }
 

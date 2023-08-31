@@ -6,17 +6,12 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
-import brave.Tracer;
-import it.finanze.sanita.fse2.ms.srvquery.client.impl.TerminologyClient;
-import it.finanze.sanita.fse2.ms.srvquery.client.impl.TranslatorClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.Constants;
 import it.finanze.sanita.fse2.ms.srvquery.controller.impl.MetadataResourceCTL;
 import it.finanze.sanita.fse2.ms.srvquery.dto.MetadataResourceDTO;
@@ -29,21 +24,10 @@ import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
 @ActiveProfiles(Constants.Profile.TEST)
 class MetadataResourceCTLTest {
 
-	@Mock
-	private Tracer tracer;
-	@Mock
+	@MockBean
     private ITerminologySRV terminologySRV;
-	@Mock
-	private TerminologyClient terminologyClient;
-	@Mock
-	private TranslatorClient translatorClient;
-	@InjectMocks
+	@Autowired
     private MetadataResourceCTL metadataResourceCTL;
-
-    @BeforeEach
-    public void setup() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void testManageMetadataResource() {

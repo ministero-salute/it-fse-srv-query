@@ -13,7 +13,7 @@ import it.finanze.sanita.fse2.ms.srvquery.utility.FileUtility;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(Constants.Profile.TEST)
 @AutoConfigureMockMvc
-public class GeneratorTest {
+class GeneratorTest {
 
 	@Test
 	void generateRandomBundle() {

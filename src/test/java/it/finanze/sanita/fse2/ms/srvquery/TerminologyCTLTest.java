@@ -7,17 +7,14 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 
-import brave.Tracer;
 import it.finanze.sanita.fse2.ms.srvquery.config.Constants;
 import it.finanze.sanita.fse2.ms.srvquery.controller.impl.TerminologyCTL;
 import it.finanze.sanita.fse2.ms.srvquery.dto.RequestDTO;
@@ -30,22 +27,14 @@ import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
 @ActiveProfiles(Constants.Profile.TEST)
 class TerminologyCTLTest {
 
-	@Mock
-    private ITerminologySRV terminologySRV;
-	
-	@Mock
-	private Tracer tracer;
-
-    @InjectMocks
+	@Autowired
     private TerminologyCTL terminologyCTL;
+	
+	@MockBean
+    private ITerminologySRV terminologySRV;
 
-    @Mock
+    @MockBean
     private MockHttpServletRequest request;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void testUploadTerminology() throws IOException {
