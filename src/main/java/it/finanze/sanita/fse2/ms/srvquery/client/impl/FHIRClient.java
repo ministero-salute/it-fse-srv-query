@@ -11,7 +11,10 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.client.impl;
 
+import java.nio.charset.StandardCharsets;
+
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -24,6 +27,8 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
+import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
+import it.finanze.sanita.fse2.ms.srvquery.utility.FileUtility;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 
@@ -166,5 +171,42 @@ public class FHIRClient {
 		return client.search().forResource(DocumentReference.class).cacheControl(CacheControlDirective.noCache())
 						.where(DocumentReference.IDENTIFIER.exactly().identifier(searchParameter)).returnBundle(Bundle.class).execute();
 	}
+
+	public void dataPreparation() {
+		// Purge on server FHIR
+		reset();
+		// Get file from internal resources and create bundle
+		byte[] lab = FileUtility.getFileFromInternalResources("Bundle/LAB_Bundle.json");
+		byte[] rad = FileUtility.getFileFromInternalResources("Bundle/RAD_Bundle.json");
+		byte[] singVacc = FileUtility.getFileFromInternalResources("Bundle/SING_VACC_Bundle.json");
+		byte[] rsa = FileUtility.getFileFromInternalResources("Bundle/RSA_Bundle.json");
+		byte[] ldo = FileUtility.getFileFromInternalResources("Bundle/LDO_Bundle.json");
+		byte[] vps = FileUtility.getFileFromInternalResources("Bundle/VPS_Bundle.json");
+		Bundle labBundle = FHIRUtility.deserializeBundle(new String(lab, StandardCharsets.UTF_8));
+		Bundle radBundle = FHIRUtility.deserializeBundle(new String(rad, StandardCharsets.UTF_8));
+		Bundle singVaccBundle = FHIRUtility.deserializeBundle(new String(singVacc, StandardCharsets.UTF_8));
+		Bundle rsaBundle = FHIRUtility.deserializeBundle(new String(rsa, StandardCharsets.UTF_8));
+		Bundle ldoBundle = FHIRUtility.deserializeBundle(new String(ldo, StandardCharsets.UTF_8));
+		Bundle vpsBundle = FHIRUtility.deserializeBundle(new String(vps, StandardCharsets.UTF_8));
+		// Create bundle on server FHIR
+		create(labBundle);
+		create(radBundle);
+		create(singVaccBundle);
+		create(rsaBundle);
+		create(ldoBundle);
+		create(vpsBundle);
+	}
+	
+	private void reset() {
+        // Inside terminology-server (AppProperties.java):
+        // allow_multiple_delete = true
+        client
+            .operation()
+            .onServer()
+            .named("$expunge")
+            .withParameter(
+                Parameters.class, "expungeEverything", new BooleanType(true)
+            ).execute();
+    }
 
 }

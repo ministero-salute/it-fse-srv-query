@@ -1,0 +1,2884 @@
+{
+  "resourceType": "Bundle",
+  "id": "6a67b6f5-813b-4785-8207-bdea8fb6c43e",
+  "identifier": {
+    "system": "urn:oid:2.16.840.1.113883.2.9.2.120.4.4",
+    "value": "030702.LCNLDE90L47H501Q.20220420112426.Q123E456",
+    "assigner": {
+      "display": "Regione Lazio"
+    }
+  },
+  "type": "transaction",
+  "timestamp": "2023-11-07T10:17:25+01:00",
+  "entry": [
+    {
+      "fullUrl": "https://example/PractitionerRole/256eea2f-9f84-4010-b2e0-12e9b1a0a0e7",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "256eea2f-9f84-4010-b2e0-12e9b1a0a0e7",
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:2.16.840.1.113883.2.9.6.1.54.1",
+                "code": "3",
+                "display": "Specialista"
+              }
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "PractitionerRole"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/0668487f-e35a-44f8-99be-6083bf7bcb2b",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "0668487f-e35a-44f8-99be-6083bf7bcb2b",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "86524-6",
+              "display": "Type of assessment"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "valueString": "[ESITO_ACCERTAMENTO]"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/DocumentReference/73d7e44f-fc4d-4081-84c8-055d1fbf30e2",
+      "resource": {
+        "resourceType": "DocumentReference",
+        "id": "73d7e44f-fc4d-4081-84c8-055d1fbf30e2",
+        "status": "current",
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "author": [
+          {
+            "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+          }
+        ],
+        "custodian": {
+          "reference": "https://example/Organization/2.16.840.1.113883.2.9.4.1.2-PROVAX00X00X000Y"
+        },
+        "content": [
+          {
+            "attachment": {
+              "title": "string"
+            }
+          }
+        ],
+        "context": {
+          "related": [
+            {
+              "reference": "https://example/Composition/15da1dbd-2abf-40b2-a484-23ed19c75688"
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "DocumentReference"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/64ac12f5-0ac8-495d-b473-e049b5493b1c",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "64ac12f5-0ac8-495d-b473-e049b5493b1c",
+        "basedOn": [
+          {
+            "reference": "https://example/ServiceRequest/58a67d7d-b869-4407-997d-2409bdcd0d60"
+          }
+        ],
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "30954-2",
+              "display": "Relevant diagnostic tests/laboratory data"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "effectiveDateTime": "2022-04-21T10:10:10+01:00",
+        "performer": [
+          {
+            "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+          }
+        ],
+        "hasMember": [
+          {
+            "reference": "https://example/Observation/0668487f-e35a-44f8-99be-6083bf7bcb2b"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/668c3194-6343-4edd-8718-0e025aacaf1b",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "668c3194-6343-4edd-8718-0e025aacaf1b",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "29308-4",
+              "display": "Diagnosi"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/5d836ac9-7205-4f68-a555-7ad0a696c497"
+        },
+        "effectiveDateTime": "2022-04-27T10:10:10+01:00",
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-9",
+              "code": "162.3",
+              "display": "Tumore del solco polmonare"
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/Condition/f37d5460-5812-4155-be47-bb23f9985c5d",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "f37d5460-5812-4155-be47-bb23f9985c5d",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "code": "active",
+              "display": "Active"
+            }
+          ],
+          "text": "#[REF_STATO]"
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "code": "confirmed"
+            }
+          ]
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "75326-9",
+                "display": "Problem"
+              }
+            ]
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/sid/icd-9",
+              "code": "153.5",
+              "display": "TUMORI MALIGNI DELL'APPENDICE"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "onsetPeriod": {
+          "start": "2022-04-10T10:10:10+01:00",
+          "end": "2022-04-20T10:10:10+01:00"
+        },
+        "evidence": [
+          {
+            "detail": [
+              {
+                "reference": "https://example/Observation/30641a94-dd6c-4999-99b2-50bc0c6a2027"
+              }
+            ]
+          }
+        ],
+        "note": [
+          {
+            "authorReference": {
+              "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+            },
+            "time": "2022-04-28T20:20:20+01:00",
+            "text": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li><span id=\"ANAMNESI_PATOL_FISIOL\">[DESC_ANAMNESI_PATOLOGICA_FISIOLOGICA]</span></li><li><span id=\"ANAMNESI_FAMILIARE\">[DESC_ANAMNESI_FAMILIARE]</span></li></ul></div>"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "https://example/AllergyIntolerance/2dfe9866-bb51-4716-9a75-24a32ece8eba",
+      "resource": {
+        "resourceType": "AllergyIntolerance",
+        "id": "2dfe9866-bb51-4716-9a75-24a32ece8eba",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+              "code": "active",
+              "display": "Active"
+            }
+          ]
+        },
+        "type": "allergy",
+        "criticality": "unable-to-assess",
+        "patient": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "onsetPeriod": {
+          "start": "2022-04-20T10:10:10+01:00"
+        },
+        "note": [
+          {
+            "authorReference": {
+              "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+            },
+            "time": "2022-04-25T11:11:11+01:00",
+            "text": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p> \n\t\t\t\t\t\t\t\t\tDopo la somministrazione del mezzo di contrasto, il paziente ha \n\t\t\t\t\t\t\t\t\tmanifestato una evidente reazione allergica.\n\t\t\t\t\t\t\t\t</p></div>"
+          },
+          {
+            "text": "#[REF_COMMENTI]"
+          }
+        ],
+        "reaction": [
+          {
+            "substance": {
+              "coding": [
+                {
+                  "system": "urn:oid:2.16.840.1.113883.2.9.77.22.11.2",
+                  "code": "260152009",
+                  "display": "Peli di gatto"
+                }
+              ],
+              "text": "#[REF_AGENT]"
+            },
+            "manifestation": [
+              {
+                "coding": [
+                  {
+                    "system": "http://hl7.org/fhir/sid/icd-9",
+                    "code": "477.2",
+                    "display": "RINITE ALLERGICA DA PELI O FORFORA ANIMALE (GATTO)(CANE)"
+                  }
+                ],
+                "text": "#[REF_REAZ]"
+              }
+            ],
+            "onset": "2022-04-19T10:10:10+01:00"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "AllergyIntolerance"
+      }
+    },
+    {
+      "fullUrl": "https://example/Encounter/5d836ac9-7205-4f68-a555-7ad0a696c497",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "5d836ac9-7205-4f68-a555-7ad0a696c497",
+        "status": "finished",
+        "class": {
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:2.16.840.1.113883.2.9.5.1.4",
+                "code": "dimissione"
+              }
+            ]
+          }
+        ],
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "participant": [
+          {
+            "individual": {
+              "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+            }
+          }
+        ],
+        "period": {
+          "start": "2022-04-27T10:10:10+01:00"
+        },
+        "reasonReference": [
+          {
+            "reference": "https://example/Observation/668c3194-6343-4edd-8718-0e025aacaf1b"
+          }
+        ],
+        "hospitalization": {
+          "dischargeDisposition": {
+            "coding": [
+              {
+                "system": "urn:oid:2.16.840.1.113883.2.9.6.1.54.5",
+                "code": "1",
+                "display": "Dimissione a domicilio"
+              }
+            ]
+          }
+        },
+        "partOf": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Encounter"
+      }
+    },
+    {
+      "fullUrl": "https://example/Organization/2.16.840.1.113883.2.9.4.1.1-120103",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "2.16.840.1.113883.2.9.4.1.1-120103",
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.2.9.4.1.1",
+            "value": "120103",
+            "assigner": {
+              "display": "Ministero della Salute"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization?identifier=120103"
+      }
+    },
+    {
+      "fullUrl": "https://example/PractitionerRole/1cf1d24f-c6ca-4806-bc47-4843ec103218",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "1cf1d24f-c6ca-4806-bc47-4843ec103218",
+        "practitioner": {
+          "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "PractitionerRole"
+      }
+    },
+    {
+      "fullUrl": "https://example/PractitionerRole/87bffa33-2180-45f0-ad83-d7331ced7f58",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "87bffa33-2180-45f0-ad83-d7331ced7f58",
+        "practitioner": {
+          "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "PractitionerRole"
+      }
+    },
+    {
+      "fullUrl": "https://example/Location/2.16.840.1.113883.2.9.4.1.6-120103.XX.49",
+      "resource": {
+        "resourceType": "Location",
+        "id": "2.16.840.1.113883.2.9.4.1.6-120103.XX.49",
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.2.9.4.1.6",
+            "value": "120103.XX.49",
+            "assigner": {
+              "display": "Ministero della Salute"
+            }
+          }
+        ],
+        "name": "Terapia Intensiva",
+        "managingOrganization": {
+          "reference": "https://example/Organization/2.16.840.1.113883.2.9.4.1.2-120103.XX"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Location?identifier=120103.XX.49"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/4150544f-8a89-4d5e-b096-8f884910db3d",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "4150544f-8a89-4d5e-b096-8f884910db3d",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "75328-5",
+              "display": "Prognosi"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "effectiveDateTime": "2022-04-27T17:17:17+01:00",
+        "valueString": "Riservata"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958",
+      "resource": {
+        "resourceType": "Patient",
+        "id": "a1ba855b-614c-451d-b372-43c1e77f4958",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/patient-birthPlace",
+            "valueAddress": {
+              "line": [
+                null
+              ],
+              "_line": [
+                {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-censusTract",
+                      "valueString": "058091"
+                    }
+                  ]
+                }
+              ],
+              "city": "Roma",
+              "district": "RM",
+              "state": "120",
+              "country": "100"
+            }
+          }
+        ],
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.2.9.4.3.2",
+            "value": "RSSMRA22A01A399Z",
+            "assigner": {
+              "display": "MEF"
+            }
+          }
+        ],
+        "name": [
+          {
+            "family": "Esempio",
+            "given": [
+              "Test"
+            ]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "email",
+            "value": "prova.provax@example.com",
+            "use": "home"
+          },
+          {
+            "system": "phone",
+            "value": "3340000000",
+            "use": "mobile"
+          }
+        ],
+        "gender": "male",
+        "birthDate": "1960-06-19",
+        "address": [
+          {
+            "use": "home",
+            "line": [
+              "Via Aurora 12",
+              null
+            ],
+            "_line": [
+              null,
+              {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-censusTract",
+                    "valueString": "058091"
+                  }
+                ]
+              }
+            ],
+            "city": "Roma",
+            "district": "RM",
+            "state": "120",
+            "postalCode": "00187",
+            "country": "100"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Patient?identifier=RSSMRA22A01A399Z"
+      }
+    },
+    {
+      "fullUrl": "https://example/ServiceRequest/58a67d7d-b869-4407-997d-2409bdcd0d60",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "id": "58a67d7d-b869-4407-997d-2409bdcd0d60",
+        "status": "active",
+        "intent": "order",
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "authoredOn": "2022-04-20T10:10:10+01:00",
+        "requester": {
+          "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "ServiceRequest"
+      }
+    },
+    {
+      "fullUrl": "https://example/Composition/15da1dbd-2abf-40b2-a484-23ed19c75688",
+      "resource": {
+        "resourceType": "Composition",
+        "id": "15da1dbd-2abf-40b2-a484-23ed19c75688",
+        "language": "it-IT",
+        "identifier": {
+          "system": "urn:oid:2.16.840.1.113883.2.9.2.120.4.4",
+          "value": "030702.LCNLDE90L47H501Q.20220420112426.Q123E456",
+          "assigner": {
+            "display": "Regione Lazio"
+          }
+        },
+        "status": "final",
+        "type": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "59258-4",
+              "display": "Verbale di Pronto Soccorso"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "date": "2022-04-18T12:30:00+01:00",
+        "author": [
+          {
+            "reference": "https://example/PractitionerRole/f5a98555-3484-4987-8bad-bf78def52cc4"
+          },
+          {
+            "reference": "https://example/PractitionerRole/1cf1d24f-c6ca-4806-bc47-4843ec103218"
+          }
+        ],
+        "title": "VERBALE DI PRONTO SOCCORSO",
+        "confidentiality": "N",
+        "attester": [
+          {
+            "mode": "legal",
+            "time": "2022-01-19T15:46:00+01:00",
+            "party": {
+              "reference": "https://example/PractitionerRole/42ec285e-dca1-415a-b9c1-0c063d7098b3"
+            }
+          }
+        ],
+        "custodian": {
+          "reference": "https://example/Organization/2.16.840.1.113883.2.9.4.1.2-PROVAX00X00X000Y"
+        },
+        "event": [
+          {
+            "code": [
+              {
+                "coding": [
+                  {
+                    "system": "urn:oid:2.16.840.1.113883.2.9.5.1.4",
+                    "code": "DIR",
+                    "display": "Accesso Programmato (PS)"
+                  }
+                ]
+              }
+            ],
+            "period": {
+              "end": "2022-04-07T11:24:26+01:00"
+            },
+            "detail": [
+              {
+                "reference": "https://example/PractitionerRole/9efb971f-6748-43c3-b9f0-7127dee26296"
+              }
+            ]
+          }
+        ],
+        "section": [
+          {
+            "title": "Modalità di Trasporto",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "11459-5",
+                  "display": "Modalità di Trasporto"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table><thead><tr><th>Modalità Trasporto</th><th>Responsabile dell’invio</th></tr></thead><tbody><tr><td>[MODALITÀ_TRASPORTO]</td><td>[RESPONSABILE_INVIO]</td></tr></tbody></table></div>"
+            },
+            "entry": [
+              {
+                "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+              }
+            ]
+          },
+          {
+            "title": "Motivo della visita",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "46239-0",
+                  "display": "Motivo della visita"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li><span id=\"PROBLEMA_PRINCIPALE\">Ipertensione Arteriosa</span></li><li><span id=\"CAUSA_ACCESSO\">[DESC_CAUSA_ACCESSO]</span></li></ul></div>"
+            },
+            "entry": [
+              {
+                "reference": "https://example/Observation/ba4e3bae-cfa5-41e7-865f-c9697c6ff9b7"
+              },
+              {
+                "reference": "https://example/Observation/ae1e1fe1-a6f1-4125-99db-7dba5447843a"
+              }
+            ]
+          },
+          {
+            "title": "Triage",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "54094-8",
+                  "display": "Triage note"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li><span id=\"Codice_Triage\">Rosso</span></li><li><span id=\"Data_Ora_Triage\">30/03/2022 alle 10:10</span></li><li><span id=\"Note_Commenti\">[DESC_NOTE_COMMENTI]</span></li></ul></div>"
+            },
+            "entry": [
+              {
+                "reference": "https://example/Observation/4f5dfbe8-3227-4973-b142-e3433bc67f3e"
+              }
+            ]
+          },
+          {
+            "title": "Inquadramento clinico iniziale",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "78337-3",
+                  "display": "Inquadramento clinico iniziale"
+                }
+              ]
+            },
+            "entry": [
+              {
+                "reference": "https://example/Observation/41979485-87f7-40b2-a50b-42c64b52dbeb"
+              }
+            ],
+            "section": [
+              {
+                "code": {
+                  "coding": [
+                    {
+                      "system": "http://loinc.org",
+                      "code": "11329-0",
+                      "display": "Anamnesi generale"
+                    }
+                  ]
+                },
+                "entry": [
+                  {
+                    "reference": "https://example/Condition/f37d5460-5812-4155-be47-bb23f9985c5d"
+                  },
+                  {
+                    "reference": "https://example/FamilyMemberHistory/d6dbbc32-247a-4f17-bb5b-9c29d7a4e456"
+                  }
+                ]
+              },
+              {
+                "title": "Esame Obiettivo",
+                "code": {
+                  "coding": [
+                    {
+                      "system": "http://loinc.org",
+                      "code": "29545-1",
+                      "display": "Esame Obiettivo"
+                    }
+                  ]
+                },
+                "entry": [
+                  {
+                    "reference": "https://example/Observation/37bb0aa8-e523-4029-b49a-a72fd3fb8350"
+                  }
+                ]
+              },
+              {
+                "title": "Terapia Farmacologica all’Ingresso",
+                "code": {
+                  "coding": [
+                    {
+                      "system": "http://loinc.org",
+                      "code": "42346-7",
+                      "display": "Medications on admission (narrative)"
+                    }
+                  ]
+                },
+                "entry": [
+                  {
+                    "reference": "https://example/MedicationStatement/8bb25654-7e2e-4559-9fa9-be3e6875b138"
+                  }
+                ]
+              },
+              {
+                "title": "Allergie",
+                "code": {
+                  "coding": [
+                    {
+                      "system": "http://loinc.org",
+                      "code": "48765-2",
+                      "display": "Allergie e/o Reazioni Avverse"
+                    }
+                  ]
+                },
+                "entry": [
+                  {
+                    "reference": "https://example/AllergyIntolerance/2dfe9866-bb51-4716-9a75-24a32ece8eba"
+                  }
+                ]
+              },
+              {
+                "title": "Problemi aperti",
+                "code": {
+                  "coding": [
+                    {
+                      "system": "http://loinc.org",
+                      "code": "11450-4",
+                      "display": "Problem list Reported"
+                    }
+                  ]
+                },
+                "entry": [
+                  {
+                    "reference": "https://example/Condition/4d043e19-4296-475c-ab1d-d05506fb8887"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "title": "Fasi dell’episodio di Pronto Soccorso",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "46240-8",
+                  "display": "History of Hospitalizations + Outpatient visits Narrative"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table><thead><tr><th>Dettagli Visita</th><th>Note dimissione - Commento</th></tr></thead><tbody><tr><td>[DETTAGLI_VISITA]</td><td>[NOTE_DIMISSIONE_COMMENTO]</td></tr></tbody></table></div>"
+            },
+            "entry": [
+              {
+                "reference": "https://example/Encounter/1990e8cf-7480-494d-b133-368f67e63761"
+              }
+            ]
+          },
+          {
+            "title": "Decorso Ospedaliero",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8648-8",
+                  "display": "Decorso ospedaliero"
+                }
+              ]
+            },
+            "entry": [
+              {
+                "reference": "https://example/Observation/ac8c7fc9-6f8e-4dd6-a3ee-bde392b15377"
+              }
+            ]
+          },
+          {
+            "title": "Complicanze",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "55109-3",
+                  "display": "Complicazioni"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p> \n\t\t\t\t\t\t\tDopo la somministrazione del mezzo di contrasto, il paziente ha \n\t\t\t\t\t\t\tmanifestato una evidente reazione allergica.\n\t\t\t\t\t\t</p></div>"
+            },
+            "entry": [
+              {
+                "reference": "https://example/Observation/e408a7f3-45c5-429c-8f3f-d7098fc071d1"
+              }
+            ]
+          },
+          {
+            "title": "Interventi Prestazioni Consulenze",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "62387-6",
+                  "display": "Procedure ed Interventi"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table><thead><tr><th>Prestazioni Consulenze Richieste</th><th>Prestazioni Consulenze Eseguite</th></tr></thead><tbody><tr><td>[DESC_PRESTAZIONI_RICHIESTE]</td><td>[DESC_PRESTAZIONI_ESEGUITE]</td></tr></tbody></table></div>"
+            },
+            "entry": [
+              {
+                "reference": "https://example/ServiceRequest/6727e6ca-b57e-440d-8f67-e9bc5ae7e29c"
+              }
+            ]
+          },
+          {
+            "title": "Accertamenti",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "30954-2",
+                  "display": "Relevant diagnostic tests/laboratory data"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>\n\t\t\t\t\t\t\tIn data 07/07 u.s. eseguita valutazione ecocardiografica della \n\t\t\t\t\t\t\tmalattia valvolare aortica attraverso cui è stata data \n\t\t\t\t\t\t\tindicazione a correzione della stenosi valvolare mediante\n\t\t\t\t\t\t\timpianto di protesi valvolare per via percutanea.\n\t\t\t\t\t\t</p></div>"
+            },
+            "entry": [
+              {
+                "reference": "https://example/Observation/64ac12f5-0ac8-495d-b473-e049b5493b1c"
+              }
+            ]
+          },
+          {
+            "title": "Parametri Vitali",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8716-3",
+                  "display": "Parametri Vitali"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table><thead><tr><th>Parametri Vitali</th></tr></thead><tbody><tr><td>[DESC_PARAMETRI_VITALI]</td></tr></tbody></table></div>"
+            },
+            "entry": [
+              {
+                "reference": "https://example/Observation/9ad1b80b-8277-4609-9e90-b24806f3c7ba"
+              }
+            ]
+          },
+          {
+            "title": "Terapia Farmacologica Effettuata in Pronto Soccorso",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "29549-3",
+                  "display": "Medication administered Narrative"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t\t\t\t\tDal 1/7 al 7/7: Losaprex 50 mg 1 cpr ore 8\n\t\t\t\t\t\tDal 1/7 al 7/7: Cardicor 5 mg 1 cpr ore 8 Dal 1/7 al 7/7: Lasix 25 \n\t\t\t\t\t\tmg 2 cpr ore 8\n\t\t\t\t\t\tDal 1/7 al 7/7: Peptazol 40 mg 1 cpr ore 20\n\t\t\t\t\t\tDal 1/7 al 7/7: Arixtra 2.5 mg 1 fl s.c. ore 20\n\t\t\t\t\t\tDal 1/7 al 7/7: Coumadin sec INR (range terapeutico 2-3)\n\t\t\t\t\t</div>"
+            },
+            "entry": [
+              {
+                "reference": "https://example/MedicationAdministration/43fb7c41-f467-432b-93bf-6e0a3d8bc2df"
+              }
+            ]
+          },
+          {
+            "title": "Dimissione",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "28574-2",
+                  "display": "Note di Dimissione"
+                }
+              ]
+            },
+            "text": {
+              "status": "generated",
+              "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table><thead><tr><th>Dimissione</th><th>Prognosi</th><th>Livello di appropriatezza</th><th>Data di decesso</th><th>Richiesta di autopsia</th></tr></thead><tbody><tr><td id=\"REF_1\">[DESC_DIMISSIONE]</td><td id=\"REF_2\">[DESC_PROGNOSI]</td><td id=\"REF_3\">[DESC_LIVELLO_APPROPRIATEZZA]</td><td id=\"REF_4\">[DESC_DATA_DECESSO]</td><td id=\"REF_5\">[DESC_RICHIESTA_AUTOPSIA]</td></tr></tbody></table></div>"
+            },
+            "entry": [
+              {
+                "reference": "https://example/Encounter/5d836ac9-7205-4f68-a555-7ad0a696c497"
+              },
+              {
+                "reference": "https://example/Encounter/4aea5a27-9112-4e32-a756-385dd5f3d481"
+              },
+              {
+                "reference": "https://example/Encounter/7e8f5517-6194-4d86-9ee0-4aa3cbf17fa4"
+              },
+              {
+                "reference": "https://example/Observation/4150544f-8a89-4d5e-b096-8f884910db3d"
+              },
+              {
+                "reference": "https://example/Observation/c93626c8-c26b-4421-ae00-f5073d511a55"
+              }
+            ]
+          },
+          {
+            "title": "Piano di cura",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "18776-5",
+                  "display": "Piano di cura"
+                }
+              ]
+            },
+            "entry": [
+              {
+                "reference": "https://example/CarePlan/bec628f2-bf1f-4b55-bfb4-e0e9608bdc23"
+              }
+            ]
+          },
+          {
+            "title": "Terapia farmacologica alla dimissione",
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "75311-1",
+                  "display": "Terapia farmacologica alla dimissione"
+                }
+              ]
+            },
+            "entry": [
+              {
+                "reference": "https://example/MedicationRequest/e1412c05-37f4-4e98-9a78-bc0dad9b59d8"
+              }
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Composition"
+      }
+    },
+    {
+      "fullUrl": "https://example/Encounter/7e8f5517-6194-4d86-9ee0-4aa3cbf17fa4",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "7e8f5517-6194-4d86-9ee0-4aa3cbf17fa4",
+        "status": "finished",
+        "class": {
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "period": {
+          "start": "2022-04-27T10:10:10+01:00"
+        },
+        "reasonReference": [
+          {
+            "reference": "https://example/Observation/b0949e06-ef12-4e64-8c81-9d9125116688"
+          }
+        ],
+        "location": [
+          {
+            "location": {
+              "reference": "https://example/Location/2.16.840.1.113883.2.9.4.1.1-111"
+            },
+            "period": {
+              "end": "2022-05-06T10:10:10+01:00"
+            }
+          }
+        ],
+        "partOf": {
+          "reference": "https://example/Encounter/5d836ac9-7205-4f68-a555-7ad0a696c497"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Encounter"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/41979485-87f7-40b2-a50b-42c64b52dbeb",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "41979485-87f7-40b2-a50b-42c64b52dbeb",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "78337-3",
+              "display": "Inquadramento clinico iniziale"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "note": [
+          {
+            "authorReference": {
+              "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+            },
+            "time": "2022-04-26T09:09:10+01:00",
+            "text": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table><thead><tr><th>Anamnesi</th><th>Esame Obiettivo</th><th>Terapia farmacologica all’ingresso</th><th>Allergie</th><th>Problemi aperti</th></tr></thead><tbody><tr><td>[DESC_ANAMNESI]</td><td>[DESC_ESAME_OBIETTIBO]</td><td>[DESC_TERAPIA_FARM_INGRESSO]</td><td>[DESC_ALLERGIE]</td><td>[DESC_PROBLEMI_APERTI]</td></tr></tbody></table></div>"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/e408a7f3-45c5-429c-8f3f-d7098fc071d1",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "e408a7f3-45c5-429c-8f3f-d7098fc071d1",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "75326-9",
+              "display": "Problem"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "effectivePeriod": {
+          "start": "2017-01-01T09:00:00+01:00",
+          "end": "2017-01-01T10:30:00+01:00"
+        },
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "97835-3",
+              "display": "Medical complication"
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/ServiceRequest/101a9a93-27f9-4f70-ad91-7b1224cb4217",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "id": "101a9a93-27f9-4f70-ad91-7b1224cb4217",
+        "status": "active",
+        "intent": "order",
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "authoredOn": "2022-04-21T10:10:10+01:00",
+        "requester": {
+          "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "ServiceRequest"
+      }
+    },
+    {
+      "fullUrl": "https://example/Location/2.16.840.1.113883.2.9.4.1.2-111",
+      "resource": {
+        "resourceType": "Location",
+        "id": "2.16.840.1.113883.2.9.4.1.2-111",
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.2.9.4.1.2",
+            "value": "111",
+            "assigner": {
+              "display": "Ministero della Salute"
+            }
+          }
+        ],
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:2.16.840.1.113883.2.9.1.11.1.2.10",
+                "code": "08",
+                "display": "Cardiologia(a)"
+              }
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Location?identifier=111"
+      }
+    },
+    {
+      "fullUrl": "https://example/MedicationStatement/8bb25654-7e2e-4559-9fa9-be3e6875b138",
+      "resource": {
+        "resourceType": "MedicationStatement",
+        "id": "8bb25654-7e2e-4559-9fa9-be3e6875b138",
+        "status": "completed",
+        "medicationCodeableConcept": {
+          "text": "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t\t\t\t\t\t\tLosaprex 50 mg 1 cpr ore 8\n\t\t\t\t\t\t\t\tCardicor 5 mg 1 cpr ore 8\n\t\t\t\t\t\t\t\tLasix 25 mg 2 cpr ore 8\n\t\t\t\t\t\t\t\tPeptazol 40 mg 1 cpr ore 8\n\t\t\t\t\t\t\t\tArixtra 2.5 mg 1 fl s.c. ore 8\n\t\t\t\t\t\t\t\tCoumadin sec INR (range terapeutico 2-3)\n\t\t\t\t\t\t\t</div>"
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "note": [
+          {
+            "authorReference": {
+              "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+            },
+            "time": "2022-04-25T11:11:11+01:00",
+            "text": "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t\t\t\t\t\t\tLosaprex 50 mg 1 cpr ore 8\n\t\t\t\t\t\t\t\tCardicor 5 mg 1 cpr ore 8\n\t\t\t\t\t\t\t\tLasix 25 mg 2 cpr ore 8\n\t\t\t\t\t\t\t\tPeptazol 40 mg 1 cpr ore 8\n\t\t\t\t\t\t\t\tArixtra 2.5 mg 1 fl s.c. ore 8\n\t\t\t\t\t\t\t\tCoumadin sec INR (range terapeutico 2-3)\n\t\t\t\t\t\t\t</div>"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationStatement"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/30641a94-dd6c-4999-99b2-50bc0c6a2027",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "30641a94-dd6c-4999-99b2-50bc0c6a2027",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "89261-2",
+              "display": "Decorso Clinico"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "LA28752-6",
+              "display": "Chronic"
+            }
+          ]
+        },
+        "note": [
+          {
+            "text": "#[REF_CRON]"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/ba4e3bae-cfa5-41e7-865f-c9697c6ff9b7",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "ba4e3bae-cfa5-41e7-865f-c9697c6ff9b7",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "56817-0",
+              "display": "Problema all'accesso"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.2.9.6.1.54.2",
+              "code": "15",
+              "display": "Ipertensione Arteriosa"
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/9ad1b80b-8277-4609-9e90-b24806f3c7ba",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "9ad1b80b-8277-4609-9e90-b24806f3c7ba",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "85353-1",
+              "display": "Vital signs, weight, height, head circumference, oxygen saturation and BMI"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "hasMember": [
+          {
+            "reference": "https://example/Observation/10f495e0-378a-490a-87e2-096005c9a77d"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/37bb0aa8-e523-4029-b49a-a72fd3fb8350",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "37bb0aa8-e523-4029-b49a-a72fd3fb8350",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "29545-1",
+              "display": "Esame Obiettivo"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "note": [
+          {
+            "authorReference": {
+              "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+            },
+            "time": "2022-04-25T11:11:11+01:00",
+            "text": "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t\t\t\t\t\t\tCondizioni generali: paziente vigile, orientato e collaborante.\n\t\t\t\t\t\t\t\tApparato cardiocircolatorio: azione cardiaca ritmica normofrequente, \n\t\t\t\t\t\t\t\ttoni puri e pause libere.\n\t\t\t\t\t\t\t\tSoffi vascolari: assenti.\n\t\t\t\t\t\t\t\tPolsi periferici: palpabili nelle comuni sedi di repere\n\t\t\t\t\t\t\t\tApparato respiratorio: Murmure vescicolare presente su tutto\n\t\t\t\t\t\t\t\tl’ambito, non rumori patologici aggiunti\n\t\t\t\t\t\t\t\tAddome: trattabile alla palpazione superficiale e profonda non \n\t\t\t\t\t\t\t\tdolente nédolorabile; Murphy: negativo. Blumberg: negativo.\n\t\t\t\t\t\t\t\tGiordano: negativo\n\t\t\t\t\t\t\t\tFegato: nei limitiMilza: nei limiti\n\t\t\t\t\t\t\t\tTurgore giugulare: assenteEdemi: assenti\n\t\t\t\t\t\t\t</div>"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/Location/2.16.840.1.113883.2.9.4.1.1-111",
+      "resource": {
+        "resourceType": "Location",
+        "id": "2.16.840.1.113883.2.9.4.1.1-111",
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.2.9.4.1.1",
+            "value": "111",
+            "assigner": {
+              "display": "[NOME_ORGANIZZAZIONE]"
+            }
+          }
+        ],
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:2.16.840.1.113883.2.9.1.11.1.2.11",
+                "code": "3",
+                "display": "Trafesrimento in un altro istituto"
+              }
+            ]
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Location?identifier=111"
+      }
+    },
+    {
+      "fullUrl": "https://example/PractitionerRole/f5a98555-3484-4987-8bad-bf78def52cc4",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "f5a98555-3484-4987-8bad-bf78def52cc4",
+        "practitioner": {
+          "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "PractitionerRole"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/e9252504-50fd-4ea0-859c-8bbd1580a794",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "e9252504-50fd-4ea0-859c-8bbd1580a794",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.2.9.1.11.1.2.13",
+              "code": "1",
+              "display": "in continuità di soccorso"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/4aea5a27-9112-4e32-a756-385dd5f3d481"
+        },
+        "effectiveDateTime": "2022-04-28T10:10:10+01:00",
+        "valueString": "[DETTAGLIO_CAUSA_TRASFERIMENTO]"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/PractitionerRole/9efb971f-6748-43c3-b9f0-7127dee26296",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "9efb971f-6748-43c3-b9f0-7127dee26296",
+        "practitioner": {
+          "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "PractitionerRole"
+      }
+    },
+    {
+      "fullUrl": "https://example/MedicationAdministration/43fb7c41-f467-432b-93bf-6e0a3d8bc2df",
+      "resource": {
+        "resourceType": "MedicationAdministration",
+        "id": "43fb7c41-f467-432b-93bf-6e0a3d8bc2df",
+        "status": "completed",
+        "medicationReference": {
+          "reference": "https://example/Medication/ee8d27be-ce04-4656-bf64-d9b0bce9f445"
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "context": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "effectivePeriod": {
+          "start": "2022-04-21T12:11:22+01:00",
+          "end": "2022-04-26T22:11:22+01:00"
+        },
+        "performer": [
+          {
+            "actor": {
+              "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+            }
+          }
+        ],
+        "request": {
+          "reference": "https://example/MedicationRequest/a476d7f8-f7c3-4827-9258-094614c506cb"
+        },
+        "note": [
+          {
+            "text": "#[REF_MED]"
+          },
+          {
+            "time": "2022-04-02T22:11:22+01:00",
+            "text": "performertime"
+          }
+        ],
+        "dosage": {
+          "site": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ActSite",
+                "code": "LA",
+                "display": "left arm"
+              }
+            ]
+          },
+          "route": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-RouteOfAdministration",
+                "code": "IABDINJ",
+                "display": "Injection, intra-abdominal"
+              }
+            ]
+          },
+          "rateRatio": {
+            "numerator": {
+              "value": 12,
+              "unit": "h"
+            },
+            "denominator": {
+              "value": 1,
+              "unit": "h"
+            }
+          }
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationAdministration"
+      }
+    },
+    {
+      "fullUrl": "https://example/PractitionerRole/b9c08045-ecc4-48d5-88fe-4b6f3611892d",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "b9c08045-ecc4-48d5-88fe-4b6f3611892d",
+        "practitioner": {
+          "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "PractitionerRole"
+      }
+    },
+    {
+      "fullUrl": "https://example/Encounter/1990e8cf-7480-494d-b133-368f67e63761",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "1990e8cf-7480-494d-b133-368f67e63761",
+        "status": "finished",
+        "class": {
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:2.16.840.1.113883.2.9.1.11.1.2.4",
+                "code": "XXX",
+                "display": "[DESC_VISITA]"
+              }
+            ]
+          }
+        ],
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "ADM"
+                  }
+                ]
+              }
+            ],
+            "period": {
+              "start": "2022-04-15T10:10:10+01:00",
+              "end": "2022-04-15T15:15:15+01:00"
+            },
+            "individual": {
+              "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+            }
+          },
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "ATND"
+                  }
+                ]
+              }
+            ],
+            "period": {
+              "start": "2022-04-15T10:10:10+01:00",
+              "end": "2022-04-15T15:15:15+01:00"
+            },
+            "individual": {
+              "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+            }
+          },
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "DIS"
+                  }
+                ]
+              }
+            ],
+            "period": {
+              "start": "2022-04-15T10:10:10+01:00",
+              "end": "2022-04-15T15:15:15+01:00"
+            },
+            "individual": {
+              "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+            }
+          }
+        ],
+        "period": {
+          "start": "2022-04-15T09:09:09+01:00",
+          "end": "2022-04-15T16:00:00+01:00"
+        },
+        "reasonReference": [
+          {
+            "reference": "https://example/Observation/49970098-a5d1-4f7f-a86e-59c9dacba0fb"
+          }
+        ],
+        "location": [
+          {
+            "location": {
+              "reference": "https://example/Location/2.16.840.1.113883.2.9.4.1.2-111"
+            },
+            "period": {
+              "end": "2022-04-15T15:15:15+01:00"
+            }
+          }
+        ],
+        "partOf": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Encounter"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/ac8c7fc9-6f8e-4dd6-a3ee-bde392b15377",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "ac8c7fc9-6f8e-4dd6-a3ee-bde392b15377",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "8648-8",
+              "display": "Decorso ospedaliero"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "note": [
+          {
+            "authorReference": {
+              "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+            },
+            "time": "2022-04-16T10:10:10+01:00",
+            "text": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>\n\t\t\t\t\t\t\tIl paziente giungeva alla nostra attenzione sintomatico per \n\t\t\t\t\t\t\tincidente stradale. \n\t\t\t\t\t\t</p></div>"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "1a956acf-0847-4ca8-9caf-5e302dfb6367",
+        "extension": [
+          {
+            "url": "http://hl7.org/fhir/StructureDefinition/encounter-modeOfArrival",
+            "valueCoding": {
+              "system": "urn:oid:2.16.840.1.113883.2.9.6.1.54.6",
+              "code": "3",
+              "display": "Autonomo (arrivato con mezzi propri)"
+            }
+          }
+        ],
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.2.9.2.120110.4.6",
+            "value": "2011008159",
+            "assigner": {
+              "display": "MEF"
+            }
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "participant": [
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "REF"
+                  }
+                ]
+              }
+            ],
+            "individual": {
+              "reference": "https://example/PractitionerRole/02c57e96-55f3-4eae-961e-2f32f44bde42"
+            }
+          },
+          {
+            "individual": {
+              "reference": "https://example/PractitionerRole/b9c08045-ecc4-48d5-88fe-4b6f3611892d"
+            }
+          },
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "ADM"
+                  }
+                ]
+              }
+            ],
+            "individual": {
+              "reference": "https://example/PractitionerRole/87bffa33-2180-45f0-ad83-d7331ced7f58"
+            }
+          },
+          {
+            "type": [
+              {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/v3-ParticipationType",
+                    "code": "REFB"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "individual": {
+              "reference": "https://example/PractitionerRole/256eea2f-9f84-4010-b2e0-12e9b1a0a0e7"
+            }
+          }
+        ],
+        "period": {
+          "start": "2022-03-30T11:24:26+01:00",
+          "end": "2022-04-18T10:10:10+02:00"
+        },
+        "location": [
+          {
+            "location": {
+              "reference": "https://example/Location/2.16.840.1.113883.2.9.4.1.6-120103.XX.49"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Encounter"
+      }
+    },
+    {
+      "fullUrl": "https://example/ServiceRequest/67c47002-6a9d-4f09-b297-3fdf385926eb",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "id": "67c47002-6a9d-4f09-b297-3fdf385926eb",
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.2.9.4.3.9",
+            "value": "999999",
+            "assigner": {
+              "display": "MEF"
+            }
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "27536-2",
+              "display": "Cardiac rehabilitation treatment plan"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "authoredOn": "2022-04-28T10:10:10+01:00",
+        "requester": {
+          "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "ServiceRequest"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/4f5dfbe8-3227-4973-b142-e3433bc67f3e",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "4f5dfbe8-3227-4973-b142-e3433bc67f3e",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11283-9",
+              "display": "Valutazione Acutezza"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "effectiveDateTime": "2022-03-30T10:10:00+01:00",
+        "performer": [
+          {
+            "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+          }
+        ],
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.2.9.6.1.54.4",
+              "code": "R",
+              "display": "Rosso"
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/b0949e06-ef12-4e64-8c81-9d9125116688",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "b0949e06-ef12-4e64-8c81-9d9125116688",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.2.9.1.11.1.2.13",
+              "code": "3",
+              "display": "Ritorno all’ospedale che ha richiesto consulenza"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/7e8f5517-6194-4d86-9ee0-4aa3cbf17fa4"
+        },
+        "effectiveDateTime": "2022-05-06T10:10:10+01:00",
+        "valueString": "[DETTAGLIO_CAUSA_TRASFERIMENTO]"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/PractitionerRole/02c57e96-55f3-4eae-961e-2f32f44bde42",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "02c57e96-55f3-4eae-961e-2f32f44bde42",
+        "practitioner": {
+          "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "PractitionerRole"
+      }
+    },
+    {
+      "fullUrl": "https://example/PractitionerRole/42ec285e-dca1-415a-b9c1-0c063d7098b3",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "42ec285e-dca1-415a-b9c1-0c063d7098b3",
+        "practitioner": {
+          "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "PractitionerRole"
+      }
+    },
+    {
+      "fullUrl": "https://example/Condition/4d043e19-4296-475c-ab1d-d05506fb8887",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "4d043e19-4296-475c-ab1d-d05506fb8887",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11450-4",
+              "display": "Problem list Reported"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "note": [
+          {
+            "authorReference": {
+              "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+            },
+            "time": "2022-04-26T09:09:10+01:00",
+            "text": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><table><thead><tr><th>Problemi aperti</th></tr></thead><tbody><tr><td>[DESC_PROBLEMI_APERTI]</td></tr></tbody></table></div>"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Condition"
+      }
+    },
+    {
+      "fullUrl": "https://example/Organization/2.16.840.1.113883.2.9.4.1.2-120103.XX",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "2.16.840.1.113883.2.9.4.1.2-120103.XX",
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.2.9.4.1.2",
+            "value": "120103.XX",
+            "assigner": {
+              "display": "Ministero della Salute"
+            }
+          }
+        ],
+        "name": "Ospedale Sant'Eugenio",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "3340000000",
+            "use": "mobile"
+          }
+        ],
+        "partOf": {
+          "reference": "https://example/Organization/2.16.840.1.113883.2.9.4.1.1-120103"
+        }
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization?identifier=120103.XX"
+      }
+    },
+    {
+      "fullUrl": "https://example/MedicationRequest/e1412c05-37f4-4e98-9a78-bc0dad9b59d8",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "e1412c05-37f4-4e98-9a78-bc0dad9b59d8",
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.2.9.4.3.9",
+            "value": "999999",
+            "assigner": {
+              "display": "MEF"
+            }
+          }
+        ],
+        "status": "active",
+        "intent": "order",
+        "medicationReference": {
+          "reference": "https://example/Medication/42be4b27-0913-4fb7-a2dd-3ad526d473ce"
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "authoredOn": "2022-04-26T22:11:22+01:00",
+        "requester": {
+          "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+        },
+        "note": [
+          {
+            "authorReference": {
+              "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+            },
+            "time": "2022-04-28T10:10:10+01:00",
+            "text": "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t\t\t\t\tDal 1/7 al 7/7: Losaprex 50 mg 1 cpr ore 8\n\t\t\t\t\t\tDal 1/7 al 7/7: Cardicor 5 mg 1 cpr ore 8 Dal 1/7 al 7/7: Lasix 25 \n\t\t\t\t\t\tmg 2 cpr ore 8\n\t\t\t\t\t\tDal 1/7 al 7/7: Peptazol 40 mg 1 cpr ore 20\n\t\t\t\t\t\tDal 1/7 al 7/7: Arixtra 2.5 mg 1 fl s.c. ore 20\n\t\t\t\t\t\tDal 1/7 al 7/7: Coumadin sec INR (range terapeutico 2-3)\n\t\t\t\t\t</div>"
+          }
+        ],
+        "dosageInstruction": [
+          {
+            "timing": {
+              "repeat": {
+                "boundsPeriod": {
+                  "start": "2022-04-25T12:11:22+01:00",
+                  "end": "2022-07-07T22:11:22+01:00"
+                }
+              }
+            }
+          },
+          {
+            "timing": {
+              "repeat": {
+                "period": 12,
+                "periodUnit": "h"
+              }
+            }
+          },
+          {
+            "route": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v3-RouteOfAdministration",
+                  "code": "PO",
+                  "display": "Swallow,oral"
+                }
+              ]
+            }
+          },
+          {
+            "site": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v3-ActSite",
+                  "code": "LA",
+                  "display": "Left Arm"
+                }
+              ]
+            }
+          },
+          {
+            "doseAndRate": [
+              {
+                "doseRange": {
+                  "low": {
+                    "value": 5,
+                    "unit": "mg"
+                  },
+                  "high": {
+                    "value": 10,
+                    "unit": "mg"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "doseAndRate": [
+              {
+                "rateRange": {
+                  "low": {
+                    "value": 0.5,
+                    "unit": "mg/h"
+                  },
+                  "high": {
+                    "value": 1,
+                    "unit": "mg/h"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "dispenseRequest": {
+          "quantity": {
+            "value": 5
+          }
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    },
+    {
+      "fullUrl": "https://example/Encounter/4aea5a27-9112-4e32-a756-385dd5f3d481",
+      "resource": {
+        "resourceType": "Encounter",
+        "id": "4aea5a27-9112-4e32-a756-385dd5f3d481",
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.2.9.2.120101.4.6",
+            "value": "999999"
+          }
+        ],
+        "status": "finished",
+        "class": {
+          "code": "AMB",
+          "display": "ambulatory"
+        },
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:2.16.840.1.113883.2.9.1.11.1.2.9",
+                "code": "IMP",
+                "display": "inpatient"
+              }
+            ],
+            "text": "#[REF_1]"
+          }
+        ],
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "period": {
+          "start": "2022-04-01T10:10:10+01:00"
+        },
+        "reasonReference": [
+          {
+            "reference": "https://example/Observation/e9252504-50fd-4ea0-859c-8bbd1580a794"
+          }
+        ],
+        "location": [
+          {
+            "location": {
+              "reference": "https://example/Location/2.16.840.1.113883.2.9.4.1.1-111"
+            },
+            "period": {
+              "end": "2022-04-27T10:10:10+01:00"
+            }
+          }
+        ],
+        "partOf": {
+          "reference": "https://example/Encounter/5d836ac9-7205-4f68-a555-7ad0a696c497"
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Encounter"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/ae1e1fe1-a6f1-4125-99db-7dba5447843a",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "ae1e1fe1-a6f1-4125-99db-7dba5447843a",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "29298-7",
+              "display": "Ragione della visita"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "valueString": "XXX"
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/Medication/42be4b27-0913-4fb7-a2dd-3ad526d473ce",
+      "resource": {
+        "resourceType": "Medication",
+        "id": "42be4b27-0913-4fb7-a2dd-3ad526d473ce",
+        "code": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.2.9.6.1.5",
+              "code": "043348022",
+              "display": "NORVASC*5MG 28 CPR"
+            },
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "C08CA01",
+              "display": "AMLODIPINA"
+            }
+          ],
+          "text": "#[REF_FARMACO]"
+        },
+        "form": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "46992007",
+              "display": "Pill"
+            }
+          ]
+        },
+        "amount": {
+          "numerator": {
+            "value": 50
+          },
+          "denominator": {
+            "value": 1
+          }
+        },
+        "ingredient": [
+          {
+            "itemCodeableConcept": {
+              "coding": [
+                {
+                  "system": "urn:oid:2.16.840.1.113883.2.9.6.1.5",
+                  "code": "043348022",
+                  "display": "NORVASC*5MG 28 CPR"
+                },
+                {
+                  "system": "http://www.whocc.no/atc",
+                  "code": "C08CA01",
+                  "display": "AMLODIPINA"
+                }
+              ],
+              "text": "#[REF_FARMACO]"
+            },
+            "strength": {
+              "numerator": {
+                "value": 2.5
+              },
+              "denominator": {
+                "value": 1
+              }
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Medication"
+      }
+    },
+    {
+      "fullUrl": "https://example/Organization/2.16.840.1.113883.2.9.4.1.2-PROVAX00X00X000Y",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "2.16.840.1.113883.2.9.4.1.2-PROVAX00X00X000Y",
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.2.9.4.1.2",
+            "value": "PROVAX00X00X000Y",
+            "assigner": {
+              "display": "Ministero della Salute"
+            }
+          }
+        ],
+        "name": "XXX",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "3340000000",
+            "use": "mobile"
+          }
+        ],
+        "address": [
+          {
+            "line": [
+              "XXX",
+              null
+            ],
+            "_line": [
+              null,
+              {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-censusTract",
+                    "valueString": "058091"
+                  }
+                ]
+              }
+            ],
+            "city": "Roma",
+            "district": "RM",
+            "state": "120",
+            "country": "100"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Organization?identifier=PROVAX00X00X000Y"
+      }
+    },
+    {
+      "fullUrl": "https://example/ServiceRequest/6727e6ca-b57e-440d-8f67-e9bc5ae7e29c",
+      "resource": {
+        "resourceType": "ServiceRequest",
+        "id": "6727e6ca-b57e-440d-8f67-e9bc5ae7e29c",
+        "status": "completed",
+        "intent": "order",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "76645-1",
+              "display": "Cardiac stress test EKG study"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "occurrenceDateTime": "2022-04-17T17:17:17+01:00",
+        "authoredOn": "2022-04-17T10:10:10+01:00",
+        "requester": {
+          "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+        },
+        "performer": [
+          {
+            "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+          }
+        ],
+        "note": [
+          {
+            "text": "[descrizione elemento,esito consulenza]"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "ServiceRequest"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/49970098-a5d1-4f7f-a86e-59c9dacba0fb",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "49970098-a5d1-4f7f-a86e-59c9dacba0fb",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "48767-8",
+              "display": "Annotation Comment"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "note": [
+          {
+            "authorReference": {
+              "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+            },
+            "time": "2022-04-20T10:10:10+01:00",
+            "text": "#[NOTE]"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/CarePlan/bec628f2-bf1f-4b55-bfb4-e0e9608bdc23",
+      "resource": {
+        "resourceType": "CarePlan",
+        "id": "bec628f2-bf1f-4b55-bfb4-e0e9608bdc23",
+        "status": "active",
+        "intent": "order",
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "activity": [
+          {
+            "reference": {
+              "reference": "https://example/ServiceRequest/67c47002-6a9d-4f09-b297-3fdf385926eb"
+            }
+          }
+        ],
+        "note": [
+          {
+            "authorReference": {
+              "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+            },
+            "time": "2022-04-28T10:10:10+01:00",
+            "text": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li>Norvasc 5 mg 1 cp ore 20</li><li>Cardioaspirina 100 mg 1 cp ore 12</li><li>Lasix 25 mg 1 cp il Lun e Ven ore 8</li><li>Karvea 150 mg 1 cp ore 8</li><li>Dilatrend 6,25 mg 1/2 cp x 2 ore 8-20</li><li>Terapia insulinica come da schema domiciliare</li><li>Fragmin 0,6 ml 1 fl ore 8 fino a INR &gt; 2</li><li>Coumadin sec INR con range 2-3</li></ul></div>"
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "CarePlan"
+      }
+    },
+    {
+      "fullUrl": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y",
+        "identifier": [
+          {
+            "system": "urn:oid:2.16.840.1.113883.2.9.4.3.2",
+            "value": "PROVAX00X00X000Y",
+            "assigner": {
+              "display": "MEF"
+            }
+          }
+        ],
+        "name": [
+          {
+            "family": "Esempio",
+            "given": [
+              "Test"
+            ],
+            "prefix": [
+              "Dott."
+            ]
+          }
+        ],
+        "telecom": [
+          {
+            "system": "email",
+            "value": "prova.provax@example.com",
+            "use": "home"
+          }
+        ],
+        "address": [
+          {
+            "line": [
+              "via Corvetto 3",
+              null
+            ],
+            "_line": [
+              null,
+              {
+                "extension": [
+                  {
+                    "url": "http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-censusTract",
+                    "valueString": "058091"
+                  }
+                ]
+              }
+            ],
+            "city": "Roma",
+            "district": "RM",
+            "state": "120",
+            "postalCode": "00164",
+            "country": "100"
+          }
+        ]
+      },
+      "request": {
+        "method": "PUT",
+        "url": "Practitioner?identifier=PROVAX00X00X000Y"
+      }
+    },
+    {
+      "fullUrl": "https://example/Medication/ee8d27be-ce04-4656-bf64-d9b0bce9f445",
+      "resource": {
+        "resourceType": "Medication",
+        "id": "ee8d27be-ce04-4656-bf64-d9b0bce9f445",
+        "code": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.2.9.6.1.5",
+              "code": "035606033",
+              "display": "ARIXTRA*2,5MG/0,5MLSC 10SIR."
+            },
+            {
+              "system": "http://www.whocc.no/atc",
+              "code": "B01AX05",
+              "display": "FONDAPARINUX"
+            }
+          ],
+          "text": "#[REF_FARMACO]"
+        },
+        "form": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "385219001",
+              "display": "Injection solution"
+            }
+          ]
+        },
+        "amount": {
+          "numerator": {
+            "value": 5
+          },
+          "denominator": {
+            "value": 1
+          }
+        },
+        "ingredient": [
+          {
+            "itemCodeableConcept": {
+              "coding": [
+                {
+                  "system": "urn:oid:2.16.840.1.113883.2.9.6.1.5",
+                  "code": "035606033",
+                  "display": "ARIXTRA*2,5MG/0,5MLSC 10SIR."
+                },
+                {
+                  "system": "http://www.whocc.no/atc",
+                  "code": "B01AX05",
+                  "display": "FONDAPARINUX"
+                }
+              ],
+              "text": "#[REF_FARMACO]"
+            },
+            "strength": {
+              "numerator": {
+                "value": 2.5
+              },
+              "denominator": {
+                "value": 1
+              }
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "Medication"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/c93626c8-c26b-4421-ae00-f5073d511a55",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "c93626c8-c26b-4421-ae00-f5073d511a55",
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11283-9",
+              "display": "Valutazione Acutezza"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "effectiveDateTime": "2022-04-27T17:17:17+01:00",
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.2.9.6.1.54.4",
+              "code": "R",
+              "display": "Rosso - Molto critico"
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/Observation/10f495e0-378a-490a-87e2-096005c9a77d",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "10f495e0-378a-490a-87e2-096005c9a77d",
+        "basedOn": [
+          {
+            "reference": "https://example/ServiceRequest/101a9a93-27f9-4f70-ad91-7b1224cb4217"
+          }
+        ],
+        "status": "final",
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "86678-0",
+              "display": "Weight gain of 5% or more in the last month or gain of 10% or more in last 6 months"
+            }
+          ]
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "issued": "2022-04-21T10:10:10+01:00",
+        "performer": [
+          {
+            "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+          }
+        ],
+        "valueQuantity": {
+          "value": 10,
+          "unit": "kg"
+        },
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation",
+                "code": "B",
+                "display": "Better"
+              }
+            ]
+          }
+        ],
+        "method": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "70962-6",
+              "display": "Body weight Measured"
+            }
+          ]
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "Observation"
+      }
+    },
+    {
+      "fullUrl": "https://example/FamilyMemberHistory/d6dbbc32-247a-4f17-bb5b-9c29d7a4e456",
+      "resource": {
+        "resourceType": "FamilyMemberHistory",
+        "id": "d6dbbc32-247a-4f17-bb5b-9c29d7a4e456",
+        "status": "completed",
+        "patient": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "date": "2022-04-23T10:10:10+01:00",
+        "relationship": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/v3-RoleCode",
+              "code": "MTH",
+              "display": "Mother"
+            }
+          ]
+        },
+        "sex": {
+          "coding": [
+            {
+              "system": "http://hl7.org/fhir/administrative-gender",
+              "code": "female"
+            }
+          ]
+        },
+        "deceasedAge": {
+          "value": 70,
+          "unit": "a",
+          "system": "http://unitsofmeasure.org",
+          "code": "a"
+        },
+        "note": [
+          {
+            "authorReference": {
+              "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+            },
+            "time": "2022-04-28T20:20:20+01:00",
+            "text": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><ul><li><span id=\"ANAMNESI_PATOL_FISIOL\">[DESC_ANAMNESI_PATOLOGICA_FISIOLOGICA]</span></li><li><span id=\"ANAMNESI_FAMILIARE\">[DESC_ANAMNESI_FAMILIARE]</span></li></ul></div>"
+          },
+          {
+            "text": "#[REF_OBS]"
+          }
+        ],
+        "condition": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "52797-8",
+                  "display": "Diagnosi codice ICD"
+                }
+              ]
+            },
+            "outcome": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/sid/icd-9",
+                  "code": "575.6",
+                  "display": "COLESTEROLOSI DELLA COLECISTI"
+                }
+              ]
+            },
+            "onsetAge": {
+              "value": 40,
+              "unit": "a",
+              "system": "http://unitsofmeasure.org",
+              "code": "a"
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "52797-8",
+                  "display": "Diagnosi codice ICD"
+                }
+              ]
+            },
+            "outcome": {
+              "coding": [
+                {
+                  "system": "http://hl7.org/fhir/sid/icd-9",
+                  "code": "575.6",
+                  "display": "COLESTEROLOSI DELLA COLECISTI"
+                }
+              ]
+            },
+            "onsetPeriod": {
+              "start": "2022-04-10T10:10:10+01:00"
+            }
+          }
+        ]
+      },
+      "request": {
+        "method": "POST",
+        "url": "FamilyMemberHistory"
+      }
+    },
+    {
+      "fullUrl": "https://example/MedicationRequest/a476d7f8-f7c3-4827-9258-094614c506cb",
+      "resource": {
+        "resourceType": "MedicationRequest",
+        "id": "a476d7f8-f7c3-4827-9258-094614c506cb",
+        "status": "active",
+        "intent": "order",
+        "medicationCodeableConcept": {
+          "text": "medication"
+        },
+        "subject": {
+          "reference": "https://example/Patient/a1ba855b-614c-451d-b372-43c1e77f4958"
+        },
+        "encounter": {
+          "reference": "https://example/Encounter/1a956acf-0847-4ca8-9caf-5e302dfb6367"
+        },
+        "authoredOn": "2022-03-01T22:11:22+01:00",
+        "requester": {
+          "reference": "https://example/Practitioner/2.16.840.1.113883.2.9.4.3.2-PROVAX00X00X000Y"
+        },
+        "dosageInstruction": [
+          {
+            "doseAndRate": [
+              {
+                "doseRange": {
+                  "low": {
+                    "value": 20,
+                    "unit": "mL"
+                  },
+                  "high": {
+                    "value": 30,
+                    "unit": "mL"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "doseAndRate": [
+              {
+                "doseRange": {
+                  "low": {
+                    "value": 10,
+                    "unit": "mL/h"
+                  },
+                  "high": {
+                    "value": 15,
+                    "unit": "mL/h"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "dispenseRequest": {
+          "quantity": {
+            "value": 5
+          }
+        }
+      },
+      "request": {
+        "method": "POST",
+        "url": "MedicationRequest"
+      }
+    }
+  ]
+}
