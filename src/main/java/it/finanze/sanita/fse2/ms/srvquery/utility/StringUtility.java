@@ -17,8 +17,6 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.regex.Pattern;
-
 import static org.apache.commons.lang3.StringUtils.isWhitespace;
 
 
@@ -27,13 +25,8 @@ import static org.apache.commons.lang3.StringUtils.isWhitespace;
 public final class StringUtility {
 
 	private static final String MASTER_ID_SEPARATOR = "^";
-	/**
-	 * The allowed chars are: [a-zA-Z0-9_.]
-	 * It's expected a string shape as follows: [chars][^][chars]
-	 */
-	private static final Pattern MASTER_ID_PTT = Pattern.compile("^[\\w.]+\\^[\\w.]+$");
 
-	private static ObjectMapper objectMapper = new ObjectMapper();
+	private static final ObjectMapper objectMapper = new ObjectMapper();
 
 	public static <T> T fromJSON(final String json, final Class<T> cls) {
 		return new Gson().fromJson(json, cls);
@@ -66,7 +59,7 @@ public final class StringUtility {
 		// If there is no occurrence returns string as whole
 		if(!id.contains(MASTER_ID_SEPARATOR)) {
 			param = id;
-		} else if(MASTER_ID_PTT.matcher(id).matches()) {
+		} else if(isValidMasterId(id)) {
 			// It's required at least another word after separator
 			// No need to fear IndexOutOfBoundsException
 			param = id.substring(id.indexOf(MASTER_ID_SEPARATOR) + 1);
@@ -109,5 +102,22 @@ public final class StringUtility {
 	    }
 	    return oid;
 	}
+
+	/**
+	* Evaluate an identifier and validate it
+	*
+	* @param id The master identifier
+	* @return {@code true} if the identifier is well-formed
+	*/
+	public static boolean isValidMasterId(String id) {
+		if (isWhitespace(id)) return false;
+		if (!id.contains(MASTER_ID_SEPARATOR)) return true;
+
+		String[] values = id.split("\\"+MASTER_ID_SEPARATOR);
+		if (values.length != 2) return false;
+
+		return !values[0].isEmpty() && !values[1].isEmpty();
+	}
+
 }
 
