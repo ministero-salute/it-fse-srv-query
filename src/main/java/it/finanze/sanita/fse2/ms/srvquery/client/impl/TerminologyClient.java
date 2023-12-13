@@ -103,11 +103,15 @@ public class TerminologyClient extends AbstractTerminologyClient {
 				.elementsSubset("identifier")
 				.returnBundle(Bundle.class)
 				.cacheControl(CacheControlDirective.noCache())
+				.sort().descending("_lastUpdated")
 				.execute();
 
 		for (Bundle.BundleEntryComponent entry : results.getEntry()) {
-			CodeSystem codeSystem = (CodeSystem) entry.getResource();
-			out.add(codeSystem);
+			if(entry!=null) {
+				CodeSystem codeSystem = (CodeSystem) entry.getResource();
+				out.add(codeSystem);	
+			}
+			
 		}
 		return out;
 
