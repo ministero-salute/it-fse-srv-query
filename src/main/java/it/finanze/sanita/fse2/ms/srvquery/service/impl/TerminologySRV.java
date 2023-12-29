@@ -187,6 +187,7 @@ public class TerminologySRV implements ITerminologySRV {
 		List<GetActiveResourceDTO> out = new ArrayList<>();
 		TerminologyClient terminologyClient = getTerminologyClient();
 		List<CodeSystem> codeSystems = terminologyClient.searchSummaryNames();
+		log.info("CodeSystem found:" + codeSystems.size());
 		for(CodeSystem codeSystem : codeSystems) {
 			String id = codeSystem.getIdElement().getIdPartAsLong().toString();
 			if(!codeSystem.getIdentifier().isEmpty()) {

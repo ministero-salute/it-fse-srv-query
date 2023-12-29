@@ -19,8 +19,10 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.response.GetResDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.response.LogTraceInfoDTO;
 import it.finanze.sanita.fse2.ms.srvquery.enums.FormatEnum;
 import it.finanze.sanita.fse2.ms.srvquery.service.ITerminologySRV;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
+@Slf4j
 public class CodeSystemCTL extends AbstractCTL implements ICodeSystemCTL {
 
 	@Autowired
@@ -37,6 +39,7 @@ public class CodeSystemCTL extends AbstractCTL implements ICodeSystemCTL {
 
 	@Override
 	public GetActiveCSResponseDTO getActiveResource(HttpServletRequest request) {
+		log.info("Call get active resource");
 		List<GetActiveResourceDTO> list = terminologySRV.getSummaryNameActiveResource();
 		return new GetActiveCSResponseDTO(getLogTraceInfo(), list);
 	}
