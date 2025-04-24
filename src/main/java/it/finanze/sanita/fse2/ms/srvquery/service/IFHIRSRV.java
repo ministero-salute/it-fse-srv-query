@@ -34,7 +34,7 @@ public interface IFHIRSRV {
      * @param identifier  The masterIdentifier of the document 
      * @return boolean  The result of the delete
      */
-	boolean delete(String identifier);
+	boolean delete(final String masterIdentifier, String region);
     
 	/**
      * Replace a FHIR resource in the FHIR server
@@ -57,7 +57,7 @@ public interface IFHIRSRV {
      * @param masterIdentifier  The master identifier of the document to search 
      * @return boolean  True if the document exists on ElasticSearch 
      */
-    boolean checkExists(String masterIdentifier);
+    boolean checkExists(String masterIdentifier, String region);
 
     
     /**

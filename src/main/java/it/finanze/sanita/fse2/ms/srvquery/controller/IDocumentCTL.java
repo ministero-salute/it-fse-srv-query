@@ -16,8 +16,8 @@ import static it.finanze.sanita.fse2.ms.srvquery.utility.ValidationUtility.DEFAU
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.Size;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Size;
 
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.springframework.http.MediaType;
@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -56,8 +57,7 @@ import it.finanze.sanita.fse2.ms.srvquery.dto.response.error.base.ErrorResponseD
 public interface IDocumentCTL {
 
 	/** 
-	 * Creates a new FHIR Resource on FHIR Server. After creation, sends a message 
-	 * on a Kafka topic, for creation of the Document on MongoDB. 
+	 * Creates a new FHIR Resource on FHIR Server. 
 	 * 
 	 * @param request  The HTTP Servlet Request 
 	 * @param body  The body of the request 
@@ -71,17 +71,19 @@ public interface IDocumentCTL {
             @ApiResponse(responseCode = "200", description = "Creazione risorsa avvenuta con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseDTO.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
-    CreateResponseDTO create(@RequestBody FhirPublicationDTO body,HttpServletRequest request);
+    CreateResponseDTO create(HttpServletRequest request,
+                                @RequestBody FhirPublicationDTO body);
 
     /** 
      * Deletes a document on FHIR Server. 
      * 
      * @param request  The HTTP Servlet Request 
-     * @param identifier  The identifier of the document to be deleted 
+     * @param id  The identifier of the document to be deleted 
+     * @param region  The region associated with the document being deleted. If nothing is valorized operation is executed on the derfault partition. 
 	 * @return ResponseDTO  A DTO representing the response 
      * @throws ResourceNotFoundException  An exception thrown when the resource is not found on MongoDB
      */
-    @DeleteMapping(value = "/delete/{identifier}",  produces = { MediaType.APPLICATION_JSON_VALUE })
+    @DeleteMapping(value = "/delete/{id}",  produces = { MediaType.APPLICATION_JSON_VALUE })
     @Operation(summary = "Delete a FHIR resource", description = "Servizio che consente di cancellare una risorsa FHIR dal Server FHIR.")
     @ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = DeleteResponseDTO.class)))
     @ApiResponses(value = {
@@ -89,7 +91,9 @@ public interface IDocumentCTL {
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "404", description = "Risorsa non trovata", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
-    DeleteResponseDTO delete(@PathVariable @Size(min = DEFAULT_STRING_MIN_SIZE, max = DEFAULT_STRING_MAX_SIZE, message = "resourceId does not match the expected size") String identifier,HttpServletRequest request);
+    DeleteResponseDTO delete(HttpServletRequest request, 
+                                @PathVariable @Size(min = DEFAULT_STRING_MIN_SIZE, max = DEFAULT_STRING_MAX_SIZE, message = "resourceId does not match the expected size") String id,
+                                @RequestParam("region") @Size(min = DEFAULT_STRING_MIN_SIZE, max = DEFAULT_STRING_MAX_SIZE, message = "resourceId does not match the expected size") String region);
 
     /** 
      * Replaces an existing document on FHIR Server (it performs a deletion plus a new creation) 
@@ -105,7 +109,8 @@ public interface IDocumentCTL {
             @ApiResponse(responseCode = "200", description = "Replace Document avvenuta con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ReplaceResponseDTO.class))),
             @ApiResponse(responseCode = "400", description = "Bad request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
-    ReplaceResponseDTO replace(@RequestBody FhirPublicationDTO body,HttpServletRequest request);
+    ReplaceResponseDTO replace(HttpServletRequest request,
+                                @RequestBody FhirPublicationDTO body);
     
     /** 
      * Check if the document exists on the secondary storage (MongoDB). 
@@ -120,10 +125,9 @@ public interface IDocumentCTL {
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceExistResDTO.class))),
 			@ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
 			@ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
-    ResourceExistResDTO exist(@PathVariable(required = true, name = "id") String id, HttpServletRequest request);
-
-    
-    
+    ResourceExistResDTO exist(HttpServletRequest request, 
+                                @PathVariable(required = true, name = "id") String id,
+                                @RequestParam("region") String region);
     
     /** 
      * Updates an existing document on FHIR Server. 
@@ -139,6 +143,7 @@ public interface IDocumentCTL {
             @ApiResponse(responseCode = "200", description = "Aggiornamento metadati completato con successo", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UpdateResponseDTO.class))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))),
             @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) }) 
-    UpdateResponseDTO updateMetadata(@RequestBody FhirPublicationDTO body,HttpServletRequest request);
+    UpdateResponseDTO updateMetadata(HttpServletRequest request,
+                                        @RequestBody FhirPublicationDTO body);
     
 }

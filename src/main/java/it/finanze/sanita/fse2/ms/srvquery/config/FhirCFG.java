@@ -11,9 +11,15 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.narrative2.NullNarrativeGenerator;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
 import lombok.Data;
 
 /** 
@@ -21,7 +27,7 @@ import lombok.Data;
  *
  */
 @Data
-@Component
+@Configuration
 public class FhirCFG {
  
 	/** 
@@ -41,5 +47,18 @@ public class FhirCFG {
 	 */
 	@Value("${fhir-server-pwd}")
 	private String fhirServerPwd;
+	
+    @Bean
+    public FhirContext fhirContext() {
+        FhirContext context = FhirContext.forR4();
+        context.setNarrativeGenerator(new NullNarrativeGenerator());
+        return context;
+    }
 
+    @Bean
+    public IGenericClient fhirGenericClient(@Autowired FhirContext fhirContext) {
+        IGenericClient client = fhirContext.newRestfulGenericClient(fhirServerUrl);
+        client.registerInterceptor(new BasicAuthInterceptor(fhirServerUser, fhirServerPwd));
+        return client;
+    }
 }

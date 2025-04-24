@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.springdoc.core.customizers.OpenApiCustomiser;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,7 +47,7 @@ public class OpenApiCFG {
 	}
 	
 	@Bean
-	public OpenApiCustomiser openApiCustomiser() {
+	public OpenApiCustomizer openApiCustomizer() {
 
 		return openApi -> {
 

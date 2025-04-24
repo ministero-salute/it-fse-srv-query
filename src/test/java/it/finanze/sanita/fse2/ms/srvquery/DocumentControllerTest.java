@@ -60,6 +60,8 @@ class DocumentControllerTest {
 
 	static final String IDENTIFIER = "identifier";
 
+	static final String REGION = "102";
+
 	@Autowired
 	MockMvc mvc;
 
@@ -214,7 +216,7 @@ class DocumentControllerTest {
 	@Test
 	void deleteTest() throws Exception {
 
-		when(fhirSRV.delete(IDENTIFIER)).thenReturn(true);
+		when(fhirSRV.delete(IDENTIFIER, REGION)).thenReturn(true);
 
 		MockHttpServletResponse response = mvc
 				.perform(MockMvcRequestBuilders.delete("/v1/document/delete/" + IDENTIFIER))
@@ -231,7 +233,7 @@ class DocumentControllerTest {
 
 	@Test
 	void errorDeletionTest() throws Exception {
-		when(fhirSRV.delete("mockError")).thenThrow(new BusinessException("Mock error"));
+		when(fhirSRV.delete("mockError", anyString())).thenThrow(new BusinessException("Mock error"));
 		MockHttpServletResponse response = mvc
 				.perform(MockMvcRequestBuilders.delete("/v1/document/delete/" + "mockError"))
 				.andExpect(status().isOk())
@@ -248,7 +250,7 @@ class DocumentControllerTest {
 	@Test
 	void checkExistErrorTest() throws Exception {
 
-		when(fhirSRV.checkExists(anyString())).thenThrow(new BusinessException("Error"));
+		when(fhirSRV.checkExists(anyString(), anyString())).thenThrow(new BusinessException("Error"));
 
 		mvc.perform(MockMvcRequestBuilders.get("/v1/document/check-exist/" + IDENTIFIER))
 				.andExpect(status().isInternalServerError());
@@ -257,7 +259,7 @@ class DocumentControllerTest {
 	@Test
 	void checkExistOkTest() throws Exception {
 
-		when(fhirSRV.checkExists(anyString())).thenReturn(true);
+		when(fhirSRV.checkExists(anyString(), anyString())).thenReturn(true);
 
 		mvc.perform(MockMvcRequestBuilders.get("/v1/document/check-exist/" + IDENTIFIER))
 				.andExpect(status().isOk());

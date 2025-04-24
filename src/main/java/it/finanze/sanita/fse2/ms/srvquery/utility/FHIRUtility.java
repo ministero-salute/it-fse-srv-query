@@ -30,6 +30,8 @@ import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceContextComponent;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentReferenceRelatesToComponent;
 import org.hl7.fhir.r4.model.DocumentReference.DocumentRelationshipType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Organization;
@@ -42,13 +44,17 @@ import com.google.gson.internal.LinkedTreeMap;
 
 import it.finanze.sanita.fse2.ms.srvquery.dto.UpdateBodyDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Component
 public class FHIRUtility {
+
+	private FHIRR4Helper fhirr4Helper;
+
+	public FHIRUtility (@Autowired FHIRR4Helper inFhirr4Helper){
+		fhirr4Helper = inFhirr4Helper;
+	}
 
 	public static final List<Class<?>> IMMUTABLE_RESOURCES = Arrays.asList(
 			Patient.class,
@@ -57,25 +63,25 @@ public class FHIRUtility {
 			Location.class
 			);
 	
-	public static Bundle deserializeBundle(String json) {
-		return FHIRR4Helper.deserializeResource(Bundle.class, json, true);		
+	public Bundle deserializeBundle(String json) {
+		return fhirr4Helper.deserializeResource(Bundle.class, json, true);		
 	}
 
-	public static void prepareForDelete(Bundle bundle, DocumentReference documentReference) {
+	public void prepareForDelete(Bundle bundle, DocumentReference documentReference) {
 		bundle.setType(BundleType.TRANSACTION);
 		bundle.getEntry().add(getBundleEntryComponent(documentReference));
 		bundle.getEntry().removeIf(FHIRUtility::isImmutable);
 		bundle.getEntry().forEach(FHIRUtility::setDeletionRequest);
 	}
 
-	public static void prepareForReplace(Bundle bundle, DocumentReference previousDocumentReference, Bundle previousDocument) {
+	public void prepareForReplace(Bundle bundle, DocumentReference previousDocumentReference, Bundle previousDocument) {
     	setRelatedDocumentReference(bundle, previousDocumentReference);
     	setRelatedComposition(bundle, previousDocument);
     	addResourcesToDelete(bundle, previousDocumentReference, previousDocument);
 	}
 	
 	@SuppressWarnings("unchecked")	
-	public static void prepareForUpdate(DocumentReference documentReference, String jsonString) { 
+	public void prepareForUpdate(DocumentReference documentReference, String jsonString) { 
 		try {
 			LinkedTreeMap<String, Object> objT = StringUtility.fromJSON(jsonString, LinkedTreeMap.class);
 			UpdateBodyDTO obj = StringUtility.fromJSON(StringUtility.toJSON(objT.get("body")), UpdateBodyDTO.class);
@@ -185,7 +191,7 @@ public class FHIRUtility {
 		return related;
 	}
 	
-	private static void addResourcesToDelete(Bundle bundle, DocumentReference previousDocumentReference, Bundle previousDocument) {
+	private void addResourcesToDelete(Bundle bundle, DocumentReference previousDocumentReference, Bundle previousDocument) {
 		prepareForDelete(previousDocument, previousDocumentReference);
 		bundle.getEntry().addAll(previousDocument.getEntry());
 	}

@@ -16,6 +16,7 @@ import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRR4Helper;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FileUtility;
 import org.hl7.fhir.r4.model.Bundle;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -29,6 +30,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles(Constants.Profile.TEST)
 @AutoConfigureMockMvc
 class UtiltyTest {
+
+    @Autowired
+    FHIRR4Helper fhirr4Helper;
     
     @Test
     void searchParamsTest() {
@@ -54,8 +58,8 @@ class UtiltyTest {
 
         byte[] jsonFhir = FileUtility.getFileFromInternalResources("Files/CreationJsonFhir.json");
         String json = new String(jsonFhir, StandardCharsets.UTF_8);
-        Object obj = FHIRR4Helper.deserializeResource(Bundle.class, json, true);
+        Object obj = fhirr4Helper.deserializeResource(Bundle.class, json, true);
 
-        assertDoesNotThrow(() -> FHIRR4Helper.serializeResource((Bundle) obj, true, true, true));
+        assertDoesNotThrow(() -> fhirr4Helper.serializeResource((Bundle) obj, true, true, true));
     }
 }

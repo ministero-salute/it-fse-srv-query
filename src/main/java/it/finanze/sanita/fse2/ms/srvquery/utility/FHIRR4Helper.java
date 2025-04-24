@@ -12,9 +12,10 @@
 package it.finanze.sanita.fse2.ms.srvquery.utility;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.narrative2.NullNarrativeGenerator;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
@@ -23,18 +24,16 @@ import ca.uhn.fhir.rest.client.interceptor.BasicAuthInterceptor;
  * FHIR Helper Class 
  *
  */
+@Component
 public class FHIRR4Helper {
+	
+	private FhirContext context;
 
-	private FHIRR4Helper() {}
-
-	private static FhirContext context;
-
-	static {
-		context = FhirContext.forR4();
-		getContext().setNarrativeGenerator(new NullNarrativeGenerator());
+	public FHIRR4Helper(@Autowired FhirContext inContext){
+		context = inContext;
 	}
 
-	public static String serializeResource(IBaseResource resource, Boolean flagPrettyPrint, Boolean flagSuppressNarratives, Boolean flagSummaryMode) {
+	public String serializeResource(IBaseResource resource, Boolean flagPrettyPrint, Boolean flagSuppressNarratives, Boolean flagSummaryMode) {
 		IParser parser = context.newJsonParser();
 		parser.setPrettyPrint(flagPrettyPrint);
 		parser.setSuppressNarratives(flagSuppressNarratives);
@@ -43,7 +42,7 @@ public class FHIRR4Helper {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> T deserializeResource(Class<? extends IBaseResource> resourceClass, String input, Boolean flagJson) {
+	public <T> T deserializeResource(Class<? extends IBaseResource> resourceClass, String input, Boolean flagJson) {
 		IParser parser = null;
 		if (flagJson!=null && flagJson) {
 			parser = context.newJsonParser();
@@ -54,13 +53,13 @@ public class FHIRR4Helper {
 		return (T) parser.parseResource(resourceClass, input);
 	}
 
-	public static IGenericClient createClient(final String serverURL, final String username, final String pwd) {
+	public IGenericClient createClient(final String serverURL, final String username, final String pwd) {
 		IGenericClient client = context.newRestfulGenericClient(serverURL);
 		client.registerInterceptor(new BasicAuthInterceptor(username, pwd));
 		return client;
 	}
 
-	public static FhirContext getContext() {
+	public FhirContext getContext() {
 		return context;
 	}
 }

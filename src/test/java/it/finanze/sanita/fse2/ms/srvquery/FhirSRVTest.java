@@ -55,10 +55,11 @@ import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 @ActiveProfiles(Constants.Profile.TEST)
 @AutoConfigureMockMvc
 class FhirSRVTest {
+
+	static final String REGION = "102";
     
     @Autowired
     IFHIRSRV fhirSRV;
-
 
     Bundle bundle;
 
@@ -75,17 +76,17 @@ class FhirSRVTest {
 
         // Create a mock of the private client
         FHIRClient fhirClient = Mockito.mock(FHIRClient.class);
-        when(fhirClient.create(any(Bundle.class))).thenReturn(true);
-        when(fhirClient.update(any(DocumentReference.class))).thenReturn(true);
-        when(fhirClient.delete(any(Bundle.class))).thenReturn(true);
-        when(fhirClient.replace(any(Bundle.class))).thenReturn(true);
+        when(fhirClient.create(any(Bundle.class), anyString())).thenReturn(true);
+        when(fhirClient.update(any(DocumentReference.class), anyString() )).thenReturn(true);
+        when(fhirClient.delete(any(Bundle.class), anyString())).thenReturn(true);
+        when(fhirClient.replace(any(Bundle.class), anyString())).thenReturn(true);
 
         bundle = mockBundle();
         documentReference = mockDocumentReference();
 
-        when(fhirClient.getDocument(anyString(), anyString())).thenReturn(bundle);
-        when(fhirClient.getDocumentReferenceBundle(anyString())).thenReturn(documentReference);
-        when(fhirClient.findByMasterIdentifier(anyString())).thenReturn(bundle);
+        when(fhirClient.getDocument(anyString(), anyString(), anyString())).thenReturn(bundle);
+        when(fhirClient.getDocumentReferenceBundle(anyString(), anyString())).thenReturn(documentReference);
+        when(fhirClient.findByMasterIdentifier(anyString(), anyString())).thenReturn(bundle);
 
         fhirSRV = new FHIRSRV();
 
@@ -123,10 +124,10 @@ class FhirSRVTest {
 
     @Test
     void checkExistsTest() {
-        boolean outcome = fhirSRV.checkExists("masterId");
+        boolean outcome = fhirSRV.checkExists("masterId", REGION);
         assertTrue(outcome);
 
-        assertThrows(BusinessException.class, () -> fhirSRV.checkExists(null));
+        assertThrows(BusinessException.class, () -> fhirSRV.checkExists(null, REGION));
     }
 
    
@@ -147,7 +148,7 @@ class FhirSRVTest {
 
     @Test
     void deleteTest() {
-        boolean outcome = fhirSRV.delete("masterId");
+        boolean outcome = fhirSRV.delete("masterId", REGION);
         assertTrue(outcome);
     }
 

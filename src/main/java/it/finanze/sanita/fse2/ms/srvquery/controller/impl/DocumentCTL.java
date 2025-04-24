@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 /** 
  * The document CTL Implementation 
@@ -40,12 +40,10 @@ public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
     
     
     @Override
-    public CreateResponseDTO create(FhirPublicationDTO body,final HttpServletRequest request){
+    public CreateResponseDTO create(HttpServletRequest request, FhirPublicationDTO body){
     	final LogTraceInfoDTO traceInfoDTO = getLogTraceInfo();
     	
-    	log.info(Constants.Logs.START_LOG, Constants.Logs.CREATE,
-    			Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID()
-    			);
+    	log.info(Constants.Logs.START_LOG, Constants.Logs.CREATE, Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID());
     	
     	CreateResponseDTO output = new CreateResponseDTO();
     	try {
@@ -56,46 +54,36 @@ public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
     		output.setMessage(ex.getMessage());
     	}
     	
-    	log.info(Constants.Logs.EXIT_LOG, Constants.Logs.CREATE,
-    			Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID()
-    			);
+    	log.info(Constants.Logs.EXIT_LOG, Constants.Logs.CREATE, Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID());
     	
     	return output;
     }
 
     @Override
-    public DeleteResponseDTO delete(final String identifier,final HttpServletRequest request) {
+    public DeleteResponseDTO delete(HttpServletRequest request, String id, String region) {
     	final LogTraceInfoDTO traceInfoDTO = getLogTraceInfo();
     	
-    	log.info("[START] {}() with arguments {}={}, {}={}", "delete",
-    			Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID(),
-    			"identifier", identifier
-    			);
+    	log.info(Constants.Logs.START_LOG, "delete", Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID(), "identifier", id);
     	
         DeleteResponseDTO output = new DeleteResponseDTO();
         try {
-        	boolean result = fhirSRV.delete(identifier);
+        	boolean result = fhirSRV.delete(id, region);
         	output.setEsito(result);
         } catch(Exception ex) {
         	output.setEsito(false);
     		output.setMessage(ex.getMessage());
         }
         
-        log.info("[EXIT] {}() with arguments {}={}, {}={}", "delete",
-    			Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID(),
-    			"identifier", identifier
-    			);
+        log.info(Constants.Logs.START_LOG, "delete", Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID(), "identifier", id);
         
         return output; 
     }
 
     @Override
-    public ReplaceResponseDTO replace(FhirPublicationDTO body,final HttpServletRequest request) {
+    public ReplaceResponseDTO replace(HttpServletRequest request, FhirPublicationDTO body) {
     	final LogTraceInfoDTO traceInfoDTO = getLogTraceInfo();
     	
-    	log.info(Constants.Logs.START_LOG, "replace",
-    			Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID()
-    			);
+    	log.info(Constants.Logs.START_LOG, "replace", Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID());
     	
     	ReplaceResponseDTO output = new ReplaceResponseDTO();
     	try {
@@ -106,20 +94,16 @@ public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
     		output.setMessage(ex.getMessage());
     	}
     	
-    	log.info(Constants.Logs.EXIT_LOG, "replace",
-    			Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID()
-    			);
+    	log.info(Constants.Logs.EXIT_LOG, "replace", Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID());
 
     	return output;
     }
     
     @Override
-    public UpdateResponseDTO updateMetadata(FhirPublicationDTO body,HttpServletRequest request) {
+    public UpdateResponseDTO updateMetadata(HttpServletRequest request, FhirPublicationDTO body) {
     	final LogTraceInfoDTO traceInfoDTO = getLogTraceInfo();
     	
-    	log.info(Constants.Logs.START_LOG, Constants.Logs.UPDATE,
-    			Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID()
-    			);
+    	log.info(Constants.Logs.START_LOG, Constants.Logs.UPDATE, Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID());
     	
         UpdateResponseDTO output = new UpdateResponseDTO();
     	try {
@@ -130,26 +114,20 @@ public class DocumentCTL extends AbstractCTL implements IDocumentCTL {
     		output.setMessage(ex.getMessage());
     	}
     	
-    	log.info(Constants.Logs.EXIT_LOG, Constants.Logs.UPDATE,
-    			Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID()
-    			);
+    	log.info(Constants.Logs.EXIT_LOG, Constants.Logs.UPDATE, Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID());
 
     	return output;
     }
     
     @Override
-    public ResourceExistResDTO exist(final String id, final HttpServletRequest request) {
+    public ResourceExistResDTO exist(HttpServletRequest request, String id, String region) {
     	final LogTraceInfoDTO traceInfoDTO = getLogTraceInfo();
     	
-    	log.info(Constants.Logs.START_LOG, Constants.Logs.EXIST,
-    			Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID()
-    			);
+    	log.info(Constants.Logs.START_LOG, Constants.Logs.EXIST, Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID());
     	
-        boolean result = fhirSRV.checkExists(id);
+        boolean result = fhirSRV.checkExists(id, region);
         
-        log.info(Constants.Logs.EXIT_LOG, Constants.Logs.EXIST,
-    			Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID()
-    			);
+        log.info(Constants.Logs.EXIT_LOG, Constants.Logs.EXIST, Constants.Logs.TRACE_ID, traceInfoDTO.getTraceID());
         
         return new ResourceExistResDTO(getLogTraceInfo(), result);
     }
