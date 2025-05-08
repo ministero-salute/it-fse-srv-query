@@ -11,7 +11,6 @@
  */
 package it.finanze.sanita.fse2.ms.srvquery.dto.request;
 
-
 import static it.finanze.sanita.fse2.ms.srvquery.utility.ValidationUtility.DEFAULT_STRING_MAX_SIZE;
 import static it.finanze.sanita.fse2.ms.srvquery.utility.ValidationUtility.DEFAULT_STRING_MIN_SIZE;
 
@@ -21,8 +20,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/** 
- * DTO representing a FHIR Resource 
+/**
+ * DTO representing a FHIR Resource
  *
  */
 @Data
@@ -30,21 +29,21 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FhirPublicationDTO {
 
-	/** 
-	 * Document identifier 
-	 */
-	@Size(min = DEFAULT_STRING_MIN_SIZE, max = DEFAULT_STRING_MAX_SIZE)
-	private String identifier; 
-	
-	/** 
-	 * Document Json String
-	 */
-	@Size(min = DEFAULT_STRING_MIN_SIZE, max = DEFAULT_STRING_MAX_SIZE)
-	private String jsonString;
-	
-	/** 
-	 * Partition of Document
-	 */
-	@Size(min = DEFAULT_STRING_MIN_SIZE, max = DEFAULT_STRING_MAX_SIZE)
-	private String region;
+    /**
+     * Document identifier
+     */
+    @Size(min = DEFAULT_STRING_MIN_SIZE, max = DEFAULT_STRING_MAX_SIZE)
+    private String identifier;
+
+    /**
+     * Document Json String
+     */
+    @Size(min = DEFAULT_STRING_MIN_SIZE, max = DEFAULT_STRING_MAX_SIZE)
+    private String jsonString;
+
+    /**
+     * Partition of Document
+     */
+    @Size(min = DEFAULT_STRING_MIN_SIZE, max = DEFAULT_STRING_MAX_SIZE)
+    private String rda;
 }
