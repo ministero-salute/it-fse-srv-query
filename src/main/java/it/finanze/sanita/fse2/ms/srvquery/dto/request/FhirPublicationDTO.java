@@ -45,5 +45,5 @@ public class FhirPublicationDTO {
      * Partition of Document
      */
     @Size(min = DEFAULT_STRING_MIN_SIZE, max = DEFAULT_STRING_MAX_SIZE)
-    private String rda;
+    private String region;
 }
