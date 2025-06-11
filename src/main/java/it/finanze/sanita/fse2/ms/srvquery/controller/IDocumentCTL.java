@@ -119,7 +119,7 @@ public interface IDocumentCTL {
      * @param request  The HTTP Servlet Request 
      * @return ResourceExistResDTO  A DTO with a boolean, representing whether the resource already exists 
      */
-    @GetMapping(value = "/check-exist/{id}")
+    @GetMapping(value = "/check-exist/{id}/{region}")
 	@ApiResponse(content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceExistResDTO.class)))
 	@Operation(summary = "Controllo esistenza risorsa", description = "Controlla se su Elasticsearch è presente una risorsa con l'id fornito.")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResourceExistResDTO.class))),
@@ -127,8 +127,8 @@ public interface IDocumentCTL {
 			@ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = MediaType.APPLICATION_PROBLEM_JSON_VALUE, schema = @Schema(implementation = ErrorResponseDTO.class))) })
     ResourceExistResDTO exist(HttpServletRequest request, 
                                 @PathVariable(required = true, name = "id") String id,
-                                @RequestParam("region") String region);
-    
+                    @PathVariable(required = true, name = "region") String region);
+
     /** 
      * Updates an existing document on FHIR Server. 
      * 
