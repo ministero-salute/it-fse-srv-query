@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.CustomCapabilityStatement;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
+import it.finanze.sanita.fse2.ms.srvquery.crypt.CryptUtility;
 import it.finanze.sanita.fse2.ms.srvquery.dto.ResourceSearchParameterDTO;
 import it.finanze.sanita.fse2.ms.srvquery.dto.request.FhirPublicationDTO;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
@@ -56,6 +57,7 @@ public class FHIRSRV implements IFHIRSRV {
 			String json = createDTO.getJsonString();
 			log.debug("FHIR bundle: {}", json);
 			Bundle bundle = fhirUtility.deserializeBundle(json);
+			CryptUtility.encryptPatientInfo(bundle);
 			esito = fhirClient.create(bundle, createDTO.getRegion());
 		} catch(BusinessException e) {
 			throw e;

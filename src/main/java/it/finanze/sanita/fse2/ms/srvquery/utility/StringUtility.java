@@ -13,11 +13,14 @@ package it.finanze.sanita.fse2.ms.srvquery.utility;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.apache.commons.lang3.StringUtils.isWhitespace;
+import java.security.MessageDigest;
+import org.apache.commons.codec.binary.Hex;
 
 
 @Slf4j
@@ -99,6 +102,23 @@ public final class StringUtility {
 		if (values.length != 2) return false;
 
 		return !values[0].isEmpty() && !values[1].isEmpty();
+	}
+
+	private static final String SHA_ALGORITHM = "SHA-256";
+
+	/**
+	 * Returns the encoded String of the SHA-256 algorithm represented in base 64.
+	 * 
+	 * @param objectToEncode String to encode.
+	 * @return String Encoded.
+	 */
+	public static String encodeSHA256(final byte[] objectToEncode) {
+		try {
+			final MessageDigest digest = MessageDigest.getInstance(SHA_ALGORITHM);
+			return Hex.encodeHexString(digest.digest(objectToEncode));
+		} catch (final Exception e) {
+			throw new BusinessException(e);
+		}
 	}
 
 }
