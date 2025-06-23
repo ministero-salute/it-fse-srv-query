@@ -12,18 +12,22 @@
 package it.finanze.sanita.fse2.ms.srvquery.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import it.finanze.sanita.fse2.ms.srvquery.client.impl.CustomCapabilityStatement;
 import it.finanze.sanita.fse2.ms.srvquery.client.impl.FHIRClient;
 import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
 import it.finanze.sanita.fse2.ms.srvquery.crypt.CryptUtility;
@@ -34,125 +38,158 @@ import it.finanze.sanita.fse2.ms.srvquery.service.IFHIRSRV;
 import it.finanze.sanita.fse2.ms.srvquery.utility.FHIRUtility;
 import lombok.extern.slf4j.Slf4j;
 
-/** 
- * FHIR Service Implementation 
+/**
+ * FHIR Service Implementation
  */
 @Service
 @Slf4j
 public class FHIRSRV implements IFHIRSRV {
 
+    @Autowired
+    private FhirCFG fhirCFG;
 
-	@Autowired
-	private FhirCFG fhirCFG;
+    @Autowired
+    private FHIRClient fhirClient;
 
-	@Autowired
-	private FHIRClient fhirClient;
+    @Autowired
+    FHIRUtility fhirUtility;
 
-	@Autowired FHIRUtility fhirUtility;
+    @Override
+    public boolean create(final FhirPublicationDTO createDTO) {
+        boolean esito = false;
+        try {
+            String json = createDTO.getJsonString();
+            log.debug("FHIR bundle: {}", json);
+            Bundle bundle = fhirUtility.deserializeBundle(json);
+            CryptUtility.encryptPatientInfo(bundle);
+            esito = fhirClient.create(bundle, createDTO.getRegion());
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception ex) {
+            log.error("Error while perform create operation :", ex);
+            throw new BusinessException("Error while perform create operation :", ex);
+        }
+        return esito;
+    }
 
-	@Override
-	public boolean create(final FhirPublicationDTO createDTO) {
-		boolean esito = false;
-		try {
-			String json = createDTO.getJsonString();
-			log.debug("FHIR bundle: {}", json);
-			Bundle bundle = fhirUtility.deserializeBundle(json);
-			CryptUtility.encryptPatientInfo(bundle);
-			esito = fhirClient.create(bundle, createDTO.getRegion());
-		} catch(BusinessException e) {
-			throw e;
-		} catch(Exception ex) {
-			log.error("Error while perform create operation :", ex);
-			throw new BusinessException("Error while perform create operation :", ex);
-		}
-		return esito;
-	}
+    @Override
+    public boolean delete(final String masterIdentifier, String region) {
+        boolean output = false;
+        try {
 
-	@Override
-	public boolean delete(final String masterIdentifier, String region) {
-		boolean output = false;
-		try {
+            DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(masterIdentifier, region);
+            if (documentReference != null) {
+                String idComposition = documentReference.getContext().getRelated().get(0).getReference();
+                Bundle bundleToDelete = fhirClient.getDocument(idComposition, fhirCFG.getFhirServerUrl(), region);
+                fhirUtility.prepareForDelete(bundleToDelete, documentReference);
+                output = fhirClient.delete(bundleToDelete, region);
+            }
 
-			DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(masterIdentifier, region);
-			if(documentReference!=null) {
-				String idComposition = documentReference.getContext().getRelated().get(0).getReference();
-				Bundle bundleToDelete = fhirClient.getDocument(idComposition, fhirCFG.getFhirServerUrl(), region);
-				fhirUtility.prepareForDelete(bundleToDelete, documentReference);
-				output = fhirClient.delete(bundleToDelete, region);
-			}
+        } catch (Exception ex) {
+            log.error("Error while perform delete operation : ", ex);
+            throw new BusinessException("Error while perform delete operation : ", ex);
+        }
+        return output;
+    }
 
-		} catch(Exception ex) {
-			log.error("Error while perform delete operation : " , ex);
-			throw new BusinessException("Error while perform delete operation : " , ex);
-		}
-		return output;
-	}
+    @Override
+    public boolean replace(final FhirPublicationDTO body) {
+        boolean output = false;
+        try {
+            Bundle bundleToReplace = fhirUtility.deserializeBundle(body.getJsonString());
+            String identifier = body.getIdentifier();
+            String region = body.getRegion();
+            DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(identifier, region);
+            String idComposition = documentReference.getContext().getRelated().get(0).getReference();
+            Bundle previousBundle = fhirClient.getDocument(idComposition, fhirCFG.getFhirServerUrl(), region);
+            fhirUtility.prepareForReplace(bundleToReplace, documentReference, previousBundle);
+            output = fhirClient.replace(bundleToReplace, body.getRegion());
+        } catch (Exception ex) {
+            log.error("Error while perform replace operation : ", ex);
+            throw new BusinessException("Error while perform replace operation : ", ex);
+        }
+        return output;
+    }
 
-	@Override
-	public boolean replace(final FhirPublicationDTO body) {
-		boolean output = false;
-		try {
-			Bundle bundleToReplace = fhirUtility.deserializeBundle(body.getJsonString());
-			String identifier = body.getIdentifier();
-			String region = body.getRegion();
-			DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(identifier, region);
-			String idComposition = documentReference.getContext().getRelated().get(0).getReference();
-			Bundle previousBundle = fhirClient.getDocument(idComposition, fhirCFG.getFhirServerUrl(), region);
-			fhirUtility.prepareForReplace(bundleToReplace, documentReference, previousBundle);
-			output = fhirClient.replace(bundleToReplace, body.getRegion());
-		} catch(Exception ex) {
-			log.error("Error while perform replace operation : " , ex);
-			throw new BusinessException("Error while perform replace operation : " , ex);
-		}
-		return output;
-	}
+    @Override
+    public boolean updateMetadata(final FhirPublicationDTO body) {
+        boolean output = false;
+        try {
+            String identifier = body.getIdentifier();
+            DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(identifier, body.getRegion());
+            fhirUtility.prepareForUpdate(documentReference, body.getJsonString());
+            output = fhirClient.update(documentReference, body.getRegion());
+        } catch (Exception ex) {
+            log.error("Error while perform update operation : ", ex);
+            throw new BusinessException("Error while perform update operation : ", ex);
+        }
+        return output;
+    }
 
-	@Override
-	public boolean updateMetadata(final FhirPublicationDTO body) {
-		boolean output = false;
-		try {
-			String identifier = body.getIdentifier();
-			DocumentReference documentReference = fhirClient.getDocumentReferenceBundle(identifier, body.getRegion());
-			fhirUtility.prepareForUpdate(documentReference, body.getJsonString());
-			output = fhirClient.update(documentReference, body.getRegion());
-		} catch(Exception ex) {
-			log.error("Error while perform update operation : " , ex);
-			throw new BusinessException("Error while perform update operation : " , ex);
-		}
-		return output;
-	}
+    @Override
+    public boolean checkExists(String masterIdentifier, String region) {
+        boolean isFound = true;
 
-	@Override
-	public boolean checkExists(String masterIdentifier, String region) {
-		boolean isFound = true;
+        if (StringUtils.isEmpty(masterIdentifier)) {
+            throw new BusinessException("Attenzione. Il master identifier risulta essere null");
+        }
 
-		if(StringUtils.isEmpty(masterIdentifier)) {
-			throw new BusinessException("Attenzione. Il master identifier risulta essere null");
-		}
+        Bundle bundle = fhirClient.findByMasterIdentifier(masterIdentifier, region);
+        if (bundle == null || bundle.getEntry().isEmpty()) {
+            isFound = false;
+        }
 
-		Bundle bundle = fhirClient.findByMasterIdentifier(masterIdentifier, region);
-		if(bundle==null || bundle.getEntry().isEmpty()) {
-			isFound = false;
-		}
+        return isFound;
+    }
 
-		return isFound;
-	}
-	
-	private List<String> parametersFromPaths(List<StringType> paths) {
-		if (paths == null) paths = new ArrayList<>();
-		return paths
-			.stream()
-			.map(PrimitiveType::asStringValue)
-			.collect(Collectors.toList());
-	}
-	
-	@Override
-	public List<ResourceSearchParameterDTO> getResourcesSearchParameters() {
-		CustomCapabilityStatement capabilities = fhirClient.getServerCapabilities();
-		return capabilities.getResourceSearchPaths()
-			.stream()
-			.map(rp -> new ResourceSearchParameterDTO(rp.getType(), parametersFromPaths(rp.getSearchPath())) )
-			.collect(Collectors.toList()); 
-	}
+    private List<String> parametersFromPaths(List<StringType> paths) {
+        if (paths == null)
+            paths = new ArrayList<>();
+        return paths
+                .stream()
+                .map(PrimitiveType::asStringValue)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ResourceSearchParameterDTO> getResourcesSearchParameters() {
+
+        Map<String, List<String>> paramsByResource = new HashMap<>();
+
+        Bundle bundle = fhirClient.getSearchParams();
+        log.info("Retrieved {} search parameters from FHIR Server", bundle.getTotal());
+
+        // For every Search Param in the response
+        for (BundleEntryComponent entry : bundle.getEntry()) {
+            if (entry.getResource() instanceof SearchParameter) {
+                SearchParameter searchParam = (SearchParameter) entry.getResource();
+                // Expression is the path in the Referent Resource like Observation.note.author
+                String expression = searchParam.getExpression();
+
+                for (CodeType base : searchParam.getBase()) {
+                    String resourceName = base.getValue(); // e.g. "Observation"
+                    paramsByResource
+                            .computeIfAbsent(resourceName, rn -> new ArrayList<>())
+                            .add(expression);
+                }
+
+            }
+        }
+
+        List<ResourceSearchParameterDTO> output = new ArrayList<>(paramsByResource.size());
+        for (Map.Entry<String, List<String>> e : paramsByResource.entrySet()) {
+            String resourceName = e.getKey();
+            List<String> expressions = e.getValue();
+            // Optionally sort or dedupe expressions
+            List<String> uniqueExpr = expressions.stream()
+                    .distinct()
+                    .sorted()
+                    .collect(Collectors.toList());
+
+            output.add(new ResourceSearchParameterDTO(resourceName, uniqueExpr));
+        }
+
+        return output;
+    }
 
 }

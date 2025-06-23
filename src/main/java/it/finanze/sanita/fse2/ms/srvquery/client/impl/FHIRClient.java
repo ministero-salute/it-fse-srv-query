@@ -14,171 +14,182 @@ package it.finanze.sanita.fse2.ms.srvquery.client.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ResourceType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import it.finanze.sanita.fse2.ms.srvquery.client.IFHIRClient;
+import it.finanze.sanita.fse2.ms.srvquery.config.FhirCFG;
 import it.finanze.sanita.fse2.ms.srvquery.exceptions.BusinessException;
 import it.finanze.sanita.fse2.ms.srvquery.utility.StringUtility;
 import lombok.extern.slf4j.Slf4j;
 
-/** 
- * FHIR Client Implementation 
+/**
+ * FHIR Client Implementation
  */
 @Slf4j
 @Component
-public class FHIRClient implements IFHIRClient{
+public class FHIRClient implements IFHIRClient {
 
-	@Autowired
-	private IGenericClient client;
+    @Autowired
+    private IGenericClient client;
 
-	public boolean create(final Bundle bundle, String partitionName){
-		try { 
-			String id = transaction(bundle, partitionName);
-			return StringUtils.isNotEmpty(id);
-		} 
-		catch(BusinessException e) {
-			throw e;
-		}
-		catch(Exception ex) {
-			log.error("Errore while perform create client method: ", ex);
-			throw new BusinessException("Errore while perform create client method : ", ex);
-		}
-	}
-	
-	public boolean delete(Bundle bundle, String partitionName){
-		try {
-			String id = transaction(bundle, partitionName);
-			return StringUtils.isNotEmpty(id);
-		} catch(Exception ex) {
-			log.error("Errore while perform delete client method: ", ex);
-			throw new BusinessException("Errore while perform delete client method : ", ex);
-		}
-	}
-	
-	public boolean replace(Bundle bundle, String partitionName){
-		try {
-			String id = transaction(bundle, partitionName);
-			return StringUtils.isNotEmpty(id);
-		} catch(Exception ex) {
-			log.error("Errore while perform replace client method: ", ex);
-			throw new BusinessException("Errore while perform replace client method:", ex);
-		}
-	}
-	
- 
-	public String transaction(Bundle bundle, String partitionName) {
-		String id = "";
-		try {
-			
-			Bundle response = client.transaction()
-									.withBundle(bundle)
-									.withAdditionalHeader("X-Tenant-ID", partitionName)
-									.execute();
-									
-			if(response!=null && StringUtils.isNotEmpty(response.getIdElement().getIdPart())) {
-				id = response.getId();
-			}
+    @Autowired
+    private FhirCFG fhirCFG;
 
-		}catch(Exception ex) {
-			log.error("Error while perform transaction : " , ex);
-			throw new BusinessException(ex.getMessage());
-		}
-		return id;
-	}
-	 
-	public boolean update(final DocumentReference documentReference, String partitionName) {
-		boolean esito = false;
-		try {
-			
-			MethodOutcome response = client
-					.update()
-					.resource(documentReference)
-					.withAdditionalHeader("X-Tenant-ID", partitionName)
-					.execute();
+    public boolean create(final Bundle bundle, String partitionName) {
+        try {
+            String id = transaction(bundle, partitionName);
+            return StringUtils.isNotEmpty(id);
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception ex) {
+            log.error("Errore while perform create client method: ", ex);
+            throw new BusinessException("Errore while perform create client method : ", ex);
+        }
+    }
 
-			esito = StringUtils.isNotEmpty(response.getId().toString());
-		} catch(Exception ex) {
-			log.error("Errore while perform update client method:" , ex);
-			throw new BusinessException("Errore while perform update client method:" , ex);
-		}
-		return esito;
-	}
-   
-	
-	public Bundle getDocument(final String idComposition, final String url, final String partitionName) {
-		try {
-			return (Bundle)client.search()
-						  .byUrl(url+"/"+idComposition+"/$document")
-						  .withAdditionalHeader("X-Tenant-ID", partitionName)  // Add partition header
-						  .execute();
-		} catch(Exception ex) {
-			log.error("Errore while perform getDocument client method:", ex);
-			throw new BusinessException("Errore while perform getDocument client method:", ex);
-		}
-	}
-	
-	public CustomCapabilityStatement getServerCapabilities() {
-		try {
-			return client.capabilities()
-					.ofType(CustomCapabilityStatement.class)
-					.execute();
-		} catch(Exception ex) {
-			log.error("Errore while perform capabilities() client method:", ex);
-			throw new BusinessException("Errore while perform capabilities() client method:", ex);
-		}
-		
-	}
-	
-	
-	private Parameters translateCodeOperation(Parameters params) {
-//		Class<?> conceptMapClass = client.getFhirContext().getResourceDefinition("ConceptMap").getImplementingClass();
-		return client
-				.operation()
-//				.onType((Class<? extends IBaseResource>) conceptMapClass)
-				.onType(ConceptMap.class)
-				.named("$translate")
-				.withParameters(params)
-				.useHttpGet()
-				.execute();
-	}
-	 
-	
-	public DocumentReference getDocumentReferenceBundle(final String masterIdentifier, String partitionName) {
-		DocumentReference output = null;
-		try {
-			Bundle bundle = findByMasterIdentifier(masterIdentifier, partitionName);
-			if(bundle!=null && !bundle.getEntry().isEmpty()) {
-				for(BundleEntryComponent entry : bundle.getEntry()) {
-					if(ResourceType.DocumentReference.equals(entry.getResource().getResourceType())){
-						output = (DocumentReference)entry.getResource();
-						break;
-					} 
-				}
-			}
-		} catch(Exception ex) {
-			log.error("Errore while perform getDocumentReferenceBundle client method:", ex);
-			throw new BusinessException("Errore while perform getDocumentReferenceBundle client method:", ex);
-		}
-		return output;
-	}
-	
-	public Bundle findByMasterIdentifier(String masterIdentifier, String partitionName) {
-		String searchParameter = StringUtility.getSearchParamFromMasterId(masterIdentifier);
+    public boolean delete(Bundle bundle, String partitionName) {
+        try {
+            String id = transaction(bundle, partitionName);
+            return StringUtils.isNotEmpty(id);
+        } catch (Exception ex) {
+            log.error("Errore while perform delete client method: ", ex);
+            throw new BusinessException("Errore while perform delete client method : ", ex);
+        }
+    }
 
-		return client.search().forResource(DocumentReference.class)
-		.cacheControl(CacheControlDirective.noCache())
-		.where(DocumentReference.IDENTIFIER.exactly().identifier(searchParameter))
-		.withAdditionalHeader("X-Tenant-ID", partitionName) 
-		.returnBundle(Bundle.class)
-		.execute();
-	}
+    public boolean replace(Bundle bundle, String partitionName) {
+        try {
+            String id = transaction(bundle, partitionName);
+            return StringUtils.isNotEmpty(id);
+        } catch (Exception ex) {
+            log.error("Errore while perform replace client method: ", ex);
+            throw new BusinessException("Errore while perform replace client method:", ex);
+        }
+    }
+
+    public String transaction(Bundle bundle, String partitionName) {
+        String id = "";
+        try {
+
+            Bundle response = client.transaction()
+                    .withBundle(bundle)
+                    .withAdditionalHeader("X-Tenant-ID", partitionName)
+                    .execute();
+
+            if (response != null && StringUtils.isNotEmpty(response.getIdElement().getIdPart())) {
+                id = response.getId();
+            }
+
+        } catch (Exception ex) {
+            log.error("Error while perform transaction : ", ex);
+            throw new BusinessException(ex.getMessage());
+        }
+        return id;
+    }
+
+    public boolean update(final DocumentReference documentReference, String partitionName) {
+        boolean esito = false;
+        try {
+
+            MethodOutcome response = client
+                    .update()
+                    .resource(documentReference)
+                    .withAdditionalHeader("X-Tenant-ID", partitionName)
+                    .execute();
+
+            esito = StringUtils.isNotEmpty(response.getId().toString());
+        } catch (Exception ex) {
+            log.error("Errore while perform update client method:", ex);
+            throw new BusinessException("Errore while perform update client method:", ex);
+        }
+        return esito;
+    }
+
+    public Bundle getDocument(final String idComposition, final String url, final String partitionName) {
+        try {
+            return (Bundle) client.search()
+                    .byUrl(url + "/" + idComposition + "/$document")
+                    .withAdditionalHeader("X-Tenant-ID", partitionName) // Add partition header
+                    .execute();
+        } catch (Exception ex) {
+            log.error("Errore while perform getDocument client method:", ex);
+            throw new BusinessException("Errore while perform getDocument client method:", ex);
+        }
+    }
+
+    public Bundle getSearchParams() {
+        try {
+            return (Bundle) client.search()
+                    .byUrl(fhirCFG.getFhirServerUrl() + "/SearchParameter")
+                    .withAdditionalHeader("X-Tenant-ID", "DEFAULT")
+                    .execute();
+        } catch (Exception ex) {
+            log.error("Errore while perform getSearchParams client method:", ex);
+            throw new BusinessException("Errore while perform getSearchParams client method:", ex);
+        }
+    }
+
+    public CustomCapabilityStatement getServerCapabilities() {
+        try {
+            return client.capabilities()
+                    .ofType(CustomCapabilityStatement.class)
+                    .execute();
+        } catch (Exception ex) {
+            log.error("Errore while perform capabilities() client method:", ex);
+            throw new BusinessException("Errore while perform capabilities() client method:", ex);
+        }
+
+    }
+
+    private Parameters translateCodeOperation(Parameters params) {
+        // Class<?> conceptMapClass =
+        // client.getFhirContext().getResourceDefinition("ConceptMap").getImplementingClass();
+        return client
+                .operation()
+                // .onType((Class<? extends IBaseResource>) conceptMapClass)
+                .onType(ConceptMap.class)
+                .named("$translate")
+                .withParameters(params)
+                .useHttpGet()
+                .execute();
+    }
+
+    public DocumentReference getDocumentReferenceBundle(final String masterIdentifier, String partitionName) {
+        DocumentReference output = null;
+        try {
+            Bundle bundle = findByMasterIdentifier(masterIdentifier, partitionName);
+            if (bundle != null && !bundle.getEntry().isEmpty()) {
+                for (BundleEntryComponent entry : bundle.getEntry()) {
+                    if (ResourceType.DocumentReference.equals(entry.getResource().getResourceType())) {
+                        output = (DocumentReference) entry.getResource();
+                        break;
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            log.error("Errore while perform getDocumentReferenceBundle client method:", ex);
+            throw new BusinessException("Errore while perform getDocumentReferenceBundle client method:", ex);
+        }
+        return output;
+    }
+
+    public Bundle findByMasterIdentifier(String masterIdentifier, String partitionName) {
+        String searchParameter = StringUtility.getSearchParamFromMasterId(masterIdentifier);
+
+        return client.search().forResource(DocumentReference.class)
+                .cacheControl(CacheControlDirective.noCache())
+                .where(DocumentReference.IDENTIFIER.exactly().identifier(searchParameter))
+                .withAdditionalHeader("X-Tenant-ID", partitionName)
+                .returnBundle(Bundle.class)
+                .execute();
+    }
 
 }
